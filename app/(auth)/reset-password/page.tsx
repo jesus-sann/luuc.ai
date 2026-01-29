@@ -99,7 +99,7 @@ export default function ResetPasswordPage() {
   if (isValidSession === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md shadow-lg">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
             <p className="mt-4 text-sm text-slate-500">Verificando sesión...</p>
@@ -113,7 +113,7 @@ export default function ResetPasswordPage() {
   if (!isValidSession) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <AlertCircle className="h-6 w-6 text-red-600" />
@@ -147,7 +147,7 @@ export default function ResetPasswordPage() {
   if (success) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <CheckCircle className="h-6 w-6 text-green-600" />
@@ -172,7 +172,7 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
             <span className="text-2xl font-bold text-white">L</span>

@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Mail, Lock, AlertCircle } from "lucide-react";
+import { Loader2, Mail, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,7 @@ function LoginForm() {
   const [isLoadingMagicLink, setIsLoadingMagicLink] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const errorParam = searchParams.get("error");
 
@@ -83,7 +84,7 @@ function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
           <span className="text-2xl font-bold text-white">L</span>
@@ -119,6 +120,7 @@ function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-10"
+                autoComplete="email"
                 required
               />
             </div>
@@ -138,13 +140,25 @@ function LoginForm() {
               <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10"
+                className="pl-10 pr-10"
+                autoComplete="current-password"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
             </div>
           </div>
 
@@ -210,7 +224,7 @@ function LoginForm() {
 
 function LoginFormFallback() {
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
           <span className="text-2xl font-bold text-white">L</span>

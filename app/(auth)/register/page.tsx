@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, Mail, Lock, User, Building, AlertCircle } from "lucide-react";
+import { Loader2, Mail, Lock, User, Building, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,8 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +79,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-8">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
             <span className="text-2xl font-bold text-white">L</span>
@@ -102,6 +104,7 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleRegister} className="space-y-4">
+            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Información personal</p>
             <div className="space-y-2">
               <Label htmlFor="name">Nombre completo</Label>
               <div className="relative">
@@ -113,6 +116,7 @@ export default function RegisterPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="pl-10"
+                  autoComplete="name"
                   required
                 />
               </div>
@@ -129,6 +133,7 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -145,24 +150,36 @@ export default function RegisterPage() {
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   className="pl-10"
+                  autoComplete="organization"
                 />
               </div>
             </div>
 
+            <div className="border-t border-slate-100 pt-4">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Seguridad</p>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 pr-10"
+                  autoComplete="new-password"
                   required
                   minLength={6}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
               <p className="text-xs text-slate-500">Mínimo 6 caracteres</p>
             </div>
@@ -173,13 +190,21 @@ export default function RegisterPage() {
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   id="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 pr-10"
+                  autoComplete="new-password"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 

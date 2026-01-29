@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
   if (success) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <CheckCircle className="h-6 w-6 text-green-600" />
@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
             <span className="text-2xl font-bold text-white">L</span>
@@ -115,6 +115,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
+                  autoComplete="email"
                   required
                 />
               </div>
