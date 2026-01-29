@@ -3,6 +3,12 @@ import { analyzeDocument } from "@/lib/claude";
 import { saveAnalysis, logUsage } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse, AnalysisResponse } from "@/types";
+import {
+  validateAnalysisContent,
+  validateFilename,
+  validateFocusContext,
+  validateFileSize,
+} from "@/lib/validators";
 
 interface ReviewRequestBody {
   content: string;
@@ -33,28 +39,50 @@ export async function POST(request: NextRequest) {
     const body: ReviewRequestBody = await request.json();
     const { content, filename, focusContext, fileSize } = body;
 
-    if (!content) {
+    // SEGURIDAD: Validar y sanitizar contenido
+    const contentValidation = validateAnalysisContent(content);
+    if (!contentValidation.valid) {
       return NextResponse.json<ApiResponse<null>>(
-        {
-          success: false,
-          error: "Contenido del documento es requerido",
-        },
+        { success: false, error: contentValidation.error || "Invalid content" },
         { status: 400 }
       );
     }
+    const sanitizedContent = contentValidation.sanitized!;
 
-    if (content.length < 100) {
+    // SEGURIDAD: Validar filename
+    const filenameValidation = validateFilename(filename);
+    if (!filenameValidation.valid) {
       return NextResponse.json<ApiResponse<null>>(
-        {
-          success: false,
-          error: "El documento es muy corto para analizar",
-        },
+        { success: false, error: filenameValidation.error || "Invalid filename" },
         { status: 400 }
       );
+    }
+    const sanitizedFilename = filenameValidation.sanitized!;
+
+    // SEGURIDAD: Validar focus context (protección contra prompt injection)
+    const focusValidation = validateFocusContext(focusContext);
+    if (!focusValidation.valid) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: focusValidation.error || "Invalid focus context" },
+        { status: 400 }
+      );
+    }
+    const sanitizedFocus = focusValidation.sanitized;
+
+    // SEGURIDAD: Validar file size si se proporciona
+    if (fileSize !== undefined) {
+      const sizeValidation = validateFileSize(fileSize);
+      if (!sizeValidation.valid) {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: sizeValidation.error || "Invalid file size" },
+          { status: 400 }
+        );
+      }
     }
 
     // Analyze document using Claude with optional focus context
-    const analysisText = await analyzeDocument(content, focusContext);
+    // USAR CONTENIDO SANITIZADO para prevenir inyecciones
+    const analysisText = await analyzeDocument(sanitizedContent, sanitizedFocus);
 
     // Parse JSON response from Claude
     let analysis: AnalysisResponse;
@@ -83,9 +111,10 @@ export async function POST(request: NextRequest) {
     try {
       savedAnalysis = await saveAnalysis({
         user_id: user.id,
-        filename,
+        company_id: user.company_id || undefined, // SEGURIDAD: Asociar con company para multi-tenant
+        filename: sanitizedFilename, // USAR FILENAME SANITIZADO
         file_size: fileSize,
-        focus_context: focusContext,
+        focus_context: sanitizedFocus, // USAR FOCUS SANITIZADO
         risk_score: analysis.score,
         summary: analysis.resumen,
         findings: analysis.riesgos,
@@ -97,7 +126,12 @@ export async function POST(request: NextRequest) {
       await logUsage({
         user_id: user.id,
         action_type: "analyze",
-        metadata: { filename, focusContext, riskScore: analysis.score },
+        metadata: {
+          filename: sanitizedFilename,
+          focusContext: sanitizedFocus,
+          riskScore: analysis.score,
+          contentLength: sanitizedContent.length, // Para auditoría
+        },
       });
     } catch (dbError) {
       console.error("Error saving to database:", dbError);

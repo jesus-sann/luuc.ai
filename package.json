@@ -6,7 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "ci": "npm run lint && npm run type-check && npm run test && npm run build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
@@ -32,16 +39,23 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^22.5.0",
     "@types/react": "^18.3.4",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/ui": "^4.0.18",
     "autoprefixer": "^10.4.20",
     "dotenv": "^17.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.7",
+    "happy-dom": "^20.4.0",
+    "jsdom": "^27.4.0",
     "pg": "^8.17.2",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^4.0.18"
   }
 }

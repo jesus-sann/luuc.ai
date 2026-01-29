@@ -122,6 +122,7 @@ export async function getDocumentById(id: string): Promise<DocumentRow | null> {
 // Análisis
 export async function saveAnalysis(data: {
   user_id?: string;
+  company_id?: string; // SEGURIDAD: Para aislamiento multi-tenant
   filename: string;
   file_path?: string;
   file_size?: number;
@@ -136,6 +137,7 @@ export async function saveAnalysis(data: {
     .from("analyses")
     .insert({
       user_id: data.user_id || null,
+      company_id: data.company_id || null, // SEGURIDAD: Asociar con company
       filename: data.filename,
       file_path: data.file_path || null,
       file_size: data.file_size || null,
