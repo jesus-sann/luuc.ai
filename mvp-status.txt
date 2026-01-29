@@ -1,0 +1,257 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                     LUUC.AI - REPORTE DE ESTADO DEL MVP                       ║
+║                          Generado: 27 Enero 2026                              ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+1. ESTRUCTURA DEL PROYECTO
+═══════════════════════════════════════════════════════════════════════════════
+
+luuc-ai/
+├── app/                          # Next.js 14 App Router
+│   ├── api/                      # API Routes
+│   │   ├── auth/[...nextauth]/   # Autenticación NextAuth
+│   │   ├── company/              # APIs de empresa (multi-tenant)
+│   │   │   ├── documents/route.ts   # CRUD documentos de referencia
+│   │   │   ├── setup/route.ts       # Crear/actualizar empresa
+│   │   │   └── stats/route.ts       # Estadísticas de empresa
+│   │   ├── generate/route.ts     # Generación con templates
+│   │   ├── generate-custom/route.ts # Generación libre
+│   │   ├── review/route.ts       # Análisis de documentos
+│   │   └── user/profile/route.ts # Perfil de usuario
+│   ├── dashboard/                # Páginas del dashboard
+│   │   ├── configuracion/        # Configuración (empresa, docs, perfil, seguridad)
+│   │   ├── documentos/           # Gestión de documentos
+│   │   ├── historial/            # Historial
+│   │   └── nuevo/                # Crear documento
+│   ├── login/                    # Página de login
+│   └── register/                 # Página de registro
+├── components/                   # Componentes React
+│   ├── ui/                       # Componentes UI (shadcn)
+│   ├── DocumentGenerator.tsx
+│   ├── DocumentReview.tsx
+│   └── Layout.tsx
+├── lib/                          # Bibliotecas y utilidades
+│   ├── auth.ts                   # Funciones de autenticación
+│   ├── claude.ts                 # Integración con Claude API
+│   ├── company.ts                # Funciones de empresa/multi-tenant
+│   ├── supabase.ts               # Cliente Supabase + funciones DB
+│   ├── supabase/server.ts        # Cliente SSR
+│   ├── templates.ts              # Templates de documentos
+│   └── utils.ts                  # Utilidades generales
+├── types/                        # Definiciones TypeScript
+│   └── index.ts                  # Tipos globales
+├── hooks/                        # React Hooks personalizados
+├── supabase/                     # SQL y migraciones
+│   └── only-companies.sql        # SQL ejecutado (funcional)
+├── scripts/                      # Scripts de utilidad
+└── public/                       # Archivos estáticos
+
+
+═══════════════════════════════════════════════════════════════════════════════
+2. DEPENDENCIAS (package.json)
+═══════════════════════════════════════════════════════════════════════════════
+
+CORE:
+  - next: 14.2.7
+  - react: ^18.3.1
+  - typescript: ^5.5.4
+
+SUPABASE:
+  - @supabase/ssr: ^0.8.0
+  - @supabase/supabase-js: ^2.45.0
+
+AI:
+  - @anthropic-ai/sdk: ^0.27.0
+
+AUTENTICACIÓN:
+  - next-auth: ^4.24.7
+
+UI:
+  - @radix-ui/react-dialog: ^1.1.1
+  - @radix-ui/react-dropdown-menu: ^2.1.1
+  - @radix-ui/react-label: ^2.1.0
+  - @radix-ui/react-select: ^2.1.1
+  - @radix-ui/react-tabs: ^1.1.0
+  - @radix-ui/react-toast: ^1.2.1
+  - lucide-react: ^0.436.0
+  - tailwindcss: ^3.4.10
+  - tailwind-merge: ^2.5.2
+
+PROCESAMIENTO DE DOCUMENTOS:
+  - mammoth: ^1.8.0 (Word)
+  - pdf-parse: ^1.1.1 (PDF)
+  - react-dropzone: ^14.2.3
+
+
+═══════════════════════════════════════════════════════════════════════════════
+3. TIPOS DEFINIDOS (types/index.ts)
+═══════════════════════════════════════════════════════════════════════════════
+
+USUARIOS Y AUTH:
+  ✓ User (id, email, name, company_id, role, plan, usage_count)
+
+DOCUMENTOS:
+  ✓ Document (id, user_id, title, doc_type, content, variables)
+  ✓ DocumentType (nda, contrato_servicios, carta_terminacion, acta_reunion, politica_interna)
+  ✓ Template (id, name, slug, variables, system_prompt)
+  ✓ TemplateVariable (name, label, type, required, options)
+
+ANÁLISIS:
+  ✓ Analysis (id, user_id, filename, risk_score, findings, recommendations)
+  ✓ RiskFinding (nivel, descripcion, clausula, recomendacion)
+  ✓ AnalysisResponse (resumen, score, riesgos, clausulas_faltantes)
+
+EMPRESA (MULTI-TENANT):
+  ✓ Company (id, name, user_id, industry, document_rules, status)
+  ✓ CompanyDocument (id, company_id, title, content, category)
+  ✓ DocumentRules (style, language, tone, customInstructions)
+
+REQUESTS:
+  ✓ GenerateDocumentRequest
+  ✓ ReviewDocumentRequest
+  ✓ CreateCompanyRequest
+  ✓ UploadCompanyDocumentRequest
+  ✓ GenerateWithCompanyRequest
+
+
+═══════════════════════════════════════════════════════════════════════════════
+4. FUNCIONES DE EMPRESA (lib/company.ts)
+═══════════════════════════════════════════════════════════════════════════════
+
+GESTIÓN DE EMPRESA:
+  ✓ getCompanyByUser(userId)        - Obtener empresa del usuario
+  ✓ getCompanyById(companyId)       - Obtener empresa por ID
+  ✓ createCompany(userId, ...)      - Crear empresa
+  ✓ updateCompany(companyId, ...)   - Actualizar empresa
+
+DOCUMENTOS DE REFERENCIA:
+  ✓ getCompanyDocuments(companyId, docType?, category?)
+  ✓ getCompanyDocumentById(docId)
+  ✓ uploadCompanyDocument(companyId, userId, title, content, ...)
+  ✓ updateCompanyDocument(docId, updates)
+  ✓ deleteCompanyDocument(docId)
+
+GENERACIÓN CON CONTEXTO:
+  ✓ getApprovedDocumentsForContext(companyId, docType)
+  ✓ getCompanyInstructions(companyId)
+
+ESTADÍSTICAS:
+  ✓ getCompanyStats(companyId)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+5. API ROUTES IMPLEMENTADAS
+═══════════════════════════════════════════════════════════════════════════════
+
+AUTENTICACIÓN:
+  □ /api/auth/[...nextauth]     - NextAuth (directorio vacío, pendiente)
+
+EMPRESA:
+  ✓ /api/company/documents      - GET/POST documentos de referencia
+  ✓ /api/company/setup          - POST crear/actualizar empresa
+  ✓ /api/company/stats          - GET estadísticas de empresa
+
+DOCUMENTOS:
+  ✓ /api/generate               - POST generar con template
+  ✓ /api/generate-custom        - POST generación libre
+  ✓ /api/review                 - POST análisis de documento
+  □ /api/documents              - CRUD documentos (directorio vacío)
+
+USUARIO:
+  ✓ /api/user/profile           - GET/PUT perfil de usuario
+
+
+═══════════════════════════════════════════════════════════════════════════════
+6. CONFIGURACIÓN DE ENTORNO (.env.local)
+═══════════════════════════════════════════════════════════════════════════════
+
+CONFIGURADO:
+  ✓ NEXT_PUBLIC_SUPABASE_URL
+  ✓ NEXT_PUBLIC_SUPABASE_ANON_KEY (oculta)
+  ✓ SUPABASE_SERVICE_ROLE_KEY (oculta)
+  ✓ ANTHROPIC_API_KEY (oculta)
+  ✓ NEXTAUTH_URL=http://localhost:3000
+  ✓ NEXTAUTH_SECRET (oculta)
+  ✓ NEXT_PUBLIC_APP_URL=http://localhost:3000
+  ✓ NEXT_PUBLIC_APP_NAME=Luuc.ai
+
+LÍMITES:
+  ✓ FREE_TIER_DOCUMENT_LIMIT=10
+  ✓ FREE_TIER_ANALYSIS_LIMIT=5
+  ✓ MAX_TOKENS_GENERATE=4096
+  ✓ MAX_TOKENS_ANALYZE=4096
+
+
+═══════════════════════════════════════════════════════════════════════════════
+7. BASE DE DATOS SUPABASE
+═══════════════════════════════════════════════════════════════════════════════
+
+TABLAS CREADAS:
+  ✓ users             - Usuarios del sistema
+  ✓ documents         - Documentos generados
+  ✓ analyses          - Análisis de documentos
+  ✓ templates         - Templates de documentos
+  ✓ usage_logs        - Logs de uso
+  ✓ companies         - Empresas (multi-tenant)
+  ✓ company_documents - Documentos de referencia
+
+COLUMNAS MULTI-TENANT:
+  ✓ users.company_id
+  ✓ users.role
+  ✓ documents.company_id
+  ✓ analyses.company_id
+
+POLÍTICAS RLS:
+  ✓ Configuradas para companies
+  ✓ Configuradas para company_documents
+
+
+═══════════════════════════════════════════════════════════════════════════════
+8. ESTADO ACTUAL DEL MVP
+═══════════════════════════════════════════════════════════════════════════════
+
+COMPLETADO (✓):
+  ✓ Estructura del proyecto Next.js 14
+  ✓ Integración Supabase (auth + database)
+  ✓ Integración Claude API (generación + análisis)
+  ✓ Sistema multi-tenant con empresas
+  ✓ Documentos de referencia para contextualizar generación
+  ✓ Dashboard con configuración (empresa, docs, perfil, seguridad)
+  ✓ Tipos TypeScript completos
+  ✓ APIs para todas las operaciones principales
+  ✓ Base de datos con esquema completo
+
+PENDIENTE (□):
+  □ /api/auth/[...nextauth] - Configurar NextAuth
+  □ /api/documents - CRUD de documentos del usuario
+  □ Tests unitarios y de integración
+  □ Deployment a producción
+  □ Trigger para word_count automático
+
+
+═══════════════════════════════════════════════════════════════════════════════
+9. PARA PROBAR EL MVP
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Iniciar servidor:
+   npm run dev
+
+2. Acceder a:
+   http://localhost:3001 (o 3000 si está libre)
+
+3. Registrarse/Login con:
+   - Email existente: jesusandresbeltranserrano@gmail.com
+   - O crear nuevo usuario
+
+4. Flujo de prueba:
+   a) Login → Dashboard
+   b) Configuración > Empresa → Crear empresa
+   c) Configuración > Documentos → Subir documento de referencia
+   d) Nuevo > Generar documento → Verificar que usa contexto de empresa
+   e) Revisión → Analizar documento externo
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FIN DEL REPORTE
+═══════════════════════════════════════════════════════════════════════════════

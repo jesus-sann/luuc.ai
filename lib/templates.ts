@@ -1,0 +1,263 @@
+import { Template } from "@/types";
+
+export const templates: Template[] = [
+  {
+    id: "1",
+    name: "Acuerdo de Confidencialidad (NDA)",
+    slug: "nda",
+    description:
+      "Protege información confidencial entre partes comerciales o laborales",
+    icon: "Shield",
+    variables: [
+      {
+        name: "parte_reveladora",
+        label: "Parte Reveladora (quien comparte la información)",
+        type: "text",
+        required: true,
+        placeholder: "Nombre completo o razón social",
+      },
+      {
+        name: "parte_receptora",
+        label: "Parte Receptora (quien recibe la información)",
+        type: "text",
+        required: true,
+        placeholder: "Nombre completo o razón social",
+      },
+      {
+        name: "tipo_informacion",
+        label: "Tipo de Información Confidencial",
+        type: "textarea",
+        required: true,
+        placeholder:
+          "Ej: Datos financieros, estrategias comerciales, código fuente...",
+      },
+      {
+        name: "duracion",
+        label: "Duración del Acuerdo",
+        type: "select",
+        required: true,
+        options: ["1 año", "2 años", "3 años", "5 años", "Indefinido"],
+      },
+      {
+        name: "jurisdiccion",
+        label: "Jurisdicción Aplicable",
+        type: "select",
+        required: true,
+        options: ["Colombia", "México", "Argentina", "Chile", "Perú", "España"],
+      },
+    ],
+    system_prompt: "Genera un Acuerdo de Confidencialidad (NDA) bilateral completo.",
+  },
+  {
+    id: "2",
+    name: "Contrato de Prestación de Servicios",
+    slug: "contrato_servicios",
+    description:
+      "Formaliza la relación entre un prestador de servicios y su cliente",
+    icon: "FileText",
+    variables: [
+      {
+        name: "prestador",
+        label: "Prestador del Servicio",
+        type: "text",
+        required: true,
+        placeholder: "Nombre o razón social del prestador",
+      },
+      {
+        name: "cliente",
+        label: "Cliente / Contratante",
+        type: "text",
+        required: true,
+        placeholder: "Nombre o razón social del cliente",
+      },
+      {
+        name: "descripcion_servicios",
+        label: "Descripción de los Servicios",
+        type: "textarea",
+        required: true,
+        placeholder: "Detalle los servicios a prestar...",
+      },
+      {
+        name: "valor",
+        label: "Valor del Contrato",
+        type: "text",
+        required: true,
+        placeholder: "Ej: $5,000,000 COP mensuales",
+      },
+      {
+        name: "forma_pago",
+        label: "Forma de Pago",
+        type: "select",
+        required: true,
+        options: ["Mensual", "Quincenal", "Por entregable", "Al finalizar"],
+      },
+      {
+        name: "duracion",
+        label: "Duración del Contrato",
+        type: "text",
+        required: true,
+        placeholder: "Ej: 6 meses, 1 año",
+      },
+    ],
+    system_prompt:
+      "Genera un Contrato de Prestación de Servicios profesional completo.",
+  },
+  {
+    id: "3",
+    name: "Carta de Terminación de Contrato",
+    slug: "carta_terminacion",
+    description: "Comunicación formal para finalizar una relación contractual",
+    icon: "FileX",
+    variables: [
+      {
+        name: "remitente",
+        label: "Remitente (quien envía la carta)",
+        type: "text",
+        required: true,
+        placeholder: "Nombre completo o razón social",
+      },
+      {
+        name: "destinatario",
+        label: "Destinatario",
+        type: "text",
+        required: true,
+        placeholder: "Nombre completo o razón social",
+      },
+      {
+        name: "tipo_contrato",
+        label: "Tipo de Contrato a Terminar",
+        type: "text",
+        required: true,
+        placeholder: "Ej: Contrato de arrendamiento, laboral, servicios",
+      },
+      {
+        name: "fecha_contrato",
+        label: "Fecha del Contrato Original",
+        type: "date",
+        required: true,
+      },
+      {
+        name: "motivo",
+        label: "Motivo de la Terminación",
+        type: "textarea",
+        required: true,
+        placeholder: "Explique brevemente el motivo...",
+      },
+      {
+        name: "fecha_efectiva",
+        label: "Fecha Efectiva de Terminación",
+        type: "date",
+        required: true,
+      },
+    ],
+    system_prompt:
+      "Genera una Carta de Terminación de Contrato formal y profesional.",
+  },
+  {
+    id: "4",
+    name: "Acta de Reunión",
+    slug: "acta_reunion",
+    description: "Documenta los temas tratados y acuerdos de una reunión",
+    icon: "Users",
+    variables: [
+      {
+        name: "titulo_reunion",
+        label: "Título de la Reunión",
+        type: "text",
+        required: true,
+        placeholder: "Ej: Reunión de Junta Directiva Q4 2024",
+      },
+      {
+        name: "fecha_reunion",
+        label: "Fecha de la Reunión",
+        type: "date",
+        required: true,
+      },
+      {
+        name: "lugar",
+        label: "Lugar de la Reunión",
+        type: "text",
+        required: true,
+        placeholder: "Ej: Sala de juntas principal / Virtual (Zoom)",
+      },
+      {
+        name: "asistentes",
+        label: "Asistentes",
+        type: "textarea",
+        required: true,
+        placeholder: "Liste los asistentes, uno por línea",
+      },
+      {
+        name: "temas_tratados",
+        label: "Temas Tratados",
+        type: "textarea",
+        required: true,
+        placeholder: "Liste los temas discutidos...",
+      },
+      {
+        name: "acuerdos",
+        label: "Acuerdos y Compromisos",
+        type: "textarea",
+        required: true,
+        placeholder: "Liste los acuerdos alcanzados...",
+      },
+    ],
+    system_prompt: "Genera un Acta de Reunión formal y estructurada.",
+  },
+  {
+    id: "5",
+    name: "Política Interna",
+    slug: "politica_interna",
+    description: "Define lineamientos y reglas para la organización",
+    icon: "BookOpen",
+    variables: [
+      {
+        name: "empresa",
+        label: "Nombre de la Empresa",
+        type: "text",
+        required: true,
+        placeholder: "Razón social de la empresa",
+      },
+      {
+        name: "tipo_politica",
+        label: "Tipo de Política",
+        type: "select",
+        required: true,
+        options: [
+          "Política de Protección de Datos",
+          "Política de Trabajo Remoto",
+          "Política de Uso de Equipos",
+          "Política de Vacaciones",
+          "Política de Gastos",
+          "Código de Ética",
+        ],
+      },
+      {
+        name: "alcance",
+        label: "Alcance (a quién aplica)",
+        type: "text",
+        required: true,
+        placeholder: "Ej: Todos los empleados, Solo área comercial",
+      },
+      {
+        name: "puntos_clave",
+        label: "Puntos Clave a Incluir",
+        type: "textarea",
+        required: true,
+        placeholder: "Liste los aspectos más importantes que debe cubrir...",
+      },
+      {
+        name: "consecuencias",
+        label: "Consecuencias por Incumplimiento",
+        type: "textarea",
+        required: false,
+        placeholder: "Opcional: Sanciones o consecuencias",
+      },
+    ],
+    system_prompt: "Genera una Política Interna corporativa completa y profesional.",
+  },
+];
+
+export function getTemplateBySlug(slug: string): Template | undefined {
+  return templates.find((t) => t.slug === slug);
+}
