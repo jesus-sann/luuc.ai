@@ -365,31 +365,31 @@ export default function KnowledgeBasePage() {
         ) : (
           <>
             <Upload
-              className={`mx-auto mb-4 w-12 h-12 ${
+              className={`mx-auto mb-4 h-12 w-12 ${
                 selectedCategory ? "text-slate-400" : "text-slate-300"
               }`}
             />
             {!selectedCategory ? (
               <>
-                <p className="text-lg font-medium mb-2 text-slate-400">
-                  Selecciona una categoria primero
+                <p className="mb-2 text-lg font-medium text-slate-400">
+                  Selecciona una categoría primero
                 </p>
                 <p className="text-sm text-slate-400">
-                  Elige una categoria abajo para poder subir archivos
+                  Elige una categoría abajo para poder subir archivos
                 </p>
               </>
             ) : (
               <>
-                <p className="text-lg font-medium mb-2">
+                <p className="mb-2 text-lg font-medium">
                   {isDragActive
-                    ? "Suelta los archivos aqui!"
+                    ? "Suelta los archivos aquí"
                     : "Arrastra archivos o haz clic para subir"}
                 </p>
                 <p className="text-sm text-slate-500">
-                  Soporta: PDF, DOCX, TXT, MD (max 10MB)
+                  Soporta: PDF, DOCX, TXT, MD (máx. 10MB)
                 </p>
-                <p className="text-xs text-slate-400 mt-2">
-                  Se subira a:{" "}
+                <p className="mt-2 text-xs text-slate-400">
+                  Se subirá a:{" "}
                   {categories.find((c) => c.slug === selectedCategory)?.name}
                 </p>
               </>
@@ -400,14 +400,14 @@ export default function KnowledgeBasePage() {
 
       {/* Categories */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <Folder className="h-5 h-5" />
-            Categorias
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-xl font-bold">
+            <Folder className="h-5 w-5" />
+            Categorías
           </h2>
           <Button onClick={() => setShowNewCategoryModal(true)} size="sm">
-            <Plus className="h-4 h-4 mr-2" />
-            Nueva Categoria
+            <Plus className="mr-2 h-4 w-4" />
+            Nueva Categoría
           </Button>
         </div>
 
@@ -440,8 +440,8 @@ export default function KnowledgeBasePage() {
 
       {/* Documents List */}
       <div>
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <FileText className="h-5 h-5" />
+        <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
+          <FileText className="h-5 w-5" />
           {selectedCategory
             ? `Documentos en "${categories.find((c) => c.slug === selectedCategory)?.name}"`
             : "Todos los Documentos"}
@@ -450,11 +450,18 @@ export default function KnowledgeBasePage() {
         {documents.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <FileText className="mx-auto text-slate-300 w-16 h-16 mb-4" />
-              <p className="text-slate-500 text-lg">
+              <div className="mb-4 inline-flex rounded-full bg-orange-100 p-4">
+                <FileText className="h-12 w-12 text-orange-600" />
+              </div>
+              <h3 className="mb-2 text-xl font-semibold text-slate-900">
                 {selectedCategory
-                  ? "No hay documentos en esta categoria"
-                  : "No hay documentos. Sube el primero!"}
+                  ? "No hay documentos en esta categoría"
+                  : "No hay documentos aún"}
+              </h3>
+              <p className="mx-auto max-w-md text-slate-600">
+                {selectedCategory
+                  ? "Arrastra archivos arriba o haz clic en la zona de subida para añadir tu primer documento a esta categoría"
+                  : "Selecciona una categoría y sube tu primer documento para entrenar la IA con el conocimiento de tu empresa"}
               </p>
             </CardContent>
           </Card>
