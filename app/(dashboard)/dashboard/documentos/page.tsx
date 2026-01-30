@@ -1,48 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FileText, Search, Calendar, MoreVertical, Download, Trash2, Eye, Copy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-// Mock data - En producción vendrá de Supabase
-const mockDocuments = [
-  {
-    id: "1",
-    title: "NDA - Empresa ABC",
-    doc_type: "nda",
-    created_at: "2024-01-15T10:30:00Z",
-  },
-  {
-    id: "2",
-    title: "Contrato de Servicios - Consultoría",
-    doc_type: "contrato_servicios",
-    created_at: "2024-01-14T15:45:00Z",
-  },
-  {
-    id: "3",
-    title: "Política de Trabajo Remoto",
-    doc_type: "politica_interna",
-    created_at: "2024-01-12T09:00:00Z",
-  },
-];
-
-const mockAnalyses = [
-  {
-    id: "1",
-    filename: "Contrato_Proveedor_XYZ.pdf",
-    risk_score: 6.5,
-    created_at: "2024-01-16T11:20:00Z",
-  },
-  {
-    id: "2",
-    filename: "NDA_Cliente_123.docx",
-    risk_score: 3.2,
-    created_at: "2024-01-15T14:30:00Z",
-  },
-];
+import { Document, Analysis } from "@/types";
 
 export default function DocumentosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,6 +14,195 @@ export default function DocumentosPage() {
     "generados"
   );
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [analyses, setAnalyses] = useState<Analysis[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch documents and analyses on mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [docsRes, analysesRes] = await Promise.all([
+        fetch("/api/documents"),
+        fetch("/api/analyses"),
+      ]);
+
+      if (docsRes.ok) {
+        const docsData = await docsRes.json();
+        setDocuments(docsData.data || []);
+      }
+
+      if (analysesRes.ok) {
+        const analysesData = await analysesRes.json();
+        setAnalyses(analysesData.data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError("Error al cargar los datos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewDocument = (doc: Document) => {
+    // Open in new window with content
+    const newWindow = window.open("", "_blank");
+    if (newWindow) {
+      newWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${doc.title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+            h1 { color: #1e293b; }
+            pre { white-space: pre-wrap; word-wrap: break-word; }
+          </style>
+        </head>
+        <body>
+          <h1>${doc.title}</h1>
+          <pre>${doc.content}</pre>
+        </body>
+        </html>
+      `);
+      newWindow.document.close();
+    }
+  };
+
+  const handleDownloadDocument = (doc: Document) => {
+    const blob = new Blob([doc.content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${doc.title}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDuplicateDocument = async (docId: string) => {
+    try {
+      const res = await fetch(`/api/documents/${docId}/duplicate`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        await fetchData(); // Refresh list
+        alert("Documento duplicado exitosamente");
+      } else {
+        const data = await res.json();
+        alert(data.error || "Error al duplicar documento");
+      }
+    } catch (err) {
+      console.error("Error duplicating document:", err);
+      alert("Error al duplicar documento");
+    }
+    setOpenMenuId(null);
+  };
+
+  const handleDeleteDocument = async (docId: string) => {
+    if (!confirm("¿Estás seguro de que quieres eliminar este documento?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/documents/${docId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        await fetchData(); // Refresh list
+        alert("Documento eliminado exitosamente");
+      } else {
+        const data = await res.json();
+        alert(data.error || "Error al eliminar documento");
+      }
+    } catch (err) {
+      console.error("Error deleting document:", err);
+      alert("Error al eliminar documento");
+    }
+    setOpenMenuId(null);
+  };
+
+  const handleViewAnalysis = async (analysisId: string) => {
+    try {
+      const res = await fetch(`/api/analyses/${analysisId}`);
+      if (res.ok) {
+        const data = await res.json();
+        const analysis = data.data;
+
+        // Open in new window with analysis details
+        const newWindow = window.open("", "_blank");
+        if (newWindow) {
+          newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Análisis: ${analysis.filename}</title>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+                h1 { color: #1e293b; }
+                h2 { color: #334155; margin-top: 30px; }
+                .risk-score { font-size: 24px; font-weight: bold; color: #dc2626; }
+                .summary { background: #f1f5f9; padding: 20px; border-radius: 8px; }
+                .risk-item { background: #fff; border-left: 4px solid #dc2626; padding: 15px; margin: 10px 0; }
+              </style>
+            </head>
+            <body>
+              <h1>${analysis.filename}</h1>
+              <div class="risk-score">Puntuación de Riesgo: ${analysis.risk_score}/10</div>
+              <h2>Resumen</h2>
+              <div class="summary">${analysis.summary}</div>
+              <h2>Hallazgos</h2>
+              ${analysis.findings.map((f: any) => `
+                <div class="risk-item">
+                  <strong>${f.nivel}:</strong> ${f.descripcion}<br/>
+                  <em>Recomendación: ${f.recomendacion}</em>
+                </div>
+              `).join('')}
+            </body>
+            </html>
+          `);
+          newWindow.document.close();
+        }
+      }
+    } catch (err) {
+      console.error("Error viewing analysis:", err);
+      alert("Error al ver el análisis");
+    }
+    setOpenMenuId(null);
+  };
+
+  const handleDeleteAnalysis = async (analysisId: string) => {
+    if (!confirm("¿Estás seguro de que quieres eliminar este análisis?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/analyses/${analysisId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        await fetchData(); // Refresh list
+        alert("Análisis eliminado exitosamente");
+      } else {
+        const data = await res.json();
+        alert(data.error || "Error al eliminar análisis");
+      }
+    } catch (err) {
+      console.error("Error deleting analysis:", err);
+      alert("Error al eliminar análisis");
+    }
+    setOpenMenuId(null);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("es-CO", {
@@ -114,7 +267,19 @@ export default function DocumentosPage() {
       {/* Documents List */}
       {activeTab === "generados" ? (
         <div className="space-y-4">
-          {mockDocuments.length === 0 ? (
+          {loading ? (
+            <Card>
+              <CardContent className="flex min-h-[400px] items-center justify-center p-12">
+                <p className="text-slate-600">Cargando documentos...</p>
+              </CardContent>
+            </Card>
+          ) : error ? (
+            <Card>
+              <CardContent className="flex min-h-[400px] items-center justify-center p-12">
+                <p className="text-red-600">{error}</p>
+              </CardContent>
+            </Card>
+          ) : documents.length === 0 ? (
             <Card>
               <CardContent className="flex min-h-[400px] flex-col items-center justify-center p-12">
                 <div className="mb-4 rounded-full bg-blue-100 p-4">
@@ -135,7 +300,7 @@ export default function DocumentosPage() {
               </CardContent>
             </Card>
           ) : (
-            mockDocuments.map((doc) => (
+            documents.map((doc) => (
               <Card key={doc.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="flex items-center justify-between p-4">
                   <div className="flex items-center gap-4">
@@ -171,8 +336,8 @@ export default function DocumentosPage() {
                           <button
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
                             onClick={() => {
+                              handleViewDocument(doc);
                               setOpenMenuId(null);
-                              // TODO: Implementar ver documento
                             }}
                           >
                             <Eye className="h-4 w-4" />
@@ -181,8 +346,8 @@ export default function DocumentosPage() {
                           <button
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
                             onClick={() => {
+                              handleDownloadDocument(doc);
                               setOpenMenuId(null);
-                              // TODO: Implementar descargar
                             }}
                           >
                             <Download className="h-4 w-4" />
@@ -190,10 +355,7 @@ export default function DocumentosPage() {
                           </button>
                           <button
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              // TODO: Implementar duplicar
-                            }}
+                            onClick={() => handleDuplicateDocument(doc.id)}
                           >
                             <Copy className="h-4 w-4" />
                             Duplicar
@@ -201,10 +363,7 @@ export default function DocumentosPage() {
                           <hr className="my-1 border-slate-200" />
                           <button
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              // TODO: Implementar eliminar
-                            }}
+                            onClick={() => handleDeleteDocument(doc.id)}
                           >
                             <Trash2 className="h-4 w-4" />
                             Eliminar
@@ -220,7 +379,19 @@ export default function DocumentosPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {mockAnalyses.length === 0 ? (
+          {loading ? (
+            <Card>
+              <CardContent className="flex min-h-[400px] items-center justify-center p-12">
+                <p className="text-slate-600">Cargando análisis...</p>
+              </CardContent>
+            </Card>
+          ) : error ? (
+            <Card>
+              <CardContent className="flex min-h-[400px] items-center justify-center p-12">
+                <p className="text-red-600">{error}</p>
+              </CardContent>
+            </Card>
+          ) : analyses.length === 0 ? (
             <Card>
               <CardContent className="flex min-h-[400px] flex-col items-center justify-center p-12">
                 <div className="mb-4 rounded-full bg-green-100 p-4">
@@ -241,7 +412,7 @@ export default function DocumentosPage() {
               </CardContent>
             </Card>
           ) : (
-            mockAnalyses.map((analysis) => (
+            analyses.map((analysis) => (
               <Card
                 key={analysis.id}
                 className="hover:shadow-md transition-shadow"
@@ -293,10 +464,7 @@ export default function DocumentosPage() {
                           <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
                             <button
                               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                // TODO: Implementar ver análisis
-                              }}
+                              onClick={() => handleViewAnalysis(analysis.id)}
                             >
                               <Eye className="h-4 w-4" />
                               Ver análisis
@@ -304,8 +472,7 @@ export default function DocumentosPage() {
                             <button
                               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
                               onClick={() => {
-                                setOpenMenuId(null);
-                                // TODO: Implementar descargar reporte
+                                handleViewAnalysis(analysis.id);
                               }}
                             >
                               <Download className="h-4 w-4" />
@@ -314,10 +481,7 @@ export default function DocumentosPage() {
                             <hr className="my-1 border-slate-200" />
                             <button
                               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                // TODO: Implementar eliminar
-                              }}
+                              onClick={() => handleDeleteAnalysis(analysis.id)}
                             >
                               <Trash2 className="h-4 w-4" />
                               Eliminar

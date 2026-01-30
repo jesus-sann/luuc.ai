@@ -10,6 +10,7 @@ import {
   validateFocusContext,
   validateFileSize,
 } from "@/lib/validators";
+import { USAGE_ACTION_TYPES } from "@/lib/constants";
 
 interface ReviewRequestBody {
   content: string;
@@ -85,26 +86,31 @@ export async function POST(request: NextRequest) {
     // USAR CONTENIDO SANITIZADO para prevenir inyecciones
     const analysisText = await analyzeDocument(sanitizedContent, sanitizedFocus);
 
-    // Parse JSON response from Claude
+    // Parse JSON response from Claude - robust approach
     let analysis: AnalysisResponse;
     try {
-      // Try to extract JSON from the response
-      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        analysis = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error("No JSON found in response");
+      // First, try to parse the entire response as JSON
+      analysis = JSON.parse(analysisText);
+    } catch (directParseError) {
+      // If that fails, try to extract JSON using regex as fallback
+      try {
+        const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          analysis = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error("No JSON found in response");
+        }
+      } catch (regexParseError) {
+        console.error("Error parsing analysis:", { directParseError, regexParseError });
+        // Return a default structure if parsing fails
+        analysis = {
+          resumen: "No se pudo procesar el análisis correctamente.",
+          score: 5,
+          riesgos: [],
+          clausulas_faltantes: [],
+          observaciones_generales: analysisText.substring(0, 500),
+        };
       }
-    } catch (parseError) {
-      console.error("Error parsing analysis:", parseError);
-      // Return a default structure if parsing fails
-      analysis = {
-        resumen: "No se pudo procesar el análisis correctamente.",
-        score: 5,
-        riesgos: [],
-        clausulas_faltantes: [],
-        observaciones_generales: analysisText.substring(0, 500),
-      };
     }
 
     // Guardar en Supabase
@@ -126,7 +132,7 @@ export async function POST(request: NextRequest) {
       // Registrar uso
       await logUsage({
         user_id: user.id,
-        action_type: "analyze",
+        action_type: USAGE_ACTION_TYPES.ANALYZE,
         metadata: {
           filename: sanitizedFilename,
           focusContext: sanitizedFocus,

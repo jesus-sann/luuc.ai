@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { CLAUDE_MODEL, TIMEOUTS } from "@/lib/constants";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -8,24 +9,43 @@ export async function generateWithClaude(
   systemPrompt: string,
   userPrompt: string
 ): Promise<string> {
-  const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 4096,
-    messages: [
+  // Create AbortController for timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.CLAUDE_API);
+
+  try {
+    const message = await anthropic.messages.create(
       {
-        role: "user",
-        content: userPrompt,
+        model: CLAUDE_MODEL,
+        max_tokens: 4096,
+        messages: [
+          {
+            role: "user",
+            content: userPrompt,
+          },
+        ],
+        system: systemPrompt,
       },
-    ],
-    system: systemPrompt,
-  });
+      {
+        signal: controller.signal,
+      }
+    );
 
-  const content = message.content[0];
-  if (content.type === "text") {
-    return content.text;
+    clearTimeout(timeoutId);
+
+    const content = message.content[0];
+    if (content.type === "text") {
+      return content.text;
+    }
+
+    throw new Error("Unexpected response format from Claude");
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Claude API request timed out after 60 seconds");
+    }
+    throw error;
   }
-
-  throw new Error("Unexpected response format from Claude");
 }
 
 export async function generateDocument(
@@ -108,10 +128,22 @@ Tu tarea es identificar riesgos, cláusulas problemáticas y áreas de mejora.
 ${focusContext ? "ENFOQUE ESPECIAL: El usuario ha solicitado que te enfoques en aspectos específicos. Prioriza tu análisis según sus indicaciones." : ""}
 Responde SIEMPRE en formato JSON válido.`;
 
+  // Truncate content if too long and log it
+  const maxContentLength = 15000;
+  const wasTruncated = content.length > maxContentLength;
+  const truncatedContent = content.substring(0, maxContentLength);
+
+  if (wasTruncated) {
+    console.warn(
+      `Content truncated for analysis: ${content.length} chars -> ${maxContentLength} chars (${Math.round((maxContentLength / content.length) * 100)}% retained)`
+    );
+  }
+
   let userPrompt = `DOCUMENTO A ANALIZAR:
 """
-${content.substring(0, 15000)}
+${truncatedContent}
 """
+${wasTruncated ? "\n[NOTA: El documento fue truncado debido a su extenso tamaño. Análisis basado en los primeros 15,000 caracteres.]" : ""}
 `;
 
   if (focusContext) {
@@ -126,7 +158,7 @@ Prioriza tu análisis según el enfoque solicitado. Asegúrate de abordar espec�
   userPrompt += `
 Analiza el documento y responde en este formato JSON exacto:
 {
-  "resumen": "Resumen ejecutivo de 2-3 oraciones${focusContext ? ", enfocado en lo que el usuario solicitó" : ""}",
+  "resumen": "Resumen ejecutivo de 2-3 oraciones${focusContext ? ", enfocado en lo que el usuario solicitó" : ""}${wasTruncated ? ". NOTA: Análisis basado en los primeros 15,000 caracteres del documento." : ""}",
   "score": 5,
   "riesgos": [
     {
@@ -137,7 +169,7 @@ Analiza el documento y responde en este formato JSON exacto:
     }
   ],
   "clausulas_faltantes": ["Lista de cláusulas importantes que faltan"],
-  "observaciones_generales": "Observaciones adicionales${focusContext ? " relacionadas con el enfoque solicitado" : ""}"
+  "observaciones_generales": "Observaciones adicionales${focusContext ? " relacionadas con el enfoque solicitado" : ""}${wasTruncated ? " [El documento original era más extenso, este análisis se basa en una muestra.]" : ""}"
 }
 
 IMPORTANTE:

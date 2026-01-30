@@ -3,21 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { saveDocument, logUsage } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
+import { sanitizeString } from "@/lib/validators";
+import { ALLOWED_CUSTOM_DOCUMENT_TYPES, CLAUDE_MODEL, TIMEOUTS, USAGE_ACTION_TYPES } from "@/lib/constants";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
-
-// Tipos de documentos permitidos
-const ALLOWED_DOCUMENT_TYPES = [
-  "contrato",
-  "carta",
-  "politica",
-  "acta",
-  "poder",
-  "memorando",
-  "otro",
-];
 
 // Palabras clave que indican solicitudes NO permitidas
 const BLOCKED_PATTERNS = [
@@ -71,19 +62,34 @@ interface GenerateCustomRequest {
   detallesAdicionales?: string;
 }
 
-function validateRequest(data: GenerateCustomRequest): { valid: boolean; error?: string } {
+function validateRequest(data: GenerateCustomRequest): {
+  valid: boolean;
+  error?: string;
+  sanitized?: GenerateCustomRequest;
+} {
   // 1. Verificar tipo de documento permitido
-  if (!ALLOWED_DOCUMENT_TYPES.includes(data.tipoDocumento)) {
+  if (!data.tipoDocumento || !(ALLOWED_CUSTOM_DOCUMENT_TYPES as readonly string[]).includes(data.tipoDocumento)) {
     return { valid: false, error: "Tipo de documento no válido." };
   }
 
   // 2. Verificar descripción mínima
-  if (!data.descripcion || data.descripcion.trim().length < 20) {
+  if (!data.descripcion || typeof data.descripcion !== 'string' || data.descripcion.trim().length < 20) {
     return { valid: false, error: "La descripción debe tener al menos 20 caracteres." };
   }
 
-  // 3. Verificar patrones bloqueados
-  const fullText = `${data.descripcion} ${data.detallesAdicionales || ""}`.toLowerCase();
+  // 3. Sanitizar inputs
+  const sanitizedData: GenerateCustomRequest = {
+    tipoDocumento: sanitizeString(data.tipoDocumento, 100),
+    descripcion: sanitizeString(data.descripcion, 5000),
+    partes: data.partes ? sanitizeString(data.partes, 1000) : undefined,
+    duracion: data.duracion ? sanitizeString(data.duracion, 500) : undefined,
+    valor: data.valor ? sanitizeString(data.valor, 500) : undefined,
+    jurisdiccion: data.jurisdiccion ? sanitizeString(data.jurisdiccion, 200) : undefined,
+    detallesAdicionales: data.detallesAdicionales ? sanitizeString(data.detallesAdicionales, 2000) : undefined,
+  };
+
+  // 4. Verificar patrones bloqueados
+  const fullText = `${sanitizedData.descripcion} ${sanitizedData.detallesAdicionales || ""}`.toLowerCase();
 
   for (const pattern of BLOCKED_PATTERNS) {
     if (pattern.test(fullText)) {
@@ -94,7 +100,7 @@ function validateRequest(data: GenerateCustomRequest): { valid: boolean; error?:
     }
   }
 
-  // 4. Verificar que tenga contexto legal
+  // 5. Verificar que tenga contexto legal
   const hasLegalContext = REQUIRED_LEGAL_CONTEXT.some((pattern) => pattern.test(fullText));
 
   if (!hasLegalContext) {
@@ -104,7 +110,7 @@ function validateRequest(data: GenerateCustomRequest): { valid: boolean; error?:
     };
   }
 
-  return { valid: true };
+  return { valid: true, sanitized: sanitizedData };
 }
 
 function buildPrompt(data: GenerateCustomRequest): string {
@@ -181,16 +187,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data: GenerateCustomRequest = await request.json();
+    const rawData: GenerateCustomRequest = await request.json();
 
-    // Validar la solicitud
-    const validation = validateRequest(data);
+    // SEGURIDAD: Validar y sanitizar la solicitud
+    const validation = validateRequest(rawData);
     if (!validation.valid) {
       return NextResponse.json(
         { success: false, error: validation.error },
         { status: 400 }
       );
     }
+
+    // Usar datos sanitizados
+    const data = validation.sanitized!;
 
     // Verificar API key
     if (!process.env.ANTHROPIC_API_KEY) {
@@ -203,18 +212,39 @@ export async function POST(request: NextRequest) {
     // Construir el prompt
     const userPrompt = buildPrompt(data);
 
-    // Llamar a Claude
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4096,
-      messages: [
+    // Llamar a Claude con timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.CLAUDE_API);
+
+    let message;
+    try {
+      message = await anthropic.messages.create(
         {
-          role: "user",
-          content: `Redacta el siguiente documento legal:\n${userPrompt}`,
+          model: CLAUDE_MODEL,
+          max_tokens: 4096,
+          messages: [
+            {
+              role: "user",
+              content: `Redacta el siguiente documento legal:\n${userPrompt}`,
+            },
+          ],
+          system: SYSTEM_PROMPT,
         },
-      ],
-      system: SYSTEM_PROMPT,
-    });
+        {
+          signal: controller.signal,
+        }
+      );
+      clearTimeout(timeoutId);
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === "AbortError") {
+        return NextResponse.json(
+          { success: false, error: "La solicitud tardó demasiado tiempo. Intenta de nuevo." },
+          { status: 500 }
+        );
+      }
+      throw error;
+    }
 
     // Extraer el contenido
     const content = message.content[0];
@@ -258,7 +288,7 @@ export async function POST(request: NextRequest) {
       // Registrar uso
       await logUsage({
         user_id: user.id,
-        action_type: "custom_generate",
+        action_type: USAGE_ACTION_TYPES.CUSTOM_GENERATE,
         tokens_used: message.usage?.output_tokens || 0,
         metadata: {
           tipoDocumento: data.tipoDocumento,

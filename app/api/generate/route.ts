@@ -9,7 +9,9 @@ import {
   getCompanyByUser,
 } from "@/lib/company";
 import { getRelevantKnowledgeContext } from "@/lib/knowledge-base";
-import { GenerateWithCompanyRequest, ApiResponse } from "@/types";
+import { ApiResponse } from "@/types";
+import { validateGenerateRequest } from "@/lib/validators";
+import { USAGE_ACTION_TYPES } from "@/lib/constants";
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,18 +37,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body: GenerateWithCompanyRequest = await request.json();
-    const { template, variables, title, companyId } = body;
+    const body = await request.json();
 
-    if (!template || !variables) {
+    // SEGURIDAD: Validar y sanitizar inputs
+    const validation = validateGenerateRequest(body);
+    if (!validation.valid) {
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
-          error: "Template y variables son requeridos",
+          error: validation.error || "Datos de entrada inválidos",
         },
         { status: 400 }
       );
     }
+
+    const { template, variables, title, companyId } = validation.sanitized!;
 
     // Determinar companyId (del request o del usuario)
     let effectiveCompanyId: string | undefined = companyId;
@@ -121,7 +126,7 @@ ${knowledgeContext}
       // Registrar uso
       await logUsage({
         user_id: user.id,
-        action_type: "generate",
+        action_type: USAGE_ACTION_TYPES.GENERATE,
         metadata: {
           template,
           title,
