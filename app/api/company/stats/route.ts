@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { getCompanyStats, getCompanyByUser, getCompanyById } from "@/lib/company";
 import { getCurrentUser } from "@/lib/auth";

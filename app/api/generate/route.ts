@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { generateDocumentWithContext } from "@/lib/claude";
 import { saveDocument, logUsage } from "@/lib/supabase";

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { getDocuments, getDocumentById, supabaseAdmin } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
