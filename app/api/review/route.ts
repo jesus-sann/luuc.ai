@@ -11,6 +11,8 @@ import {
   validateFileSize,
 } from "@/lib/validators";
 import { USAGE_ACTION_TYPES } from "@/lib/constants";
+import { withRateLimit } from "@/lib/api-middleware";
+import { auditLog } from "@/lib/audit-log";
 
 interface ReviewRequestBody {
   content: string;
@@ -19,7 +21,7 @@ interface ReviewRequestBody {
   fileSize?: number;
 }
 
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     // Obtener usuario actual - REQUERIDO
     const user = await getCurrentUser();
@@ -140,6 +142,19 @@ export async function POST(request: NextRequest) {
           contentLength: sanitizedContent.length, // Para auditoría
         },
       });
+
+      // Audit log
+      auditLog({
+        userId: user.id,
+        companyId: user.company_id || undefined,
+        action: "document.review",
+        resourceType: "analysis",
+        resourceId: savedAnalysis?.id,
+        metadata: {
+          filename: sanitizedFilename,
+          riskScore: analysis.score,
+        },
+      });
     } catch (dbError) {
       console.error("Error saving to database:", dbError);
       // Continuamos aunque falle el guardado
@@ -163,3 +178,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const POST = withRateLimit(handler, "generate");

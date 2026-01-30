@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDocuments, getDocumentById, supabaseAdmin } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse, Document } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
 
 /**
  * GET /api/documents
  * Obtener documentos del usuario actual
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
  * DELETE /api/documents?id=xxx
  * Eliminar documento del usuario
  */
-export async function DELETE(request: NextRequest) {
+async function deleteHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -123,3 +124,6 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");
+export const DELETE = withRateLimit(deleteHandler, "crud");

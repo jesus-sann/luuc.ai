@@ -2,12 +2,13 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { ApiResponse } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
 
 /**
  * PUT /api/user/profile
  * Actualizar perfil del usuario
  */
-export async function PUT(request: NextRequest) {
+async function putHandler(request: NextRequest) {
   try {
     const supabase = await createClient();
 
@@ -72,7 +73,7 @@ export async function PUT(request: NextRequest) {
  * GET /api/user/profile
  * Obtener perfil del usuario
  */
-export async function GET() {
+async function getHandler() {
   try {
     const supabase = await createClient();
 
@@ -106,3 +107,6 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");
+export const PUT = withRateLimit(putHandler, "crud");

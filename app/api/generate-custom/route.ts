@@ -5,6 +5,7 @@ import { saveDocument, logUsage } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { sanitizeString } from "@/lib/validators";
 import { ALLOWED_CUSTOM_DOCUMENT_TYPES, CLAUDE_MODEL, TIMEOUTS, USAGE_ACTION_TYPES } from "@/lib/constants";
+import { withRateLimit } from "@/lib/api-middleware";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -163,7 +164,7 @@ INSTRUCCIONES DE REDACCIÓN:
 
 El documento debe estar listo para ser revisado por un abogado y posteriormente firmado.`;
 
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     // Obtener usuario actual - REQUERIDO
     const user = await getCurrentUser();
@@ -317,3 +318,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const POST = withRateLimit(handler, "generate");

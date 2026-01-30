@@ -9,12 +9,14 @@ import {
   searchKnowledgeBase,
 } from "@/lib/knowledge-base";
 import { ApiResponse, KnowledgeBaseDocument } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
+import { auditLog } from "@/lib/audit-log";
 
 /**
  * GET /api/knowledge-base
  * Obtener documentos de la knowledge base
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -72,7 +74,7 @@ export async function GET(request: NextRequest) {
  * POST /api/knowledge-base
  * Subir documento a la knowledge base
  */
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -159,6 +161,20 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Audit log
+      auditLog({
+        userId: user.id,
+        companyId: companyId,
+        action: "kb.upload",
+        resourceType: "knowledge_base",
+        resourceId: document.id,
+        metadata: {
+          title: title,
+          category: category,
+          fileType: fileType,
+        },
+      });
+
       return NextResponse.json<ApiResponse<KnowledgeBaseDocument>>(
         { success: true, data: document },
         { status: 201 }
@@ -200,6 +216,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Audit log
+    auditLog({
+      userId: user.id,
+      companyId: companyId,
+      action: "kb.upload",
+      resourceType: "knowledge_base",
+      resourceId: document.id,
+      metadata: {
+        title: title,
+        category: category,
+        contentLength: content.length,
+      },
+    });
+
     return NextResponse.json<ApiResponse<KnowledgeBaseDocument>>(
       { success: true, data: document },
       { status: 201 }
@@ -212,3 +242,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");
+export const POST = withRateLimit(postHandler, "crud");

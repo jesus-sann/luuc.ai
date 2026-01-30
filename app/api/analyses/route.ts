@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse, Analysis } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
 
 /**
  * GET /api/analyses
  * Obtener análisis del usuario actual
  */
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -49,3 +50,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(handler, "read");

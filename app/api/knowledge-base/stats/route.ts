@@ -4,12 +4,13 @@ import { getCurrentUser } from "@/lib/auth";
 import { getCompanyByUser } from "@/lib/company";
 import { getKnowledgeBaseStats } from "@/lib/knowledge-base";
 import { ApiResponse, KnowledgeBaseStats } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
 
 /**
  * GET /api/knowledge-base/stats
  * Obtener estadisticas de la knowledge base
  */
-export async function GET() {
+async function handler() {
   try {
     const user = await getCurrentUser();
 
@@ -51,3 +52,5 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withRateLimit(handler, "read");

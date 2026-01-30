@@ -3,12 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDocumentById, saveDocument, supabaseAdmin } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
+import { auditLog } from "@/lib/audit-log";
 
 /**
  * GET /api/documents/[id]
  * Obtener un documento específico por ID
  */
-export async function GET(
+async function getHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -56,7 +58,7 @@ export async function GET(
  * POST /api/documents/[id]/duplicate
  * Duplicar un documento existente
  */
-export async function POST(
+async function postHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -98,6 +100,19 @@ export async function POST(
       is_custom: document.is_custom || false,
     });
 
+    // Audit log
+    auditLog({
+      userId: user.id,
+      companyId: document.company_id || undefined,
+      action: "document.duplicate",
+      resourceType: "document",
+      resourceId: duplicatedDocument?.id,
+      metadata: {
+        originalDocumentId: params.id,
+        docType: document.doc_type,
+      },
+    });
+
     return NextResponse.json<ApiResponse<any>>({
       success: true,
       data: duplicatedDocument,
@@ -115,7 +130,7 @@ export async function POST(
  * DELETE /api/documents/[id]
  * Eliminar un documento específico
  */
-export async function DELETE(
+async function deleteHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -159,6 +174,19 @@ export async function DELETE(
       );
     }
 
+    // Audit log
+    auditLog({
+      userId: user.id,
+      companyId: document.company_id || undefined,
+      action: "document.delete",
+      resourceType: "document",
+      resourceId: params.id,
+      metadata: {
+        title: document.title,
+        docType: document.doc_type,
+      },
+    });
+
     return NextResponse.json<ApiResponse<{ deleted: boolean }>>({
       success: true,
       data: { deleted: true },
@@ -171,3 +199,7 @@ export async function DELETE(
     );
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");
+export const POST = withRateLimit(postHandler, "crud");
+export const DELETE = withRateLimit(deleteHandler, "crud");

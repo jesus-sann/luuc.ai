@@ -12,8 +12,10 @@ import { getRelevantKnowledgeContext } from "@/lib/knowledge-base";
 import { ApiResponse } from "@/types";
 import { validateGenerateRequest } from "@/lib/validators";
 import { USAGE_ACTION_TYPES } from "@/lib/constants";
+import { withRateLimit } from "@/lib/api-middleware";
+import { auditLog } from "@/lib/audit-log";
 
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     // Obtener usuario actual - REQUERIDO
     const user = await getCurrentUser();
@@ -135,6 +137,19 @@ ${knowledgeContext}
           usedKnowledgeBase: !!knowledgeContext,
         },
       });
+
+      // Audit log
+      auditLog({
+        userId: user.id,
+        companyId: effectiveCompanyId,
+        action: "document.generate",
+        resourceType: "document",
+        resourceId: savedDocument?.id,
+        metadata: {
+          template,
+          usedContext: !!companyContext || !!knowledgeContext,
+        },
+      });
     } catch (dbError) {
       console.error("Error saving to database:", dbError);
       // Continuamos aunque falle el guardado
@@ -167,3 +182,5 @@ ${knowledgeContext}
     );
   }
 }
+
+export const POST = withRateLimit(handler, "generate");

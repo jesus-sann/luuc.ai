@@ -8,12 +8,13 @@ import {
 } from "@/lib/company";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse, CompanyDocument } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
 
 /**
  * GET /api/company/documents
  * Obtener documentos de referencia de la empresa
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
  * POST /api/company/documents
  * Subir nuevo documento de referencia
  */
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -136,7 +137,7 @@ export async function POST(request: NextRequest) {
  * DELETE /api/company/documents?docId=xxx
  * Eliminar documento de referencia
  */
-export async function DELETE(request: NextRequest) {
+async function deleteHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -177,3 +178,7 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");
+export const POST = withRateLimit(postHandler, "crud");
+export const DELETE = withRateLimit(deleteHandler, "crud");

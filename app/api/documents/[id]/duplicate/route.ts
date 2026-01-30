@@ -3,12 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDocumentById, saveDocument } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse, Document } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
+import { auditLog } from "@/lib/audit-log";
 
 /**
  * POST /api/documents/[id]/duplicate
  * Duplicar un documento existente
  */
-export async function POST(
+async function handler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -50,6 +52,19 @@ export async function POST(
       is_custom: document.is_custom || false,
     });
 
+    // Audit log
+    auditLog({
+      userId: user.id,
+      companyId: document.company_id || undefined,
+      action: "document.duplicate",
+      resourceType: "document",
+      resourceId: duplicatedDocument?.id,
+      metadata: {
+        originalDocumentId: params.id,
+        docType: document.doc_type,
+      },
+    });
+
     return NextResponse.json<ApiResponse<any>>({
       success: true,
       data: duplicatedDocument,
@@ -62,3 +77,5 @@ export async function POST(
     );
   }
 }
+
+export const POST = withRateLimit(handler, "crud");

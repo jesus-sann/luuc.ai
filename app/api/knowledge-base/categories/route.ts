@@ -4,12 +4,13 @@ import { getCurrentUser } from "@/lib/auth";
 import { getCompanyByUser } from "@/lib/company";
 import { getCompanyCategories, createCategory } from "@/lib/knowledge-base";
 import { ApiResponse, KnowledgeBaseCategory } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
 
 /**
  * GET /api/knowledge-base/categories
  * Obtener categorias de la empresa
  */
-export async function GET() {
+async function getHandler() {
   try {
     const user = await getCurrentUser();
 
@@ -49,7 +50,7 @@ export async function GET() {
  * POST /api/knowledge-base/categories
  * Crear nueva categoria
  */
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -107,3 +108,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");
+export const POST = withRateLimit(postHandler, "crud");

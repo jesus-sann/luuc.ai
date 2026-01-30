@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCompanyStats, getCompanyByUser, getCompanyById } from "@/lib/company";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
 
 /**
  * GET /api/company/stats
  * Obtener estadísticas de la empresa del usuario
  */
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -48,3 +49,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(handler, "read");

@@ -7,12 +7,14 @@ import {
   deleteKnowledgeDocument,
 } from "@/lib/knowledge-base";
 import { ApiResponse, KnowledgeBaseDocument } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
+import { auditLog } from "@/lib/audit-log";
 
 /**
  * GET /api/knowledge-base/[id]
  * Obtener documento por ID
  */
-export async function GET(
+async function getHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -53,7 +55,7 @@ export async function GET(
  * PUT /api/knowledge-base/[id]
  * Actualizar documento
  */
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -110,7 +112,7 @@ export async function PUT(
  * DELETE /api/knowledge-base/[id]
  * Eliminar documento
  */
-export async function DELETE(
+async function deleteHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -125,6 +127,10 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    // Get document before deleting for audit log
+    const document = await getKnowledgeDocumentById(id);
+
     const success = await deleteKnowledgeDocument(id);
 
     if (!success) {
@@ -132,6 +138,21 @@ export async function DELETE(
         { success: false, error: "Error al eliminar documento" },
         { status: 500 }
       );
+    }
+
+    // Audit log
+    if (document) {
+      auditLog({
+        userId: user.id,
+        companyId: document.company_id,
+        action: "kb.delete",
+        resourceType: "knowledge_base",
+        resourceId: id,
+        metadata: {
+          title: document.title,
+          category: document.category,
+        },
+      });
     }
 
     return NextResponse.json<ApiResponse<{ deleted: boolean }>>({
@@ -146,3 +167,7 @@ export async function DELETE(
     );
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");
+export const PUT = withRateLimit(putHandler, "crud");
+export const DELETE = withRateLimit(deleteHandler, "crud");

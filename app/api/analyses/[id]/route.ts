@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse, Analysis } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
 
 /**
  * GET /api/analyses/[id]
  * Obtener un análisis específico por ID
  */
-export async function GET(
+async function getHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -60,7 +61,7 @@ export async function GET(
  * DELETE /api/analyses/[id]
  * Eliminar un análisis específico
  */
-export async function DELETE(
+async function deleteHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -120,3 +121,6 @@ export async function DELETE(
     );
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");
+export const DELETE = withRateLimit(deleteHandler, "crud");

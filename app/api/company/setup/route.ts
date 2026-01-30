@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createCompany, getCompanyByUser, getCompanyById, updateCompany } from "@/lib/company";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
 
 /**
  * GET /api/company/setup
  * Obtener la empresa del usuario actual
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
  * POST /api/company/setup
  * Crear una nueva empresa
  */
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
  * PUT /api/company/setup
  * Actualizar empresa existente
  */
-export async function PUT(request: NextRequest) {
+async function putHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
@@ -156,3 +157,7 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");
+export const POST = withRateLimit(postHandler, "crud");
+export const PUT = withRateLimit(putHandler, "crud");
