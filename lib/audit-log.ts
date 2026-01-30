@@ -50,6 +50,7 @@ export function auditLog(params: {
     };
 
     // Structured JSON logging for easy parsing by log aggregators
+    // eslint-disable-next-line no-console
     console.log(
       JSON.stringify({
         level: "audit",
