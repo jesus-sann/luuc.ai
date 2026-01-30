@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, FileText, Search, Shield, Zap, Clock, CheckCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PricingSection } from "@/components/pricing-section";
 
 export default function LandingPage() {
   const currentYear = new Date().getFullYear();
@@ -8,7 +9,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
@@ -16,7 +17,13 @@ export default function LandingPage() {
             </div>
             <span className="text-xl font-bold">Luuc.ai</span>
           </div>
-          <div className="flex items-center gap-4">
+          <nav className="hidden items-center gap-6 md:flex">
+            <Link href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+              Funcionalidades
+            </Link>
+            <Link href="#pricing" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+              Precios
+            </Link>
             <Link href="/login">
               <Button variant="ghost">Iniciar Sesión</Button>
             </Link>
@@ -24,6 +31,16 @@ export default function LandingPage() {
               <Button>
                 Comenzar Gratis
                 <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </nav>
+          <div className="flex items-center gap-4 md:hidden">
+            <Link href="/login">
+              <Button variant="ghost" size="sm">Iniciar Sesión</Button>
+            </Link>
+            <Link href="/register">
+              <Button size="sm">
+                Comenzar
               </Button>
             </Link>
           </div>
@@ -133,6 +150,11 @@ export default function LandingPage() {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="mx-auto max-w-7xl px-4 py-16">
+        <PricingSection />
       </section>
 
       {/* CTA */}

@@ -53,11 +53,11 @@ interface KBStats {
 
 // Mapeo de iconos de Lucide
 const iconMap: Record<string, React.ReactNode> = {
-  folder: <Folder className="w-6 h-6" />,
-  "file-text": <FileText className="w-6 h-6" />,
-  "check-circle": <CheckCircle className="w-6 h-6" />,
-  "book-open": <BookOpen className="w-6 h-6" />,
-  "bar-chart-2": <BarChart2 className="w-6 h-6" />,
+  folder: <Folder className="h-6 w-6" />,
+  "file-text": <FileText className="h-6 w-6" />,
+  "check-circle": <CheckCircle className="h-6 w-6" />,
+  "book-open": <BookOpen className="h-6 w-6" />,
+  "bar-chart-2": <BarChart2 className="h-6 w-6" />,
 };
 
 export default function KnowledgeBasePage() {
@@ -241,35 +241,35 @@ export default function KnowledgeBasePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-          <BookOpen className="w-8 h-8 text-blue-600" />
+          <BookOpen className="h-8 w-8 text-blue-600" />
           Base de Conocimiento
         </h1>
         <p className="text-slate-600">
-          Alimenta a LUUC con la documentacion de tu empresa para generar
-          documentos coherentes con tus estandares
+          Alimenta a Luuc con la documentación de tu empresa para generar
+          documentos coherentes con tus estándares
         </p>
       </div>
 
       {/* Error Alert */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
-          <AlertCircle className="w-5 h-5" />
-          <span>{error}</span>
+          <AlertCircle className="h-5 w-5 flex-shrink-0" />
+          <span className="flex-1">{error}</span>
           <button
             onClick={() => setError(null)}
-            className="ml-auto hover:text-red-900"
+            className="hover:text-red-900"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -284,7 +284,7 @@ export default function KnowledgeBasePage() {
                   <p className="text-sm text-slate-600">Total Archivos</p>
                   <p className="text-2xl font-bold">{stats.totalDocuments}</p>
                 </div>
-                <FileText className="text-blue-500 w-8 h-8" />
+                <FileText className="text-blue-500 h-8 w-8" />
               </div>
             </CardContent>
           </Card>
@@ -359,7 +359,7 @@ export default function KnowledgeBasePage() {
         <input {...getInputProps()} />
         {isUploading ? (
           <div className="flex flex-col items-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
+            <Loader2 className="h-12 h-12 animate-spin text-blue-600 mb-4" />
             <p className="text-blue-600 font-medium">Procesando archivos...</p>
           </div>
         ) : (
@@ -402,11 +402,11 @@ export default function KnowledgeBasePage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold flex items-center gap-2">
-            <Folder className="w-5 h-5" />
+            <Folder className="h-5 h-5" />
             Categorias
           </h2>
           <Button onClick={() => setShowNewCategoryModal(true)} size="sm">
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="h-4 h-4 mr-2" />
             Nueva Categoria
           </Button>
         </div>
@@ -426,7 +426,7 @@ export default function KnowledgeBasePage() {
                 className="mb-2"
                 style={{ color: cat.color }}
               >
-                {iconMap[cat.icon] || <Folder className="w-6 h-6" />}
+                {iconMap[cat.icon] || <Folder className="h-6 h-6" />}
               </div>
               <p className="font-medium text-sm">{cat.name}</p>
               <p className="text-xs text-slate-500 mt-1">
@@ -441,7 +441,7 @@ export default function KnowledgeBasePage() {
       {/* Documents List */}
       <div>
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <FileText className="w-5 h-5" />
+          <FileText className="h-5 h-5" />
           {selectedCategory
             ? `Documentos en "${categories.find((c) => c.slug === selectedCategory)?.name}"`
             : "Todos los Documentos"}
@@ -493,7 +493,7 @@ export default function KnowledgeBasePage() {
                       onClick={() => deleteDocument(doc.id)}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-4 h-4" />
                     </Button>
                   </div>
                 </CardContent>
@@ -514,7 +514,7 @@ export default function KnowledgeBasePage() {
                   onClick={() => setShowNewCategoryModal(false)}
                   className="text-slate-400 hover:text-slate-600"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="h-5 h-5" />
                 </button>
               </div>
             </CardHeader>

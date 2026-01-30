@@ -29,6 +29,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Breadcrumb } from "@/components/breadcrumb";
 
 interface Company {
   id: string;
@@ -161,6 +162,13 @@ export default function EmpresaPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb
+        items={[
+          { label: "Configuración", href: "/dashboard/configuracion" },
+          { label: isNewCompany ? "Configurar Empresa" : "Mi Empresa" },
+        ]}
+      />
+
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link

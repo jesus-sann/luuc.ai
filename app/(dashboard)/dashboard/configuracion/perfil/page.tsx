@@ -24,6 +24,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
+import { Breadcrumb } from "@/components/breadcrumb";
 
 export default function PerfilPage() {
   const { user } = useAuth();
@@ -87,6 +88,13 @@ export default function PerfilPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb
+        items={[
+          { label: "Configuración", href: "/dashboard/configuracion" },
+          { label: "Mi Perfil" },
+        ]}
+      />
+
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link

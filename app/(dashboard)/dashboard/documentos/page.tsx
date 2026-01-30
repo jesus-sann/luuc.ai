@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { FileText, Search, Calendar, MoreVertical, Download, Trash2, Eye, Copy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -115,12 +116,22 @@ export default function DocumentosPage() {
         <div className="space-y-4">
           {mockDocuments.length === 0 ? (
             <Card>
-              <CardContent className="flex h-48 flex-col items-center justify-center">
-                <FileText className="mb-4 h-12 w-12 text-slate-300" />
-                <p className="text-slate-500">No hay documentos generados aún</p>
-                <Button className="mt-4" variant="outline">
-                  Crear primer documento
-                </Button>
+              <CardContent className="flex min-h-[400px] flex-col items-center justify-center p-12">
+                <div className="mb-4 rounded-full bg-blue-100 p-4">
+                  <FileText className="h-12 w-12 text-blue-600" />
+                </div>
+                <h3 className="mb-2 text-xl font-semibold text-slate-900">
+                  Aún no tienes documentos generados
+                </h3>
+                <p className="mb-6 max-w-md text-center text-slate-600">
+                  Comienza a redactar tu primer documento legal en minutos con la ayuda de nuestra IA
+                </p>
+                <Link href="/dashboard/redactar">
+                  <Button size="lg">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Crear primer documento
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ) : (
@@ -211,12 +222,22 @@ export default function DocumentosPage() {
         <div className="space-y-4">
           {mockAnalyses.length === 0 ? (
             <Card>
-              <CardContent className="flex h-48 flex-col items-center justify-center">
-                <Search className="mb-4 h-12 w-12 text-slate-300" />
-                <p className="text-slate-500">No hay análisis realizados aún</p>
-                <Button className="mt-4" variant="outline">
-                  Analizar documento
-                </Button>
+              <CardContent className="flex min-h-[400px] flex-col items-center justify-center p-12">
+                <div className="mb-4 rounded-full bg-green-100 p-4">
+                  <Search className="h-12 w-12 text-green-600" />
+                </div>
+                <h3 className="mb-2 text-xl font-semibold text-slate-900">
+                  No hay análisis realizados aún
+                </h3>
+                <p className="mb-6 max-w-md text-center text-slate-600">
+                  Sube un contrato o documento legal para obtener un análisis detallado de riesgos y recomendaciones
+                </p>
+                <Link href="/dashboard/revisar">
+                  <Button size="lg">
+                    <Search className="mr-2 h-4 w-4" />
+                    Analizar documento
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ) : (

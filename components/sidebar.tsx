@@ -9,7 +9,6 @@ import {
   Home,
   LogOut,
   Settings,
-  Sparkles,
   Loader2,
   User,
   BookOpen,
@@ -20,7 +19,6 @@ import { useAuth } from "@/hooks/use-auth";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Redactar", href: "/dashboard/redactar", icon: FileText },
-  { name: "Personalizado", href: "/dashboard/redactar/personalizado", icon: Sparkles },
   { name: "Revisar", href: "/dashboard/revisar", icon: Search },
   { name: "Knowledge Base", href: "/dashboard/knowledge-base", icon: BookOpen },
   { name: "Documentos", href: "/dashboard/documentos", icon: FolderOpen },

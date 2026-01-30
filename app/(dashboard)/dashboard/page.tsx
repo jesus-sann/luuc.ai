@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, Search, FolderOpen, ArrowRight } from "lucide-react";
+import { FileText, Search, FolderOpen, ArrowRight, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -17,7 +17,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Link href="/dashboard/redactar">
           <Card className="cursor-pointer transition-all hover:border-blue-300 hover:shadow-md">
             <CardHeader>
@@ -51,6 +51,25 @@ export default function DashboardPage() {
             <CardContent>
               <Button variant="ghost" className="p-0 text-green-600">
                 Analizar <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/knowledge-base">
+          <Card className="cursor-pointer transition-all hover:border-orange-300 hover:shadow-md">
+            <CardHeader>
+              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100">
+                <BookOpen className="h-6 w-6 text-orange-600" />
+              </div>
+              <CardTitle>Knowledge Base</CardTitle>
+              <CardDescription>
+                Sube documentos de tu empresa para personalizar la IA
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="ghost" className="p-0 text-orange-600">
+                Gestionar <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>
