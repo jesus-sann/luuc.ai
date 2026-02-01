@@ -29,10 +29,13 @@ export interface Document {
 // Tipos de documentos soportados
 export type DocumentType =
   | "nda"
+  | "contrato"
   | "contrato_servicios"
+  | "carta_correo"
   | "carta_terminacion"
   | "acta_reunion"
-  | "politica_interna";
+  | "politica_interna"
+  | "performance_report";
 
 // Template de documento
 export interface Template {
