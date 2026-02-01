@@ -118,12 +118,12 @@ export default function RedaccionPersonalizadaPage() {
             <ArrowLeft className="mr-1.5 h-4 w-4" />
             Volver
           </Link>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-600">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-600">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">Documento Generado</h1>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Documento Generado</h1>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={handleCopy}>

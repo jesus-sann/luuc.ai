@@ -35,9 +35,14 @@ async function handler(request: NextRequest) {
 
     // Verificar límites del plan
     const FREE_LIMIT = parseInt(process.env.FREE_TIER_ANALYSIS_LIMIT || "5");
-    if (user.plan === "free") {
-      // Obtener conteo actual de análisis del usuario
-      // Por ahora usamos usage_count general, pero idealmente sería usage_analyses
+    if (user.plan === "free" && user.usage_count >= FREE_LIMIT) {
+      return NextResponse.json<ApiResponse<null>>(
+        {
+          success: false,
+          error: `Has alcanzado el límite de ${FREE_LIMIT} análisis de tu plan gratuito. Actualiza a Pro para continuar.`,
+        },
+        { status: 403 }
+      );
     }
 
     const body: ReviewRequestBody = await request.json();

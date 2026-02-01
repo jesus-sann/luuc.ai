@@ -177,7 +177,7 @@ export async function getAnalyses(userId: string): Promise<AnalysisRow[]> {
 // Logs de uso
 export async function logUsage(data: {
   user_id?: string;
-  action_type: "generate" | "analyze" | "custom_generate";
+  action_type: string;
   tokens_used?: number;
   model_used?: string;
   metadata?: Record<string, unknown>;

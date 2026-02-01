@@ -50,27 +50,15 @@ export default function DocumentosPage() {
     }
   };
 
+  const escapeHtml = (str: string) =>
+    str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
   const handleViewDocument = (doc: Document) => {
-    // Open in new window with content
     const newWindow = window.open("", "_blank");
     if (newWindow) {
-      newWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${doc.title}</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
-            h1 { color: #1e293b; }
-            pre { white-space: pre-wrap; word-wrap: break-word; }
-          </style>
-        </head>
-        <body>
-          <h1>${doc.title}</h1>
-          <pre>${doc.content}</pre>
-        </body>
-        </html>
-      `);
+      newWindow.document.write(`<!DOCTYPE html><html><head><title>${escapeHtml(doc.title)}</title>
+        <style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto}h1{color:#1e293b}pre{white-space:pre-wrap;word-wrap:break-word}</style>
+        </head><body><h1>${escapeHtml(doc.title)}</h1><pre>${escapeHtml(doc.content)}</pre></body></html>`);
       newWindow.document.close();
     }
   };
@@ -145,7 +133,7 @@ export default function DocumentosPage() {
             <!DOCTYPE html>
             <html>
             <head>
-              <title>Análisis: ${analysis.filename}</title>
+              <title>Análisis: ${escapeHtml(analysis.filename)}</title>
               <style>
                 body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
                 h1 { color: #1e293b; }
@@ -156,15 +144,15 @@ export default function DocumentosPage() {
               </style>
             </head>
             <body>
-              <h1>${analysis.filename}</h1>
+              <h1>${escapeHtml(analysis.filename)}</h1>
               <div class="risk-score">Puntuación de Riesgo: ${analysis.risk_score}/10</div>
               <h2>Resumen</h2>
-              <div class="summary">${analysis.summary}</div>
+              <div class="summary">${escapeHtml(analysis.summary || '')}</div>
               <h2>Hallazgos</h2>
               ${analysis.findings.map((f: any) => `
                 <div class="risk-item">
-                  <strong>${f.nivel}:</strong> ${f.descripcion}<br/>
-                  <em>Recomendación: ${f.recomendacion}</em>
+                  <strong>${escapeHtml(f.nivel)}:</strong> ${escapeHtml(f.descripcion)}<br/>
+                  <em>Recomendación: ${escapeHtml(f.recomendacion)}</em>
                 </div>
               `).join('')}
             </body>
@@ -230,7 +218,7 @@ export default function DocumentosPage() {
       </div>
 
       {/* Search and Filters */}
-      <div className="mb-6 flex items-center gap-4">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input

@@ -11,10 +11,13 @@
 
 export const DOCUMENT_TYPES = {
   NDA: "nda",
+  CONTRATO: "contrato",
   CONTRATO_SERVICIOS: "contrato_servicios",
+  CARTA_CORREO: "carta_correo",
   CARTA_TERMINACION: "carta_terminacion",
   ACTA_REUNION: "acta_reunion",
   POLITICA_INTERNA: "politica_interna",
+  PERFORMANCE_REPORT: "performance_report",
 } as const;
 
 export type DocumentTypeValue = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES];
@@ -40,10 +43,13 @@ export const ALLOWED_CUSTOM_DOCUMENT_TYPES = Object.values(CUSTOM_DOCUMENT_TYPES
 
 export const TEMPLATE_NAMES = {
   [DOCUMENT_TYPES.NDA]: "Acuerdo de Confidencialidad (NDA)",
+  [DOCUMENT_TYPES.CONTRATO]: "Contrato",
   [DOCUMENT_TYPES.CONTRATO_SERVICIOS]: "Contrato de Prestación de Servicios",
+  [DOCUMENT_TYPES.CARTA_CORREO]: "Carta / Correo Electrónico",
   [DOCUMENT_TYPES.CARTA_TERMINACION]: "Carta de Terminación de Contrato",
   [DOCUMENT_TYPES.ACTA_REUNION]: "Acta de Reunión",
   [DOCUMENT_TYPES.POLITICA_INTERNA]: "Política Interna",
+  [DOCUMENT_TYPES.PERFORMANCE_REPORT]: "Reporte de Desempeño",
 } as const;
 
 // ===========================================

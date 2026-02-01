@@ -52,7 +52,7 @@ export default function TemplateFormPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          template: template.name,
+          template: template.slug,
           variables: formData,
           title: `${template.name} - ${new Date().toLocaleDateString("es-CO")}`,
         }),
@@ -109,13 +109,13 @@ export default function TemplateFormPage() {
             <ArrowLeft className="mr-1.5 h-4 w-4" />
             Volver
           </Link>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100">
                 <FileText className="h-4 w-4 text-blue-600" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">{template.name}</h1>
+              <div className="min-w-0">
+                <h1 className="truncate text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">{template.name}</h1>
                 <p className="text-sm text-slate-500">Documento generado</p>
               </div>
             </div>

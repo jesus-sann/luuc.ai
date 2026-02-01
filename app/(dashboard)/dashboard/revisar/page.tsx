@@ -36,13 +36,27 @@ export default function RevisarPage() {
     setError(null);
 
     try {
-      const text = await readFileContent(selectedFile);
+      // Parse file server-side (supports PDF, DOCX, TXT)
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const parseRes = await fetch("/api/parse-file", {
+        method: "POST",
+        body: formData,
+      });
+      const parseData = await parseRes.json();
+
+      if (!parseData.success) {
+        setError(parseData.error || "Error leyendo el archivo");
+        setIsLoading(false);
+        return;
+      }
 
       const response = await fetch("/api/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          content: text,
+          content: parseData.data.text,
           filename: selectedFile.name,
           focusContext: focusContext.trim() || undefined,
         }),
@@ -62,15 +76,6 @@ export default function RevisarPage() {
     }
   };
 
-  const readFileContent = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
-      reader.onerror = () => reject(new Error("Error leyendo archivo"));
-      reader.readAsText(file);
-    });
-  };
-
   const handleExampleClick = (example: string) => {
     setFocusContext(example);
   };
@@ -86,19 +91,19 @@ export default function RevisarPage() {
   if (analysisResult) {
     return (
       <div>
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-blue-600">
               Revisión
             </p>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
               Resultados del Análisis
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 truncate text-sm text-slate-500">
               {selectedFile?.name}
             </p>
           </div>
-          <Button onClick={handleNewAnalysis} variant="outline">
+          <Button onClick={handleNewAnalysis} variant="outline" className="w-full sm:w-auto">
             Nuevo Análisis
           </Button>
         </div>

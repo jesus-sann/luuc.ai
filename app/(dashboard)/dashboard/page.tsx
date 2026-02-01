@@ -121,7 +121,7 @@ export default function DashboardPage() {
                       {feature.description}
                     </p>
                     <div
-                      className={`flex items-center text-sm font-medium ${c.text} opacity-0 transition-opacity group-hover:opacity-100`}
+                      className={`flex items-center text-sm font-medium ${c.text} opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100`}
                     >
                       Abrir <ArrowRight className="ml-1 h-3.5 w-3.5" />
                     </div>
@@ -168,11 +168,11 @@ export default function DashboardPage() {
       </div>
 
       {/* Feedback CTA */}
-      <div className="mt-4 flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3">
+      <div className="mt-4 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-slate-600">
           ¿Tienes sugerencias o encontraste un problema?
         </p>
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" size="sm" className="w-full sm:w-auto" asChild>
           <a href="mailto:feedback@luuc.ai">Enviar Feedback</a>
         </Button>
       </div>
