@@ -41,6 +41,8 @@ export interface Template {
   slug: DocumentType;
   description: string;
   icon: string;
+  category: string;
+  outputType: string;
   variables: TemplateVariable[];
   system_prompt: string;
 }

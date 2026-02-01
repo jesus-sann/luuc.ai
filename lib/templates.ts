@@ -8,6 +8,8 @@ export const templates: Template[] = [
     description:
       "Protege información confidencial entre partes comerciales o laborales",
     icon: "Shield",
+    category: "Contratos y Acuerdos",
+    outputType: "Borrador",
     variables: [
       {
         name: "parte_reveladora",
@@ -55,6 +57,8 @@ export const templates: Template[] = [
     description:
       "Formaliza la relación entre un prestador de servicios y su cliente",
     icon: "FileText",
+    category: "Contratos y Acuerdos",
+    outputType: "Borrador",
     variables: [
       {
         name: "prestador",
@@ -108,6 +112,8 @@ export const templates: Template[] = [
     slug: "carta_terminacion",
     description: "Comunicación formal para finalizar una relación contractual",
     icon: "FileX",
+    category: "Comunicaciones Formales",
+    outputType: "Borrador",
     variables: [
       {
         name: "remitente",
@@ -159,6 +165,8 @@ export const templates: Template[] = [
     slug: "acta_reunion",
     description: "Documenta los temas tratados y acuerdos de una reunión",
     icon: "Users",
+    category: "Comunicaciones Formales",
+    outputType: "Acta",
     variables: [
       {
         name: "titulo_reunion",
@@ -210,6 +218,8 @@ export const templates: Template[] = [
     slug: "politica_interna",
     description: "Define lineamientos y reglas para la organización",
     icon: "BookOpen",
+    category: "Políticas y Normativas",
+    outputType: "Política",
     variables: [
       {
         name: "empresa",

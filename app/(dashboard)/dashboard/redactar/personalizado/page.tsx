@@ -67,7 +67,7 @@ export default function RedaccionPersonalizadaPage() {
       } else {
         setError(data.error || "Error generando documento");
       }
-    } catch (err) {
+    } catch {
       setError("Error de conexión. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
@@ -106,49 +106,109 @@ export default function RedaccionPersonalizadaPage() {
     setError(null);
   };
 
+  // After generation: split layout
+  if (generatedContent) {
+    return (
+      <div>
+        <div className="mb-6">
+          <Link
+            href="/dashboard/redactar"
+            className="mb-3 inline-flex items-center text-sm text-slate-500 hover:text-slate-900"
+          >
+            <ArrowLeft className="mr-1.5 h-4 w-4" />
+            Volver
+          </Link>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-600">
+                <Sparkles className="h-4 w-4 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">Documento Generado</h1>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleCopy}>
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleDownload}>
+                <Download className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleNewDocument}>
+                Nuevo
+              </Button>
+            </div>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="max-h-[700px] overflow-auto rounded-lg bg-slate-50 p-5">
+              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-700">
+                {generatedContent}
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Before generation: single centered column
   return (
     <div>
       {/* Header */}
       <div className="mb-8">
         <Link
           href="/dashboard/redactar"
-          className="mb-4 inline-flex items-center text-sm text-slate-600 hover:text-slate-900"
+          className="mb-3 inline-flex items-center text-sm text-slate-500 hover:text-slate-900"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver a templates
+          <ArrowLeft className="mr-1.5 h-4 w-4" />
+          Volver
         </Link>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-600">
-            <Sparkles className="h-5 w-5 text-white" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-600">
+            <Sparkles className="h-4 w-4 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Redacción Personalizada</h1>
-            <p className="mt-1 text-slate-600">
-              Crea documentos legales personalizados describiendo lo que necesitas
+            <p className="text-xs font-semibold uppercase tracking-widest text-purple-600">
+              Personalizado
             </p>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              Redacción Personalizada
+            </h1>
           </div>
         </div>
-      </div>
-
-      {/* Info Banner */}
-      <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-        <p className="text-sm text-blue-800">
-          <strong>Esta herramienta está diseñada exclusivamente para redacción de documentos legales y corporativos.</strong>
-          {" "}Describe el tipo de documento que necesitas y te generaremos un borrador profesional.
+        <p className="mt-2 text-sm text-slate-500">
+          Describe qué documento necesitas y la IA generará un borrador profesional
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Form */}
+      {/* Steps indicator */}
+      <div className="mb-6 flex items-center gap-4 text-xs text-slate-400">
+        <span className="flex items-center gap-1.5 font-medium text-blue-600">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">1</span>
+          Describe
+        </span>
+        <span className="h-px flex-1 bg-slate-200" />
+        <span className="flex items-center gap-1.5">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-500">2</span>
+          Genera
+        </span>
+        <span className="h-px flex-1 bg-slate-200" />
+        <span className="flex items-center gap-1.5">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-500">3</span>
+          Descarga
+        </span>
+      </div>
+
+      <div className="mx-auto max-w-2xl">
         <Card>
           <CardHeader>
-            <CardTitle>Describe tu Documento</CardTitle>
+            <CardTitle className="text-base">Describe tu Documento</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {/* Tipo de Documento */}
-              <div className="space-y-2">
-                <Label htmlFor="tipo">
+              <div className="space-y-1.5">
+                <Label htmlFor="tipo" className="text-sm">
                   Tipo de Documento <span className="text-red-500">*</span>
                 </Label>
                 <Select value={tipoDocumento} onValueChange={setTipoDocumento}>
@@ -161,7 +221,7 @@ export default function RedaccionPersonalizadaPage() {
                         <div>
                           <span className="font-medium">{type.label}</span>
                           <span className="ml-2 text-xs text-slate-500">
-                            - {type.description}
+                            — {type.description}
                           </span>
                         </div>
                       </SelectItem>
@@ -171,62 +231,62 @@ export default function RedaccionPersonalizadaPage() {
               </div>
 
               {/* Descripción Principal */}
-              <div className="space-y-2">
-                <Label htmlFor="descripcion">
+              <div className="space-y-1.5">
+                <Label htmlFor="descripcion" className="text-sm">
                   ¿Qué documento necesitas? <span className="text-red-500">*</span>
                 </Label>
                 <Textarea
                   id="descripcion"
-                  placeholder="Ej: Necesito un contrato de arrendamiento comercial para un local en Bogotá, donde el arrendador es una empresa y el arrendatario es una persona natural. Debe incluir opción de compra al finalizar el contrato..."
-                  rows={5}
+                  placeholder="Ej: Necesito un contrato de arrendamiento comercial para un local en Bogotá, donde el arrendador es una empresa y el arrendatario es una persona natural..."
+                  rows={4}
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
+                  className="text-sm"
                   required
                 />
-                <p className="text-xs text-slate-500">
-                  Sé lo más específico posible sobre el propósito y características del documento.
+                <p className="text-xs text-slate-400">
+                  Sé lo más específico posible sobre el propósito y características.
                 </p>
               </div>
 
               {/* Campos Opcionales */}
-              <div className="rounded-lg border border-slate-200 p-4">
-                <h4 className="mb-4 text-sm font-medium text-slate-700">
+              <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-4">
+                <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Información adicional (opcional)
                 </h4>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="partes">Partes involucradas</Label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="partes" className="text-sm">Partes involucradas</Label>
                     <Input
                       id="partes"
                       placeholder="Ej: Empresa ABC y Juan Pérez"
                       value={partes}
                       onChange={(e) => setPartes(e.target.value)}
+                      className="text-sm"
                     />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="duracion">Duración / Vigencia</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="duracion" className="text-sm">Duración / Vigencia</Label>
                     <Input
                       id="duracion"
                       placeholder="Ej: 2 años, indefinido"
                       value={duracion}
                       onChange={(e) => setDuracion(e.target.value)}
+                      className="text-sm"
                     />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="valor">Valor / Monto</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="valor" className="text-sm">Valor / Monto</Label>
                     <Input
                       id="valor"
                       placeholder="Ej: $5,000,000 COP"
                       value={valor}
                       onChange={(e) => setValor(e.target.value)}
+                      className="text-sm"
                     />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="jurisdiccion">Jurisdicción</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="jurisdiccion" className="text-sm">Jurisdicción</Label>
                     <Select value={jurisdiccion} onValueChange={setJurisdiccion}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona país" />
@@ -243,30 +303,29 @@ export default function RedaccionPersonalizadaPage() {
                     </Select>
                   </div>
                 </div>
-
-                <div className="mt-4 space-y-2">
-                  <Label htmlFor="detalles">Cláusulas o detalles específicos</Label>
+                <div className="mt-3 space-y-1.5">
+                  <Label htmlFor="detalles" className="text-sm">Cláusulas o detalles específicos</Label>
                   <Textarea
                     id="detalles"
-                    placeholder="Ej: Incluir cláusula de confidencialidad, penalidad por incumplimiento del 10%, renovación automática..."
-                    rows={3}
+                    placeholder="Ej: Incluir cláusula de confidencialidad, penalidad por incumplimiento del 10%..."
+                    rows={2}
                     value={detallesAdicionales}
                     onChange={(e) => setDetallesAdicionales(e.target.value)}
+                    className="text-sm"
                   />
                 </div>
               </div>
 
-              {/* Error Message */}
               {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-                  <p className="text-sm text-red-800">{error}</p>
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                  {error}
                 </div>
               )}
 
-              {/* Submit Button */}
               <Button
                 type="submit"
                 className="w-full"
+                size="lg"
                 disabled={isLoading || !tipoDocumento || !descripcion}
               >
                 {isLoading ? (
@@ -282,51 +341,6 @@ export default function RedaccionPersonalizadaPage() {
                 )}
               </Button>
             </form>
-          </CardContent>
-        </Card>
-
-        {/* Preview */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Documento Generado</CardTitle>
-              {generatedContent && (
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={handleCopy}>
-                    {copied ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleDownload}>
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleNewDocument}>
-                    Nuevo
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {generatedContent ? (
-              <div className="max-h-[600px] overflow-auto rounded-lg bg-slate-50 p-4">
-                <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700">
-                  {generatedContent}
-                </pre>
-              </div>
-            ) : (
-              <div className="flex h-64 flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200">
-                <Sparkles className="mb-3 h-10 w-10 text-slate-300" />
-                <p className="text-sm text-slate-500">
-                  Describe tu documento para generar un borrador
-                </p>
-                <p className="mt-1 text-xs text-slate-400">
-                  El borrador aparecerá aquí
-                </p>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

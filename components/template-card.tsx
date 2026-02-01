@@ -10,7 +10,6 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { Template } from "@/types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const iconMap: Record<string, LucideIcon> = {
   Shield,
@@ -29,20 +28,27 @@ export function TemplateCard({ template }: TemplateCardProps) {
 
   return (
     <Link href={`/dashboard/redactar/${template.slug}`}>
-      <Card className="h-full cursor-pointer transition-all hover:border-blue-300 hover:shadow-md">
-        <CardHeader>
-          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
-            <Icon className="h-6 w-6 text-blue-600" />
+      <div className="group flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 transition-all hover:border-blue-200 hover:shadow-md">
+        <div className="mb-3 flex items-start gap-3">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 transition-colors group-hover:bg-blue-100">
+            <Icon className="h-5 w-5 text-blue-600" />
           </div>
-          <CardTitle className="text-lg">{template.name}</CardTitle>
-          <CardDescription>{template.description}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-xs text-slate-500">
-            {template.variables.length} campos requeridos
-          </p>
-        </CardContent>
-      </Card>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-slate-900">{template.name}</h3>
+            <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
+              {template.description}
+            </p>
+          </div>
+        </div>
+        <div className="mt-auto flex items-center gap-2 pt-3 text-xs text-slate-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-500">
+            <FileText className="h-3 w-3" />
+            {template.outputType}
+          </span>
+          <span>·</span>
+          <span>{template.variables.length} campos</span>
+        </div>
+      </div>
     </Link>
   );
 }
