@@ -5,6 +5,9 @@ import {
   Search,
   Check,
   BookOpen,
+  MessageSquare,
+  Bot,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PricingSection } from "@/components/pricing-section";
@@ -31,6 +34,12 @@ export default function LandingPage() {
               className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
             >
               Funcionalidades
+            </Link>
+            <Link
+              href="#demo"
+              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
+            >
+              Demo
             </Link>
             <Link
               href="#pricing"
@@ -227,6 +236,103 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Demo ── */}
+      <section id="demo" className="px-4 py-20 sm:px-6">
+        <div className="mx-auto max-w-4xl">
+          <p className="mb-2 text-center text-xs font-semibold uppercase tracking-widest text-blue-600">
+            Demo en Vivo
+          </p>
+          <h2 className="mb-3 text-center text-3xl font-bold tracking-tight text-slate-900">
+            Mira cómo funciona
+          </h2>
+          <p className="mx-auto mb-10 max-w-lg text-center text-base text-slate-500">
+            Así de simple es generar un documento legal con Luuc.ai
+          </p>
+
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+            {/* Chat header */}
+            <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-5 py-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+                <Sparkles className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Luuc.ai Asistente</p>
+                <p className="text-xs text-green-500">En línea</p>
+              </div>
+            </div>
+
+            {/* Chat messages */}
+            <div className="space-y-4 p-5">
+              {/* User message */}
+              <div className="flex justify-end">
+                <div className="flex items-start gap-2">
+                  <div className="max-w-sm rounded-2xl rounded-tr-sm bg-blue-600 px-4 py-3 text-sm text-white">
+                    <div className="mb-1 flex items-center gap-1.5">
+                      <MessageSquare className="h-3.5 w-3.5 opacity-70" />
+                      <span className="text-xs font-medium opacity-80">Tú</span>
+                    </div>
+                    Necesito un NDA para proteger información confidencial entre mi startup y un proveedor de tecnología en Colombia
+                  </div>
+                </div>
+              </div>
+
+              {/* AI response */}
+              <div className="flex justify-start">
+                <div className="flex items-start gap-2">
+                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
+                    <Bot className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="max-w-lg rounded-2xl rounded-tl-sm border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    <p className="mb-3 font-medium text-slate-900">
+                      He generado tu NDA bilateral. Aquí un resumen:
+                    </p>
+                    <div className="space-y-2 rounded-lg bg-white p-3 text-xs">
+                      <div className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-500" />
+                        <span><strong>Tipo:</strong> Acuerdo de Confidencialidad Bilateral</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-500" />
+                        <span><strong>Jurisdicción:</strong> Colombia — Ley 1581 de 2012</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-500" />
+                        <span><strong>Vigencia:</strong> 2 años con renovación automática</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-500" />
+                        <span><strong>Cláusulas:</strong> 12 cláusulas incluyendo penalidades y resolución de conflictos</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex gap-2">
+                      <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                        <FileText className="mr-1 h-3 w-3" />
+                        Descargar PDF
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                        Editar documento
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Input bar (decorative) */}
+            <div className="border-t border-slate-100 bg-slate-50 px-5 py-3">
+              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-400">
+                Describe el documento que necesitas...
+                <ArrowRight className="ml-auto h-4 w-4 text-blue-400" />
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-4 text-center text-xs text-slate-400">
+            * Ejemplo ilustrativo. Los documentos reales incluyen todas las cláusulas completas.
+          </p>
         </div>
       </section>
 
