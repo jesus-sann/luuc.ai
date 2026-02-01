@@ -56,7 +56,7 @@ export function RiskPanel({
   return (
     <div className="space-y-6">
       {/* Score Card */}
-      <div className="rounded-lg border bg-white p-6">
+      <div className="rounded-lg border bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-slate-500">Score de Riesgo</p>
@@ -89,14 +89,14 @@ export function RiskPanel({
       </div>
 
       {/* Summary */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-3 font-semibold text-slate-900">Resumen Ejecutivo</h3>
-        <p className="text-sm text-slate-600">{summary}</p>
+      <div className="rounded-lg border bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+        <h3 className="mb-3 font-semibold text-slate-900 dark:text-white">Resumen Ejecutivo</h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400">{summary}</p>
       </div>
 
       {/* Findings */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 font-semibold text-slate-900">
+      <div className="rounded-lg border bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+        <h3 className="mb-4 font-semibold text-slate-900 dark:text-white">
           Riesgos Identificados ({findings.length})
         </h3>
         <div className="space-y-4">
@@ -126,10 +126,10 @@ export function RiskPanel({
                     </span>
                   )}
                 </div>
-                <p className="mb-2 text-sm font-medium text-slate-800">
+                <p className="mb-2 text-sm font-medium text-slate-800 dark:text-slate-200">
                   {finding.descripcion}
                 </p>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   <span className="font-medium">Recomendación:</span>{" "}
                   {finding.recomendacion}
                 </p>
@@ -141,8 +141,8 @@ export function RiskPanel({
 
       {/* Missing Clauses */}
       {missingClauses.length > 0 && (
-        <div className="rounded-lg border bg-white p-6">
-          <h3 className="mb-3 font-semibold text-slate-900">
+        <div className="rounded-lg border bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+          <h3 className="mb-3 font-semibold text-slate-900 dark:text-white">
             Cláusulas Faltantes
           </h3>
           <ul className="space-y-2">
@@ -158,11 +158,11 @@ export function RiskPanel({
 
       {/* Observations */}
       {observations && (
-        <div className="rounded-lg border bg-white p-6">
-          <h3 className="mb-3 font-semibold text-slate-900">
+        <div className="rounded-lg border bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+          <h3 className="mb-3 font-semibold text-slate-900 dark:text-white">
             Observaciones Generales
           </h3>
-          <p className="text-sm text-slate-600">{observations}</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{observations}</p>
         </div>
       )}
     </div>

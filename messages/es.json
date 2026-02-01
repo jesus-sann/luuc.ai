@@ -1,0 +1,112 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "crear": "Crear",
+    "revisar": "Revisar",
+    "knowledgeBase": "Base de Conocimiento",
+    "documentos": "Documentos",
+    "configuracion": "Configuración",
+    "cerrarSesion": "Cerrar Sesión",
+    "modoOscuro": "Modo Oscuro",
+    "modoClaro": "Modo Claro"
+  },
+  "dashboard": {
+    "badge": "MVP Preview",
+    "welcome": "Bienvenido a Luuc.ai",
+    "description": "Esta es la versión MVP de tu asistente legal corporativo. Explora las herramientas disponibles, genera documentos reales y ayúdanos a mejorar la plataforma con tu feedback.",
+    "startHere": "Empieza aquí",
+    "open": "Abrir",
+    "underTheHood": "Bajo el capó",
+    "mvpNote": "Nota MVP:",
+    "mvpDescription": "Estás usando una versión temprana de Luuc.ai. Los documentos generados son borradores que deben ser revisados por un profesional legal. Funcionalidades como historial, colaboración y exportación avanzada están en desarrollo.",
+    "feedbackQuestion": "¿Tienes sugerencias o encontraste un problema?",
+    "sendFeedback": "Enviar Feedback"
+  },
+  "crear": {
+    "badge": "Creación",
+    "title": "¿Qué documento necesitas crear?",
+    "description": "Selecciona una plantilla o describe lo que buscas con tus propias palabras",
+    "custom": "Creación Personalizada",
+    "customDescription": "Describe en tus palabras qué documento necesitas y la IA lo redacta por ti",
+    "start": "Comenzar",
+    "back": "Volver",
+    "documentGenerated": "Documento Generado",
+    "new": "Nuevo",
+    "step1": "Describe",
+    "step2": "Genera",
+    "step3": "Descarga",
+    "describeDoc": "Describe tu Documento",
+    "docType": "Tipo de Documento",
+    "selectDocType": "Selecciona el tipo de documento",
+    "whatDoc": "¿Qué documento necesitas?",
+    "beSpecific": "Sé lo más específico posible sobre el propósito y características.",
+    "additionalInfo": "Información adicional (opcional)",
+    "parties": "Partes involucradas",
+    "duration": "Duración / Vigencia",
+    "amount": "Valor / Monto",
+    "jurisdiction": "Jurisdicción",
+    "selectCountry": "Selecciona país",
+    "clauses": "Cláusulas o detalles específicos",
+    "generating": "Generando borrador...",
+    "generateDraft": "Generar Borrador",
+    "templateNotFound": "Plantilla no encontrada",
+    "backToTemplates": "Volver a plantillas",
+    "docInfo": "Información del Documento",
+    "requiredFields": "campos requeridos",
+    "generatingDoc": "Generando documento...",
+    "generateDoc": "Generar Documento"
+  },
+  "revisar": {
+    "title": "Revisar Documento",
+    "description": "Sube un documento legal y recibe un análisis de riesgos"
+  },
+  "knowledgeBase": {
+    "title": "Base de Conocimiento",
+    "description": "Sube los documentos de tu empresa para que la IA aprenda tu estilo"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "back": "Volver",
+    "next": "Siguiente",
+    "search": "Buscar",
+    "noResults": "Sin resultados",
+    "confirm": "Confirmar"
+  },
+  "features": {
+    "crear": {
+      "title": "Crear",
+      "description": "Genera contratos, NDAs, cartas, políticas y reportes usando plantillas inteligentes o redacción libre.",
+      "badge": "6 plantillas + modo libre"
+    },
+    "revisar": {
+      "title": "Revisar",
+      "description": "Sube un documento legal y recibe un análisis de riesgos con score, hallazgos y recomendaciones.",
+      "badge": "PDF, DOCX, TXT"
+    },
+    "knowledgeBase": {
+      "title": "Base de Conocimiento",
+      "description": "Sube los documentos de tu empresa para que la IA aprenda tu estilo y genere documentos personalizados.",
+      "badge": "Próximamente"
+    }
+  },
+  "capabilities": {
+    "claudeAI": {
+      "title": "Claude AI",
+      "text": "Potenciado por Anthropic Claude — razonamiento legal avanzado en español"
+    },
+    "privacy": {
+      "title": "Privacidad",
+      "text": "Tus documentos no se usan para entrenar modelos. Datos cifrados en tránsito y reposo"
+    },
+    "speed": {
+      "title": "Velocidad",
+      "text": "Genera borradores profesionales en segundos, no horas"
+    }
+  }
+}

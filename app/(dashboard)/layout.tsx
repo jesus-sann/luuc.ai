@@ -17,7 +17,7 @@ export default function DashboardLayout({
       </div>
 
       {/* Main Content */}
-      <main className="min-h-0 flex-1 overflow-auto bg-slate-50">
+      <main className="min-h-0 flex-1 overflow-auto bg-slate-50 dark:bg-slate-900">
         <div className="p-4 pb-20 sm:p-6 lg:p-8 lg:pb-8">{children}</div>
       </main>
     </div>

@@ -1,69 +1,52 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { CLAUDE_MODEL, TIMEOUTS } from "@/lib/constants";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { generateTextSimple } from "@/lib/ai-provider";
+import { type AIProvider } from "@/lib/constants";
+import { TIMEOUTS } from "@/lib/constants";
 
 export async function generateWithClaude(
   systemPrompt: string,
-  userPrompt: string
+  userPrompt: string,
+  provider?: AIProvider
 ): Promise<string> {
   // Create AbortController for timeout
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.CLAUDE_API);
 
   try {
-    const message = await anthropic.messages.create(
-      {
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        messages: [
-          {
-            role: "user",
-            content: userPrompt,
-          },
-        ],
-        system: systemPrompt,
-      },
-      {
-        signal: controller.signal,
-      }
-    );
+    const result = await Promise.race([
+      generateTextSimple(systemPrompt, userPrompt, 4096, provider),
+      new Promise<never>((_, reject) => {
+        controller.signal.addEventListener("abort", () => {
+          reject(new Error("AI request timed out after 60 seconds"));
+        });
+      }),
+    ]);
 
     clearTimeout(timeoutId);
-
-    const content = message.content[0];
-    if (content.type === "text") {
-      return content.text;
-    }
-
-    throw new Error("Unexpected response format from Claude");
+    return result;
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new Error("Claude API request timed out after 60 seconds");
-    }
     throw error;
   }
 }
 
 export async function generateDocument(
   templateName: string,
-  variables: Record<string, string>
+  variables: Record<string, string>,
+  provider?: AIProvider
 ): Promise<string> {
-  return generateDocumentWithContext(templateName, variables, "", "");
+  return generateDocumentWithContext(templateName, variables, "", "", provider);
 }
 
 /**
  * Genera un documento usando contexto de documentos de referencia de la empresa
- * CLAVE: Esta función permite que los documentos generados respeten el estilo de la firma
+ * CLAVE: Esta funcion permite que los documentos generados respeten el estilo de la firma
  */
 export async function generateDocumentWithContext(
   templateName: string,
   variables: Record<string, string>,
   companyContext: string,
-  companyInstructions: string
+  companyInstructions: string,
+  provider?: AIProvider
 ): Promise<string> {
   let systemPrompt = `Eres un abogado corporativo experto redactando documentos legales en español para Colombia y Latinoamérica.
 
@@ -116,7 +99,7 @@ ${Object.entries(variables)
 
 Genera el documento legal completo${companyContext ? " respetando el estilo de los documentos de referencia" : ""}:`;
 
-  return generateWithClaude(systemPrompt, userPrompt);
+  return generateWithClaude(systemPrompt, userPrompt, provider);
 }
 
 export async function analyzeDocument(

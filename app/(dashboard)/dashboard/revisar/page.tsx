@@ -96,10 +96,10 @@ export default function RevisarPage() {
             <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-blue-600">
               Revisión
             </p>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
               Resultados del Análisis
             </h1>
-            <p className="mt-1 truncate text-sm text-slate-500">
+            <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
               {selectedFile?.name}
             </p>
           </div>
@@ -126,10 +126,10 @@ export default function RevisarPage() {
         <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-blue-600">
           Revisión
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           Analiza riesgos en tus documentos
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Sube un documento legal y recibe un análisis detallado con recomendaciones
         </p>
       </div>
@@ -152,7 +152,7 @@ export default function RevisarPage() {
         </Card>
 
         {/* Focus Context */}
-        <Card className="border-blue-100 bg-gradient-to-br from-blue-50/50 to-white">
+        <Card className="border-blue-100 bg-gradient-to-br from-blue-50/50 to-white dark:border-blue-900 dark:from-blue-950/20 dark:to-slate-900">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-blue-600" />
@@ -168,7 +168,7 @@ export default function RevisarPage() {
               rows={3}
               value={focusContext}
               onChange={(e) => setFocusContext(e.target.value)}
-              className="resize-none bg-white text-sm"
+              className="resize-none bg-white text-sm dark:bg-slate-800"
               disabled={isLoading}
             />
             <div className="space-y-1.5">
@@ -181,7 +181,7 @@ export default function RevisarPage() {
                   <button
                     key={index}
                     onClick={() => handleExampleClick(example)}
-                    className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                    className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-blue-700 dark:hover:bg-blue-950/30 dark:hover:text-blue-400"
                     disabled={isLoading}
                   >
                     {example}
@@ -215,7 +215,7 @@ export default function RevisarPage() {
         )}
 
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
             {error}
           </div>
         )}

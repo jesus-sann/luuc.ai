@@ -54,8 +54,8 @@ export function FileUpload({
           className={cn(
             "flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors",
             isDragActive
-              ? "border-blue-500 bg-blue-50"
-              : "border-slate-300 hover:border-slate-400",
+              ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
+              : "border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500",
             isLoading && "cursor-not-allowed opacity-50"
           )}
         >
@@ -65,7 +65,7 @@ export function FileUpload({
             <p className="text-sm text-blue-600">Suelta el archivo aquí...</p>
           ) : (
             <>
-              <p className="mb-1 text-sm font-medium text-slate-700">
+              <p className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
                 Arrastra un archivo o haz clic para seleccionar
               </p>
               <p className="text-xs text-slate-500">
@@ -75,7 +75,7 @@ export function FileUpload({
           )}
         </div>
       ) : (
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
           <div className="flex items-center gap-3">
             {isLoading ? (
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
@@ -83,7 +83,7 @@ export function FileUpload({
               <File className="h-8 w-8 text-blue-600" />
             )}
             <div>
-              <p className="text-sm font-medium text-slate-700">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 {selectedFile.name}
               </p>
               <p className="text-xs text-slate-500">

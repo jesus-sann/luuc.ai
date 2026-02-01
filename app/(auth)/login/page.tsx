@@ -179,7 +179,7 @@ function LoginForm() {
             <div className="w-full border-t border-slate-200" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-slate-500">O continúa con</span>
+            <span className="bg-white px-2 text-slate-500 dark:bg-card dark:text-slate-400">O continúa con</span>
           </div>
         </div>
 
@@ -243,7 +243,7 @@ function LoginFormFallback() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <Suspense fallback={<LoginFormFallback />}>
         <LoginForm />
       </Suspense>

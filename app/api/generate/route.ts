@@ -54,6 +54,7 @@ async function handler(request: NextRequest) {
     }
 
     const { template, variables, title, companyId } = validation.sanitized!;
+    const provider = body.provider; // optional AI provider override
 
     // Determinar companyId (del request o del usuario)
     let effectiveCompanyId: string | undefined = companyId;
@@ -109,7 +110,8 @@ ${knowledgeContext}
       template,
       variables,
       fullContext,
-      companyInstructions
+      companyInstructions,
+      provider
     );
 
     // Guardar en Supabase

@@ -211,8 +211,8 @@ export default function DocumentosPage() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Mis Documentos</h1>
-        <p className="mt-2 text-slate-600">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Mis Documentos</h1>
+        <p className="mt-2 text-slate-600 dark:text-slate-400">
           Accede a tus documentos generados y análisis realizados
         </p>
       </div>
@@ -234,7 +234,7 @@ export default function DocumentosPage() {
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === "generados"
                 ? "bg-blue-600 text-white"
-                : "text-slate-600 hover:bg-slate-100"
+                : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
             } rounded-l-lg`}
           >
             Generados
@@ -244,7 +244,7 @@ export default function DocumentosPage() {
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === "analizados"
                 ? "bg-blue-600 text-white"
-                : "text-slate-600 hover:bg-slate-100"
+                : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
             } rounded-r-lg`}
           >
             Analizados
@@ -273,7 +273,7 @@ export default function DocumentosPage() {
                 <div className="mb-4 rounded-full bg-blue-100 p-4">
                   <FileText className="h-12 w-12 text-blue-600" />
                 </div>
-                <h3 className="mb-2 text-xl font-semibold text-slate-900">
+                <h3 className="mb-2 text-xl font-semibold text-slate-900 dark:text-white">
                   Aún no tienes documentos generados
                 </h3>
                 <p className="mb-6 max-w-md text-center text-slate-600">
@@ -296,7 +296,7 @@ export default function DocumentosPage() {
                       <FileText className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900">{doc.title}</p>
+                      <p className="font-medium text-slate-900 dark:text-white">{doc.title}</p>
                       <div className="flex items-center gap-2 text-sm text-slate-500">
                         <Calendar className="h-3 w-3" />
                         {formatDate(doc.created_at)}
@@ -320,9 +320,9 @@ export default function DocumentosPage() {
                           className="fixed inset-0 z-10"
                           onClick={() => setOpenMenuId(null)}
                         />
-                        <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+                        <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
                           <button
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                             onClick={() => {
                               handleViewDocument(doc);
                               setOpenMenuId(null);
@@ -332,7 +332,7 @@ export default function DocumentosPage() {
                             Ver documento
                           </button>
                           <button
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                             onClick={() => {
                               handleDownloadDocument(doc);
                               setOpenMenuId(null);
@@ -342,7 +342,7 @@ export default function DocumentosPage() {
                             Descargar
                           </button>
                           <button
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                             onClick={() => handleDuplicateDocument(doc.id)}
                           >
                             <Copy className="h-4 w-4" />
@@ -385,7 +385,7 @@ export default function DocumentosPage() {
                 <div className="mb-4 rounded-full bg-green-100 p-4">
                   <Search className="h-12 w-12 text-green-600" />
                 </div>
-                <h3 className="mb-2 text-xl font-semibold text-slate-900">
+                <h3 className="mb-2 text-xl font-semibold text-slate-900 dark:text-white">
                   No hay análisis realizados aún
                 </h3>
                 <p className="mb-6 max-w-md text-center text-slate-600">
@@ -411,7 +411,7 @@ export default function DocumentosPage() {
                       <Search className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900">
+                      <p className="font-medium text-slate-900 dark:text-white">
                         {analysis.filename}
                       </p>
                       <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -449,16 +449,16 @@ export default function DocumentosPage() {
                             className="fixed inset-0 z-10"
                             onClick={() => setOpenMenuId(null)}
                           />
-                          <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+                          <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
                             <button
-                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                               onClick={() => handleViewAnalysis(analysis.id)}
                             >
                               <Eye className="h-4 w-4" />
                               Ver análisis
                             </button>
                             <button
-                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                               onClick={() => {
                                 handleViewAnalysis(analysis.id);
                               }}

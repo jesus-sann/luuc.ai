@@ -1,15 +1,11 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { generateText } from "@/lib/ai-provider";
 import { saveDocument, logUsage } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { sanitizeString } from "@/lib/validators";
-import { ALLOWED_CUSTOM_DOCUMENT_TYPES, CLAUDE_MODEL, TIMEOUTS, USAGE_ACTION_TYPES } from "@/lib/constants";
+import { ALLOWED_CUSTOM_DOCUMENT_TYPES, TIMEOUTS, USAGE_ACTION_TYPES } from "@/lib/constants";
 import { withRateLimit } from "@/lib/api-middleware";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 // Palabras clave que indican solicitudes NO permitidas
 const BLOCKED_PATTERNS = [
@@ -188,7 +184,9 @@ async function handler(request: NextRequest) {
       );
     }
 
-    const rawData: GenerateCustomRequest = await request.json();
+    const body = await request.json();
+    const providerOverride = body.provider;
+    const rawData: GenerateCustomRequest = body;
 
     // SEGURIDAD: Validar y sanitizar la solicitud
     const validation = validateRequest(rawData);
@@ -202,43 +200,27 @@ async function handler(request: NextRequest) {
     // Usar datos sanitizados
     const data = validation.sanitized!;
 
-    // Verificar API key
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json(
-        { success: false, error: "API key no configurada" },
-        { status: 500 }
-      );
-    }
-
     // Construir el prompt
     const userPrompt = buildPrompt(data);
 
-    // Llamar a Claude con timeout
+    // Llamar al AI provider con timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.CLAUDE_API);
 
-    let message;
+    let aiResponse;
     try {
-      message = await anthropic.messages.create(
-        {
-          model: CLAUDE_MODEL,
-          max_tokens: 4096,
-          messages: [
-            {
-              role: "user",
-              content: `Redacta el siguiente documento legal:\n${userPrompt}`,
-            },
-          ],
-          system: SYSTEM_PROMPT,
-        },
-        {
-          signal: controller.signal,
-        }
-      );
+      aiResponse = await Promise.race([
+        generateText(SYSTEM_PROMPT, `Redacta el siguiente documento legal:\n${userPrompt}`, 4096, providerOverride),
+        new Promise<never>((_, reject) => {
+          controller.signal.addEventListener("abort", () => {
+            reject(new Error("timeout"));
+          });
+        }),
+      ]);
       clearTimeout(timeoutId);
     } catch (error) {
       clearTimeout(timeoutId);
-      if (error instanceof Error && error.name === "AbortError") {
+      if (error instanceof Error && error.message === "timeout") {
         return NextResponse.json(
           { success: false, error: "La solicitud tardó demasiado tiempo. Intenta de nuevo." },
           { status: 500 }
@@ -247,19 +229,12 @@ async function handler(request: NextRequest) {
       throw error;
     }
 
-    // Extraer el contenido
-    const content = message.content[0];
-    if (content.type !== "text") {
-      return NextResponse.json(
-        { success: false, error: "Respuesta inesperada de la API" },
-        { status: 500 }
-      );
-    }
+    const generatedText = aiResponse.text;
 
     // Verificar que no sea un mensaje de error del modelo
-    if (content.text.startsWith("ERROR:")) {
+    if (generatedText.startsWith("ERROR:")) {
       return NextResponse.json(
-        { success: false, error: content.text.replace("ERROR: ", "") },
+        { success: false, error: generatedText.replace("ERROR: ", "") },
         { status: 400 }
       );
     }
@@ -273,7 +248,7 @@ async function handler(request: NextRequest) {
         user_id: user.id,
         title,
         doc_type: `custom_${data.tipoDocumento}`,
-        content: content.text,
+        content: generatedText,
         variables: {
           tipoDocumento: data.tipoDocumento,
           descripcion: data.descripcion,
@@ -290,24 +265,25 @@ async function handler(request: NextRequest) {
       await logUsage({
         user_id: user.id,
         action_type: USAGE_ACTION_TYPES.CUSTOM_GENERATE,
-        tokens_used: message.usage?.output_tokens || 0,
+        tokens_used: aiResponse.tokensUsed || 0,
         metadata: {
           tipoDocumento: data.tipoDocumento,
           jurisdiccion: data.jurisdiccion,
+          aiProvider: aiResponse.provider,
         },
       });
     } catch (dbError) {
       console.error("Error saving to database:", dbError);
-      // Continuamos aunque falle el guardado
     }
 
     return NextResponse.json({
       success: true,
       data: {
-        content: content.text,
+        content: generatedText,
         tipo: data.tipoDocumento,
         timestamp: new Date().toISOString(),
         id: savedDocument?.id,
+        provider: aiResponse.provider,
       },
     });
   } catch (error) {

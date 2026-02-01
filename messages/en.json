@@ -1,0 +1,112 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "crear": "Create",
+    "revisar": "Review",
+    "knowledgeBase": "Knowledge Base",
+    "documentos": "Documents",
+    "configuracion": "Settings",
+    "cerrarSesion": "Sign Out",
+    "modoOscuro": "Dark Mode",
+    "modoClaro": "Light Mode"
+  },
+  "dashboard": {
+    "badge": "MVP Preview",
+    "welcome": "Welcome to Luuc.ai",
+    "description": "This is the MVP version of your corporate legal assistant. Explore the available tools, generate real documents, and help us improve the platform with your feedback.",
+    "startHere": "Start here",
+    "open": "Open",
+    "underTheHood": "Under the hood",
+    "mvpNote": "MVP Note:",
+    "mvpDescription": "You are using an early version of Luuc.ai. Generated documents are drafts that should be reviewed by a legal professional. Features like history, collaboration, and advanced export are in development.",
+    "feedbackQuestion": "Have suggestions or found an issue?",
+    "sendFeedback": "Send Feedback"
+  },
+  "crear": {
+    "badge": "Create",
+    "title": "What document do you need to create?",
+    "description": "Select a template or describe what you need in your own words",
+    "custom": "Custom Creation",
+    "customDescription": "Describe in your own words what document you need and the AI will draft it for you",
+    "start": "Start",
+    "back": "Back",
+    "documentGenerated": "Document Generated",
+    "new": "New",
+    "step1": "Describe",
+    "step2": "Generate",
+    "step3": "Download",
+    "describeDoc": "Describe your Document",
+    "docType": "Document Type",
+    "selectDocType": "Select document type",
+    "whatDoc": "What document do you need?",
+    "beSpecific": "Be as specific as possible about the purpose and characteristics.",
+    "additionalInfo": "Additional information (optional)",
+    "parties": "Parties involved",
+    "duration": "Duration / Term",
+    "amount": "Value / Amount",
+    "jurisdiction": "Jurisdiction",
+    "selectCountry": "Select country",
+    "clauses": "Specific clauses or details",
+    "generating": "Generating draft...",
+    "generateDraft": "Generate Draft",
+    "templateNotFound": "Template not found",
+    "backToTemplates": "Back to templates",
+    "docInfo": "Document Information",
+    "requiredFields": "required fields",
+    "generatingDoc": "Generating document...",
+    "generateDoc": "Generate Document"
+  },
+  "revisar": {
+    "title": "Review Document",
+    "description": "Upload a legal document and get a risk analysis"
+  },
+  "knowledgeBase": {
+    "title": "Knowledge Base",
+    "description": "Upload your company's documents so the AI learns your style"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "back": "Back",
+    "next": "Next",
+    "search": "Search",
+    "noResults": "No results",
+    "confirm": "Confirm"
+  },
+  "features": {
+    "crear": {
+      "title": "Create",
+      "description": "Generate contracts, NDAs, letters, policies, and reports using smart templates or free-form drafting.",
+      "badge": "6 templates + free mode"
+    },
+    "revisar": {
+      "title": "Review",
+      "description": "Upload a legal document and receive a risk analysis with score, findings, and recommendations.",
+      "badge": "PDF, DOCX, TXT"
+    },
+    "knowledgeBase": {
+      "title": "Knowledge Base",
+      "description": "Upload your company's documents so the AI learns your style and generates personalized documents.",
+      "badge": "Coming soon"
+    }
+  },
+  "capabilities": {
+    "claudeAI": {
+      "title": "Claude AI",
+      "text": "Powered by Anthropic Claude — advanced legal reasoning in Spanish"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "text": "Your documents are not used to train models. Data encrypted in transit and at rest"
+    },
+    "speed": {
+      "title": "Speed",
+      "text": "Generate professional drafts in seconds, not hours"
+    }
+  }
+}

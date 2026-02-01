@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   FileText,
@@ -11,56 +13,56 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-const FEATURES = [
-  {
-    title: "Redactar",
-    description:
-      "Genera contratos, NDAs, cartas, políticas y reportes usando plantillas inteligentes o redacción libre.",
-    icon: FileText,
-    href: "/dashboard/redactar",
-    color: "blue",
-    badge: "6 plantillas + modo libre",
-  },
-  {
-    title: "Revisar",
-    description:
-      "Sube un documento legal y recibe un análisis de riesgos con score, hallazgos y recomendaciones.",
-    icon: Search,
-    href: "/dashboard/revisar",
-    color: "emerald",
-    badge: "PDF, DOCX, TXT",
-  },
-  {
-    title: "Base de Conocimiento",
-    description:
-      "Sube los documentos de tu empresa para que la IA aprenda tu estilo y genere documentos personalizados.",
-    icon: BookOpen,
-    href: "/dashboard/knowledge-base",
-    color: "amber",
-    badge: "Próximamente",
-  },
-];
-
-const CAPABILITIES = [
-  {
-    icon: Brain,
-    title: "Claude AI",
-    text: "Potenciado por Anthropic Claude — razonamiento legal avanzado en español",
-  },
-  {
-    icon: Shield,
-    title: "Privacidad",
-    text: "Tus documentos no se usan para entrenar modelos. Datos cifrados en tránsito y reposo",
-  },
-  {
-    icon: Zap,
-    title: "Velocidad",
-    text: "Genera borradores profesionales en segundos, no horas",
-  },
-];
+import { useTranslations } from "@/hooks/use-translations";
 
 export default function DashboardPage() {
+  const t = useTranslations();
+
+  const FEATURES = [
+    {
+      title: t("features.crear.title"),
+      description: t("features.crear.description"),
+      icon: FileText,
+      href: "/dashboard/crear",
+      color: "blue",
+      badge: t("features.crear.badge"),
+    },
+    {
+      title: t("features.revisar.title"),
+      description: t("features.revisar.description"),
+      icon: Search,
+      href: "/dashboard/revisar",
+      color: "emerald",
+      badge: t("features.revisar.badge"),
+    },
+    {
+      title: t("features.knowledgeBase.title"),
+      description: t("features.knowledgeBase.description"),
+      icon: BookOpen,
+      href: "/dashboard/knowledge-base",
+      color: "amber",
+      badge: t("features.knowledgeBase.badge"),
+    },
+  ];
+
+  const CAPABILITIES = [
+    {
+      icon: Brain,
+      title: t("capabilities.claudeAI.title"),
+      text: t("capabilities.claudeAI.text"),
+    },
+    {
+      icon: Shield,
+      title: t("capabilities.privacy.title"),
+      text: t("capabilities.privacy.text"),
+    },
+    {
+      icon: Zap,
+      title: t("capabilities.speed.title"),
+      text: t("capabilities.speed.text"),
+    },
+  ];
+
   return (
     <div>
       {/* Header */}
@@ -68,23 +70,21 @@ export default function DashboardPage() {
         <div className="mb-1 flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-blue-600" />
           <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
-            MVP Preview
+            {t("dashboard.badge")}
           </p>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Bienvenido a Luuc.ai
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          {t("dashboard.welcome")}
         </h1>
-        <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-slate-500">
-          Esta es la versión MVP de tu asistente legal corporativo. Explora las
-          herramientas disponibles, genera documentos reales y ayúdanos a mejorar
-          la plataforma con tu feedback.
+        <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+          {t("dashboard.description")}
         </p>
       </div>
 
       {/* How to use */}
       <div className="mb-8">
-        <h2 className="mb-4 text-sm font-semibold text-slate-900">
-          Empieza aquí
+        <h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-white">
+          {t("dashboard.startHere")}
         </h2>
         <div className="grid gap-4 md:grid-cols-3">
           {FEATURES.map((feature, i) => {
@@ -107,7 +107,7 @@ export default function DashboardPage() {
                         <feature.icon className={`h-5 w-5 ${c.text}`} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-slate-900">
+                        <h3 className="font-semibold text-slate-900 dark:text-white">
                           {feature.title}
                         </h3>
                         <span
@@ -117,13 +117,13 @@ export default function DashboardPage() {
                         </span>
                       </div>
                     </div>
-                    <p className="mb-4 flex-1 text-sm leading-relaxed text-slate-500">
+                    <p className="mb-4 flex-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                       {feature.description}
                     </p>
                     <div
                       className={`flex items-center text-sm font-medium ${c.text} opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100`}
                     >
-                      Abrir <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                      {t("dashboard.open")} <ArrowRight className="ml-1 h-3.5 w-3.5" />
                     </div>
                   </CardContent>
                 </Card>
@@ -134,9 +134,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Tech capabilities */}
-      <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-900">
-          Bajo el capó
+      <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-6 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
+        <h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-white">
+          {t("dashboard.underTheHood")}
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
           {CAPABILITIES.map((cap, i) => (
@@ -145,10 +145,10 @@ export default function DashboardPage() {
                 <cap.icon className="h-4 w-4 text-slate-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-sm font-medium text-slate-900 dark:text-white">
                   {cap.title}
                 </p>
-                <p className="text-xs leading-relaxed text-slate-500">
+                <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                   {cap.text}
                 </p>
               </div>
@@ -158,22 +158,20 @@ export default function DashboardPage() {
       </div>
 
       {/* MVP note */}
-      <div className="mt-6 rounded-lg border border-blue-100 bg-blue-50/50 px-4 py-3">
-        <p className="text-xs leading-relaxed text-blue-800">
-          <span className="font-semibold">Nota MVP:</span> Estás usando una
-          versión temprana de Luuc.ai. Los documentos generados son borradores
-          que deben ser revisados por un profesional legal. Funcionalidades como
-          historial, colaboración y exportación avanzada están en desarrollo.
+      <div className="mt-6 rounded-lg border border-blue-100 bg-blue-50/50 px-4 py-3 dark:border-blue-900 dark:bg-blue-950/30">
+        <p className="text-xs leading-relaxed text-blue-800 dark:text-blue-300">
+          <span className="font-semibold">{t("dashboard.mvpNote")}</span>{" "}
+          {t("dashboard.mvpDescription")}
         </p>
       </div>
 
       {/* Feedback CTA */}
-      <div className="mt-4 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-600">
-          ¿Tienes sugerencias o encontraste un problema?
+      <div className="mt-4 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700 dark:bg-slate-800">
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          {t("dashboard.feedbackQuestion")}
         </p>
         <Button variant="outline" size="sm" className="w-full sm:w-auto" asChild>
-          <a href="mailto:feedback@luuc.ai">Enviar Feedback</a>
+          <a href="mailto:feedback@luuc.ai">{t("dashboard.sendFeedback")}</a>
         </Button>
       </div>
     </div>

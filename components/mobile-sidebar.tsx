@@ -18,18 +18,22 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: Home },
-  { name: "Redactar", href: "/dashboard/redactar", icon: FileText },
-  { name: "Revisar", href: "/dashboard/revisar", icon: Search },
-  { name: "Base de Conocimiento", href: "/dashboard/knowledge-base", icon: BookOpen },
-  { name: "Documentos", href: "/dashboard/documentos", icon: FolderOpen },
-];
+import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
+import { useTranslations } from "@/hooks/use-translations";
 
 export function MobileSidebar() {
   const pathname = usePathname();
   const { user, signOut, loading } = useAuth();
+  const t = useTranslations();
+
+  const navigation = [
+    { name: t("sidebar.dashboard"), href: "/dashboard", icon: Home },
+    { name: t("sidebar.crear"), href: "/dashboard/crear", icon: FileText },
+    { name: t("sidebar.revisar"), href: "/dashboard/revisar", icon: Search },
+    { name: t("sidebar.knowledgeBase"), href: "/dashboard/knowledge-base", icon: BookOpen },
+    { name: t("sidebar.documentos"), href: "/dashboard/documentos", icon: FolderOpen },
+  ];
 
   const handleSignOut = async () => {
     await signOut();
@@ -38,12 +42,12 @@ export function MobileSidebar() {
   return (
     <>
       {/* Mobile Header */}
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-white px-4 lg:hidden">
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-white px-4 dark:border-slate-700 dark:bg-slate-900 lg:hidden">
         <Link href="/dashboard" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
             <span className="text-lg font-bold text-white">L</span>
           </div>
-          <span className="text-xl font-bold">Luuc.ai</span>
+          <span className="text-xl font-bold dark:text-white">Luuc.ai</span>
         </Link>
 
         <Sheet>
@@ -76,7 +80,7 @@ export function MobileSidebar() {
                     pathname === item.href || pathname.startsWith(item.href + "/");
                   return (
                     <Link
-                      key={item.name}
+                      key={item.href}
                       href={item.href}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -109,12 +113,15 @@ export function MobileSidebar() {
                   </div>
                 )}
 
+                <ThemeToggle />
+                <LanguageToggle />
+
                 <Link
                   href="/dashboard/configuracion"
                   className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
                 >
                   <Settings className="h-5 w-5" />
-                  Configuración
+                  {t("sidebar.configuracion")}
                 </Link>
                 <button
                   onClick={handleSignOut}
@@ -126,7 +133,7 @@ export function MobileSidebar() {
                   ) : (
                     <LogOut className="h-5 w-5" />
                   )}
-                  Cerrar Sesión
+                  {t("sidebar.cerrarSesion")}
                 </button>
               </div>
             </div>
