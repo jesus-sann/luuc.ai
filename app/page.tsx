@@ -48,16 +48,16 @@ export default function LandingPage() {
               Precios
             </Link>
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/login">
-              <Button variant="ghost" className="hidden sm:inline-flex">
+              <Button variant="ghost" size="sm" className="text-sm sm:size-default">
                 Iniciar Sesión
               </Button>
             </Link>
             <Link href="/register">
-              <Button>
+              <Button size="sm" className="text-sm sm:size-default">
                 Registrarse
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-1.5 h-4 w-4 hidden sm:inline" />
               </Button>
             </Link>
           </div>

@@ -203,13 +203,15 @@ function LoginForm() {
           )}
         </Button>
 
-        <div className="mt-6 text-center text-sm text-slate-500">
-          <p>
-            ¿No tienes cuenta?{" "}
-            <Link href="/register" className="text-blue-600 hover:underline">
-              Regístrate gratis
-            </Link>
+        <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
+          <p className="mb-2 text-sm text-slate-600">
+            ¿No tienes cuenta?
           </p>
+          <Link href="/register">
+            <Button variant="outline" className="w-full">
+              Crear Cuenta Gratis
+            </Button>
+          </Link>
         </div>
 
         <div className="mt-4 text-center">
