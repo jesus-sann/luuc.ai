@@ -183,10 +183,25 @@ export const PLAN_LIMITS = {
 } as const;
 
 // ===========================================
-// CLAUDE MODEL
+// AI PROVIDER CONFIGURATION
 // ===========================================
 
-export const CLAUDE_MODEL = "claude-sonnet-4-20250514" as const;
+export const AI_PROVIDERS = {
+  ANTHROPIC: "anthropic",
+  GOOGLE: "google",
+  GROQ: "groq",
+} as const;
+
+export type AIProvider = typeof AI_PROVIDERS[keyof typeof AI_PROVIDERS];
+
+export const AI_MODELS = {
+  ANTHROPIC: "claude-sonnet-4-20250514",
+  GOOGLE: "gemini-2.0-flash",
+  GROQ: "llama-3.3-70b-versatile",
+} as const;
+
+// Legacy alias
+export const CLAUDE_MODEL = AI_MODELS.ANTHROPIC;
 
 // ===========================================
 // TIMEOUT SETTINGS (milliseconds)

@@ -4,7 +4,7 @@ import {
   KnowledgeBaseCategory,
   KnowledgeBaseStats,
 } from "@/types";
-import Anthropic from "@anthropic-ai/sdk";
+import { generateTextSimple } from "@/lib/ai-provider";
 
 // ============================================================================
 // EXTRACCION DE TEXTO DE ARCHIVOS
@@ -49,29 +49,12 @@ export async function extractTextFromFile(
  */
 export async function generateSummary(content: string): Promise<string> {
   try {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return "";
-    }
-
-    const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
-
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 500,
-      messages: [
-        {
-          role: "user",
-          content: `Resume este documento en 2-3 oraciones clave. Enfocate en: tipo de documento, proposito principal, informacion mas importante.
-
-Documento:
-${content.substring(0, 3000)}`,
-        },
-      ],
-    });
-
-    return message.content[0].type === "text" ? message.content[0].text : "";
+    const summary = await generateTextSimple(
+      "Eres un asistente que resume documentos legales de forma concisa.",
+      `Resume este documento en 2-3 oraciones clave. Enfocate en: tipo de documento, proposito principal, informacion mas importante.\n\nDocumento:\n${content.substring(0, 3000)}`,
+      500
+    );
+    return summary;
   } catch (error) {
     console.error("Error generando resumen:", error);
     return "";
