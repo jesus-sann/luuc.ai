@@ -62,7 +62,7 @@ export default function DashboardPage() {
               <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100">
                 <BookOpen className="h-6 w-6 text-orange-600" />
               </div>
-              <CardTitle>Knowledge Base</CardTitle>
+              <CardTitle>Base de Conocimiento</CardTitle>
               <CardDescription>
                 Sube documentos de tu empresa para personalizar la IA
               </CardDescription>

@@ -20,7 +20,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Redactar", href: "/dashboard/redactar", icon: FileText },
   { name: "Revisar", href: "/dashboard/revisar", icon: Search },
-  { name: "Knowledge Base", href: "/dashboard/knowledge-base", icon: BookOpen },
+  { name: "Base de Conocimiento", href: "/dashboard/knowledge-base", icon: BookOpen },
   { name: "Documentos", href: "/dashboard/documentos", icon: FolderOpen },
 ];
 
