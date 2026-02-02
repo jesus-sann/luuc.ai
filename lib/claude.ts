@@ -32,9 +32,10 @@ export async function generateWithClaude(
 export async function generateDocument(
   templateName: string,
   variables: Record<string, string>,
-  provider?: AIProvider
+  provider?: AIProvider,
+  language?: string
 ): Promise<string> {
-  return generateDocumentWithContext(templateName, variables, "", "", provider);
+  return generateDocumentWithContext(templateName, variables, "", "", provider, language);
 }
 
 /**
@@ -46,9 +47,20 @@ export async function generateDocumentWithContext(
   variables: Record<string, string>,
   companyContext: string,
   companyInstructions: string,
-  provider?: AIProvider
+  provider?: AIProvider,
+  language?: string
 ): Promise<string> {
-  let systemPrompt = `Eres un abogado corporativo experto redactando documentos legales en español para Colombia y Latinoamérica.
+  const lang = language || "es";
+  const langInstructions: Record<string, { locale: string; region: string }> = {
+    es: { locale: "español", region: "Colombia y Latinoamérica" },
+    en: { locale: "English", region: "the United States and international contexts" },
+    pt: { locale: "português", region: "Brasil e contextos internacionais" },
+    fr: { locale: "français", region: "la France et contextes internationaux" },
+    de: { locale: "Deutsch", region: "Deutschland und internationale Kontexte" },
+  };
+  const li = langInstructions[lang] || langInstructions["es"];
+
+  let systemPrompt = `Eres un abogado corporativo experto redactando documentos legales en ${li.locale} para ${li.region}.
 
 REGLAS FUNDAMENTALES:
 1. Redacta documentos legales profesionales y completos
@@ -104,12 +116,20 @@ Genera el documento legal completo${companyContext ? " respetando el estilo de l
 
 export async function analyzeDocument(
   content: string,
-  focusContext?: string
+  focusContext?: string,
+  language?: string
 ): Promise<string> {
-  const systemPrompt = `Eres un abogado corporativo experto analizando documentos legales.
-Tu tarea es identificar riesgos, cláusulas problemáticas y áreas de mejora.
-${focusContext ? "ENFOQUE ESPECIAL: El usuario ha solicitado que te enfoques en aspectos específicos. Prioriza tu análisis según sus indicaciones." : ""}
-Responde SIEMPRE en formato JSON válido.`;
+  const lang = language || "es";
+  const langMap: Record<string, string> = {
+    es: "español", en: "English", pt: "português", fr: "français", de: "Deutsch",
+  };
+  const locale = langMap[lang] || "español";
+
+  const systemPrompt = `You are an expert corporate lawyer analyzing legal documents.
+Your task is to identify risks, problematic clauses, and areas for improvement.
+${focusContext ? "SPECIAL FOCUS: The user has requested that you focus on specific aspects. Prioritize your analysis according to their instructions." : ""}
+IMPORTANT: All text values in your JSON response MUST be written in ${locale}.
+Always respond in valid JSON format.`;
 
   // Truncate content if too long and log it
   const maxContentLength = 15000;

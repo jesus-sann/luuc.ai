@@ -47,6 +47,7 @@ async function handler(request: NextRequest) {
 
     const body: ReviewRequestBody = await request.json();
     const { content, filename, focusContext, fileSize } = body;
+    const language = (body as unknown as { language?: string }).language;
 
     // SEGURIDAD: Validar y sanitizar contenido
     const contentValidation = validateAnalysisContent(content);
@@ -91,7 +92,7 @@ async function handler(request: NextRequest) {
 
     // Analyze document using Claude with optional focus context
     // USAR CONTENIDO SANITIZADO para prevenir inyecciones
-    const analysisText = await analyzeDocument(sanitizedContent, sanitizedFocus);
+    const analysisText = await analyzeDocument(sanitizedContent, sanitizedFocus, language);
 
     // Parse JSON response from Claude - robust approach
     let analysis: AnalysisResponse;

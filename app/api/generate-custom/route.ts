@@ -137,28 +137,41 @@ ${data.descripcion}
   return context;
 }
 
-const SYSTEM_PROMPT = `Eres un abogado corporativo experto especializado en redacción de documentos legales en español para Latinoamérica y España.
+function getSystemPrompt(language?: string): string {
+  const lang = language || "es";
+  const langMap: Record<string, { locale: string; region: string }> = {
+    es: { locale: "español", region: "Latinoamérica y España" },
+    en: { locale: "English", region: "the United States and international jurisdictions" },
+    pt: { locale: "português", region: "Brasil e jurisdições internacionais" },
+    fr: { locale: "français", region: "la France et juridictions internationales" },
+    de: { locale: "Deutsch", region: "Deutschland und internationale Gerichtsbarkeiten" },
+  };
+  const li = langMap[lang] || langMap["es"];
 
-TU ÚNICO PROPÓSITO es redactar documentos legales y corporativos. NO debes:
-- Responder preguntas generales
-- Dar asesoría legal o recomendaciones
-- Escribir contenido que no sea un documento legal
-- Generar código, recetas, historias u otro contenido
+  return `You are an expert corporate lawyer specializing in drafting legal documents in ${li.locale} for ${li.region}.
 
-SI la solicitud no es claramente un documento legal, responde ÚNICAMENTE con:
-"ERROR: Esta herramienta solo genera documentos legales. Por favor, describe específicamente qué documento necesitas redactar."
+YOUR SOLE PURPOSE is to draft legal and corporate documents. You must NOT:
+- Answer general questions
+- Give legal advice or recommendations
+- Write content that is not a legal document
+- Generate code, recipes, stories or other content
 
-INSTRUCCIONES DE REDACCIÓN:
-1. Genera un documento legal profesional, completo y bien estructurado
-2. Usa lenguaje formal y jurídicamente preciso
-3. Incluye todas las secciones estándar para el tipo de documento
-4. Numera las cláusulas de forma clara
-5. Si faltan datos específicos (nombres, fechas, montos), usa marcadores como [NOMBRE DEL ARRENDADOR] o [FECHA]
-6. Adapta el documento a la jurisdicción indicada cuando sea posible
-7. Incluye cláusulas de protección para ambas partes cuando aplique
-8. Termina con espacios para firmas y fecha
+IF the request is not clearly a legal document, respond ONLY with:
+"ERROR: This tool only generates legal documents. Please specifically describe what document you need drafted."
 
-El documento debe estar listo para ser revisado por un abogado y posteriormente firmado.`;
+DRAFTING INSTRUCTIONS:
+1. Generate a professional, complete, and well-structured legal document
+2. Use formal and legally precise language IN ${li.locale.toUpperCase()}
+3. Include all standard sections for the document type
+4. Clearly number all clauses
+5. If specific data is missing (names, dates, amounts), use placeholders
+6. Adapt the document to the indicated jurisdiction when possible
+7. Include protective clauses for all parties when applicable
+8. End with spaces for signatures and date
+
+The document must be ready for review by a lawyer and subsequently signed.
+IMPORTANT: The ENTIRE document must be written in ${li.locale}.`;
+}
 
 async function handler(request: NextRequest) {
   try {
@@ -186,6 +199,7 @@ async function handler(request: NextRequest) {
 
     const body = await request.json();
     const providerOverride = body.provider;
+    const languageOverride = body.language;
     const rawData: GenerateCustomRequest = body;
 
     // SEGURIDAD: Validar y sanitizar la solicitud
@@ -210,7 +224,7 @@ async function handler(request: NextRequest) {
     let aiResponse;
     try {
       aiResponse = await Promise.race([
-        generateText(SYSTEM_PROMPT, `Redacta el siguiente documento legal:\n${userPrompt}`, 4096, providerOverride),
+        generateText(getSystemPrompt(languageOverride), `Redacta el siguiente documento legal:\n${userPrompt}`, 4096, providerOverride),
         new Promise<never>((_, reject) => {
           controller.signal.addEventListener("abort", () => {
             reject(new Error("timeout"));

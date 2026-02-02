@@ -26,6 +26,14 @@ const DOCUMENT_TYPES = [
   { value: "otro", label: "Otro documento legal", description: "Documentos especializados" },
 ];
 
+const DOC_LANGUAGES = [
+  { value: "es", label: "Español" },
+  { value: "en", label: "English" },
+  { value: "pt", label: "Português" },
+  { value: "fr", label: "Français" },
+  { value: "de", label: "Deutsch" },
+];
+
 const AI_PROVIDERS = [
   { value: "auto", label: "Auto (predeterminado)", description: "Usa el modelo configurado por defecto" },
   { value: "anthropic", label: "Claude (Anthropic)", description: "Más preciso para documentos legales" },
@@ -37,6 +45,7 @@ export default function CreacionPersonalizadaPage() {
   const [tipoDocumento, setTipoDocumento] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [aiProvider, setAiProvider] = useState("auto");
+  const [docLanguage, setDocLanguage] = useState("es");
   const [partes, setPartes] = useState("");
   const [duracion, setDuracion] = useState("");
   const [valor, setValor] = useState("");
@@ -66,6 +75,7 @@ export default function CreacionPersonalizadaPage() {
           jurisdiccion,
           detallesAdicionales,
           ...(aiProvider !== "auto" && { provider: aiProvider }),
+          language: docLanguage,
         }),
       });
 
@@ -113,6 +123,7 @@ export default function CreacionPersonalizadaPage() {
     setJurisdiccion("");
     setDetallesAdicionales("");
     setAiProvider("auto");
+    setDocLanguage("es");
     setError(null);
   };
 
@@ -290,6 +301,20 @@ export default function CreacionPersonalizadaPage() {
                   <Label htmlFor="detalles" className="text-sm">Cláusulas o detalles específicos</Label>
                   <Textarea id="detalles" placeholder="Ej: Incluir cláusula de confidencialidad..." rows={2} value={detallesAdicionales} onChange={(e) => setDetallesAdicionales(e.target.value)} className="text-sm" />
                 </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-sm">Idioma del documento</Label>
+                <Select value={docLanguage} onValueChange={setDocLanguage}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DOC_LANGUAGES.map((l) => (
+                      <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-1.5">

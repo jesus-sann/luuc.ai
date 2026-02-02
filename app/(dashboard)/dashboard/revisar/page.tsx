@@ -8,6 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnalysisResponse } from "@/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+
+const DOC_LANGUAGES = [
+  { value: "es", label: "Español" },
+  { value: "en", label: "English" },
+  { value: "pt", label: "Português" },
+  { value: "fr", label: "Français" },
+  { value: "de", label: "Deutsch" },
+];
 
 const FOCUS_EXAMPLES = [
   "Identifica riesgos para la empresa en este contrato laboral",
@@ -22,6 +38,7 @@ export default function RevisarPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [analysisLanguage, setAnalysisLanguage] = useState("es");
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
@@ -59,6 +76,7 @@ export default function RevisarPage() {
           content: parseData.data.text,
           filename: selectedFile.name,
           focusContext: focusContext.trim() || undefined,
+          language: analysisLanguage,
         }),
       });
 
@@ -191,6 +209,21 @@ export default function RevisarPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Analysis Language */}
+        <div className="space-y-1.5">
+          <Label className="text-sm">Idioma del análisis</Label>
+          <Select value={analysisLanguage} onValueChange={setAnalysisLanguage}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DOC_LANGUAGES.map((l) => (
+                <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Analyze Button */}
         {selectedFile && (

@@ -18,6 +18,14 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+const DOC_LANGUAGES = [
+  { value: "es", label: "Español" },
+  { value: "en", label: "English" },
+  { value: "pt", label: "Português" },
+  { value: "fr", label: "Français" },
+  { value: "de", label: "Deutsch" },
+];
+
 const AI_PROVIDERS = [
   { value: "auto", label: "Auto (predeterminado)", description: "Usa el modelo configurado por defecto" },
   { value: "anthropic", label: "Claude (Anthropic)", description: "Más preciso para documentos legales" },
@@ -35,6 +43,7 @@ export default function TemplateFormPage() {
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [aiProvider, setAiProvider] = useState("auto");
+  const [docLanguage, setDocLanguage] = useState("es");
 
   if (!template) {
     return (
@@ -64,6 +73,7 @@ export default function TemplateFormPage() {
           variables: formData,
           title: `${template.name} - ${new Date().toLocaleDateString("es-CO")}`,
           ...(aiProvider !== "auto" && { provider: aiProvider }),
+          language: docLanguage,
         }),
       });
 
@@ -105,6 +115,7 @@ export default function TemplateFormPage() {
     setGeneratedContent(null);
     setFormData({});
     setAiProvider("auto");
+    setDocLanguage("es");
   };
 
   if (generatedContent) {
@@ -211,6 +222,20 @@ export default function TemplateFormPage() {
                   )}
                 </div>
               ))}
+
+              <div className="space-y-1.5">
+                <Label className="text-sm">Idioma del documento</Label>
+                <Select value={docLanguage} onValueChange={setDocLanguage}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DOC_LANGUAGES.map((l) => (
+                      <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <div className="space-y-1.5">
                 <Label className="text-sm">Modelo de IA</Label>
