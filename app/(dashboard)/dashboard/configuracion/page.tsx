@@ -8,6 +8,7 @@ import {
   User,
   Bell,
   Shield,
+  CreditCard,
   ChevronRight,
   Loader2,
 } from "lucide-react";
@@ -63,6 +64,13 @@ const settingsSections = [
     icon: Shield,
     href: "/dashboard/configuracion/seguridad",
     color: "bg-red-500",
+  },
+  {
+    title: "Planes y Facturación",
+    description: "Administra tu suscripción y método de pago",
+    icon: CreditCard,
+    href: "/dashboard/configuracion/planes",
+    color: "bg-indigo-500",
   },
 ];
 
@@ -189,8 +197,8 @@ export default function ConfiguracionPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Plan actual</span>
-              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-                Free
+              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 capitalize">
+{(user.user_metadata?.plan as string) || "Free"}
               </span>
             </div>
           </CardContent>

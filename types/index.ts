@@ -11,7 +11,7 @@ export interface User {
   company_id: string | null;
   role: "owner" | "admin" | "member" | null;
   usage_count: number;
-  plan: "free" | "pro" | "enterprise";
+  plan: "free" | "plus" | "pro" | "enterprise";
   created_at: string;
 }
 

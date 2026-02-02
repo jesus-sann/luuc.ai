@@ -182,3 +182,24 @@ IMPORTANTE:
 
   return generateWithClaude(systemPrompt, userPrompt);
 }
+
+/**
+ * Generate a concise, descriptive title for a legal document based on its content.
+ * Falls back to the provided fallback title if AI call fails.
+ */
+export async function generateDocumentTitle(
+  content: string,
+  fallbackTitle: string,
+  provider?: AIProvider
+): Promise<string> {
+  try {
+    const systemPrompt = "You extract a concise professional title from legal documents. Return ONLY the title, nothing else. Max 80 characters. No quotes.";
+    const snippet = content.substring(0, 2000);
+    const userPrompt = `Extract a short descriptive title for this legal document:\n\n${snippet}`;
+    const title = await generateTextSimple(systemPrompt, userPrompt, 100, provider);
+    const cleaned = title.trim().replace(/^["']|["']$/g, "");
+    return cleaned.length > 0 && cleaned.length <= 100 ? cleaned : fallbackTitle;
+  } catch {
+    return fallbackTitle;
+  }
+}

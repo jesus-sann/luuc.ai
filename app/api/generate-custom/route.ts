@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "@/lib/ai-provider";
+import { generateDocumentTitle } from "@/lib/claude";
 import { saveDocument, logUsage } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { sanitizeString } from "@/lib/validators";
@@ -253,10 +254,13 @@ async function handler(request: NextRequest) {
       );
     }
 
+    // Generate AI title
+    const fallbackTitle = `${data.tipoDocumento.charAt(0).toUpperCase() + data.tipoDocumento.slice(1)} Personalizado - ${new Date().toLocaleDateString("es-CO")}`;
+    const title = await generateDocumentTitle(generatedText, fallbackTitle);
+
     // Guardar en Supabase
     let savedDocument = null;
     try {
-      const title = `${data.tipoDocumento.charAt(0).toUpperCase() + data.tipoDocumento.slice(1)} Personalizado - ${new Date().toLocaleDateString("es-CO")}`;
 
       savedDocument = await saveDocument({
         user_id: user.id,
@@ -294,6 +298,7 @@ async function handler(request: NextRequest) {
       success: true,
       data: {
         content: generatedText,
+        title,
         tipo: data.tipoDocumento,
         timestamp: new Date().toISOString(),
         id: savedDocument?.id,

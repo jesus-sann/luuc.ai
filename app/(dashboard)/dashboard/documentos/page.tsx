@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Document, Analysis } from "@/types";
+import { DocumentViewerModal } from "@/components/document-viewer-modal";
 
 export default function DocumentosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,6 +19,7 @@ export default function DocumentosPage() {
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewingDoc, setViewingDoc] = useState<Document | null>(null);
 
   // Fetch documents and analyses on mount
   useEffect(() => {
@@ -54,13 +56,7 @@ export default function DocumentosPage() {
     str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
   const handleViewDocument = (doc: Document) => {
-    const newWindow = window.open("", "_blank");
-    if (newWindow) {
-      newWindow.document.write(`<!DOCTYPE html><html><head><title>${escapeHtml(doc.title)}</title>
-        <style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto}h1{color:#1e293b}pre{white-space:pre-wrap;word-wrap:break-word}</style>
-        </head><body><h1>${escapeHtml(doc.title)}</h1><pre>${escapeHtml(doc.content)}</pre></body></html>`);
-      newWindow.document.close();
-    }
+    setViewingDoc(doc);
   };
 
   const handleDownloadDocument = (docId: string, format: "docx" | "pdf") => {
@@ -488,6 +484,16 @@ export default function DocumentosPage() {
             ))
           )}
         </div>
+      )}
+      {/* Document Viewer Modal */}
+      {viewingDoc && (
+        <DocumentViewerModal
+          open={!!viewingDoc}
+          onOpenChange={(open) => { if (!open) setViewingDoc(null); }}
+          title={viewingDoc.title}
+          content={viewingDoc.content}
+          documentId={viewingDoc.id}
+        />
       )}
     </div>
   );

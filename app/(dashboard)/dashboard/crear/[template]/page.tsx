@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Loader2, Download, Copy, Check, FileText, FileDown } from "lucide-react";
+import { ArrowLeft, Loader2, FileText } from "lucide-react";
 import Link from "next/link";
 import { getTemplateBySlug } from "@/lib/templates";
 import { Button } from "@/components/ui/button";
+import { DocumentViewerModal } from "@/components/document-viewer-modal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -42,7 +43,8 @@ export default function TemplateFormPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [generatedDocId, setGeneratedDocId] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [generatedTitle, setGeneratedTitle] = useState<string>("");
+  const [showModal, setShowModal] = useState(false);
   const [aiProvider, setAiProvider] = useState("auto");
   const [docLanguage, setDocLanguage] = useState("es");
 
@@ -83,6 +85,8 @@ export default function TemplateFormPage() {
       if (data.success) {
         setGeneratedContent(data.data.content);
         setGeneratedDocId(data.data.id || null);
+        setGeneratedTitle(data.data.title || template.name);
+        setShowModal(true);
       } else {
         alert("Error generando documento: " + data.error);
       }
@@ -93,76 +97,14 @@ export default function TemplateFormPage() {
     }
   };
 
-  const handleCopy = async () => {
-    if (generatedContent) {
-      await navigator.clipboard.writeText(generatedContent);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleDownload = (format: "docx" | "pdf") => {
-    if (generatedDocId) {
-      const link = document.createElement("a");
-      link.href = `/api/documents/${generatedDocId}/export?format=${format}`;
-      link.click();
-    }
-  };
-
   const handleNewDocument = () => {
     setGeneratedContent(null);
     setGeneratedDocId(null);
+    setShowModal(false);
     setFormData({});
     setAiProvider("auto");
     setDocLanguage("es");
   };
-
-  if (generatedContent) {
-    return (
-      <div>
-        <div className="mb-6">
-          <Link href="/dashboard/crear" className="mb-3 inline-flex items-center text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white">
-            <ArrowLeft className="mr-1.5 h-4 w-4" />
-            Volver
-          </Link>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900">
-                <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="truncate text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">{template.name}</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Documento generado</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleCopy}>
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => handleDownload("docx")}>
-                <FileDown className="h-4 w-4 mr-1" /> DOCX
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => handleDownload("pdf")}>
-                <Download className="h-4 w-4 mr-1" /> PDF
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleNewDocument}>
-                Nuevo
-              </Button>
-            </div>
-          </div>
-        </div>
-        <Card>
-          <CardContent className="p-6">
-            <div className="max-h-[700px] overflow-auto rounded-lg bg-slate-50 p-5 dark:bg-slate-800">
-              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-                {generatedContent}
-              </pre>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -267,6 +209,20 @@ export default function TemplateFormPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Document Viewer Modal */}
+      {generatedContent && (
+        <DocumentViewerModal
+          open={showModal}
+          onOpenChange={(open) => {
+            setShowModal(open);
+            if (!open) handleNewDocument();
+          }}
+          title={generatedTitle}
+          content={generatedContent}
+          documentId={generatedDocId}
+        />
+      )}
     </div>
   );
 }

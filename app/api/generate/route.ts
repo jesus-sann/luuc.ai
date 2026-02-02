@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
-import { generateDocumentWithContext } from "@/lib/claude";
+import { generateDocumentWithContext, generateDocumentTitle } from "@/lib/claude";
 import { saveDocument, logUsage } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -116,13 +116,17 @@ ${knowledgeContext}
       language
     );
 
+    // Generate AI title from content
+    const fallbackTitle = title || `${template} - ${new Date().toLocaleDateString("es-CO")}`;
+    const aiTitle = await generateDocumentTitle(content, fallbackTitle, provider);
+
     // Guardar en Supabase
     let savedDocument = null;
     try {
       savedDocument = await saveDocument({
         user_id: user.id,
         company_id: effectiveCompanyId,
-        title: title || `${template} - ${new Date().toLocaleDateString("es-CO")}`,
+        title: aiTitle,
         doc_type: template,
         content,
         variables,
@@ -170,7 +174,7 @@ ${knowledgeContext}
       success: true,
       data: {
         content,
-        title: title || template,
+        title: aiTitle,
         id: savedDocument?.id,
         usedCompanyContext: !!companyContext || !!knowledgeContext,
       },
