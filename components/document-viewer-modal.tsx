@@ -84,7 +84,7 @@ export function DocumentViewerModal({
           <textarea
             value={editableContent}
             onChange={(e) => handleContentEdit(e.target.value)}
-            className="h-full min-h-[400px] w-full resize-none rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-sm leading-relaxed text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            className="h-full min-h-[400px] w-full resize-none rounded-lg border border-slate-200 bg-white p-6 text-sm leading-7 text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             spellCheck={false}
           />
         </div>
