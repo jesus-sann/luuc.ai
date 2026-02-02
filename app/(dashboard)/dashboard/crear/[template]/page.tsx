@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Loader2, Download, Copy, Check, FileText } from "lucide-react";
+import { ArrowLeft, Loader2, Download, Copy, Check, FileText, FileDown } from "lucide-react";
 import Link from "next/link";
 import { getTemplateBySlug } from "@/lib/templates";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ export default function TemplateFormPage() {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
+  const [generatedDocId, setGeneratedDocId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [aiProvider, setAiProvider] = useState("auto");
   const [docLanguage, setDocLanguage] = useState("es");
@@ -81,6 +82,7 @@ export default function TemplateFormPage() {
 
       if (data.success) {
         setGeneratedContent(data.data.content);
+        setGeneratedDocId(data.data.id || null);
       } else {
         alert("Error generando documento: " + data.error);
       }
@@ -99,20 +101,17 @@ export default function TemplateFormPage() {
     }
   };
 
-  const handleDownload = () => {
-    if (generatedContent) {
-      const blob = new Blob([generatedContent], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${template.name.replace(/\s+/g, "_")}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
+  const handleDownload = (format: "docx" | "pdf") => {
+    if (generatedDocId) {
+      const link = document.createElement("a");
+      link.href = `/api/documents/${generatedDocId}/export?format=${format}`;
+      link.click();
     }
   };
 
   const handleNewDocument = () => {
     setGeneratedContent(null);
+    setGeneratedDocId(null);
     setFormData({});
     setAiProvider("auto");
     setDocLanguage("es");
@@ -140,8 +139,11 @@ export default function TemplateFormPage() {
               <Button variant="outline" size="sm" onClick={handleCopy}>
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
-              <Button variant="outline" size="sm" onClick={handleDownload}>
-                <Download className="h-4 w-4" />
+              <Button variant="outline" size="sm" onClick={() => handleDownload("docx")}>
+                <FileDown className="h-4 w-4 mr-1" /> DOCX
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleDownload("pdf")}>
+                <Download className="h-4 w-4 mr-1" /> PDF
               </Button>
               <Button variant="outline" size="sm" onClick={handleNewDocument}>
                 Nuevo

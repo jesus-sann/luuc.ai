@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Loader2, Download, Copy, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, Download, Copy, Check, Sparkles, FileDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -54,6 +54,7 @@ export default function CreacionPersonalizadaPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
+  const [generatedDocId, setGeneratedDocId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,6 +84,7 @@ export default function CreacionPersonalizadaPage() {
 
       if (data.success) {
         setGeneratedContent(data.data.content);
+        setGeneratedDocId(data.data.id || null);
       } else {
         setError(data.error || "Error generando documento");
       }
@@ -101,20 +103,17 @@ export default function CreacionPersonalizadaPage() {
     }
   };
 
-  const handleDownload = () => {
-    if (generatedContent) {
-      const blob = new Blob([generatedContent], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `documento_personalizado_${new Date().toISOString().split("T")[0]}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
+  const handleDownload = (format: "docx" | "pdf") => {
+    if (generatedDocId) {
+      const link = document.createElement("a");
+      link.href = `/api/documents/${generatedDocId}/export?format=${format}`;
+      link.click();
     }
   };
 
   const handleNewDocument = () => {
     setGeneratedContent(null);
+    setGeneratedDocId(null);
     setTipoDocumento("");
     setDescripcion("");
     setPartes("");
@@ -149,8 +148,11 @@ export default function CreacionPersonalizadaPage() {
               <Button variant="outline" size="sm" onClick={handleCopy}>
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
-              <Button variant="outline" size="sm" onClick={handleDownload}>
-                <Download className="h-4 w-4" />
+              <Button variant="outline" size="sm" onClick={() => handleDownload("docx")}>
+                <FileDown className="h-4 w-4 mr-1" /> DOCX
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleDownload("pdf")}>
+                <Download className="h-4 w-4 mr-1" /> PDF
               </Button>
               <Button variant="outline" size="sm" onClick={handleNewDocument}>
                 Nuevo

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { FileText, Search, Calendar, MoreVertical, Download, Trash2, Eye, Copy } from "lucide-react";
+import { FileText, Search, Calendar, MoreVertical, Download, Trash2, Eye, Copy, FileDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,16 +63,10 @@ export default function DocumentosPage() {
     }
   };
 
-  const handleDownloadDocument = (doc: Document) => {
-    const blob = new Blob([doc.content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${doc.title}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleDownloadDocument = (docId: string, format: "docx" | "pdf") => {
+    const link = document.createElement("a");
+    link.href = `/api/documents/${docId}/export?format=${format}`;
+    link.click();
   };
 
   const handleDuplicateDocument = async (docId: string) => {
@@ -334,12 +328,22 @@ export default function DocumentosPage() {
                           <button
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                             onClick={() => {
-                              handleDownloadDocument(doc);
+                              handleDownloadDocument(doc.id, "docx");
+                              setOpenMenuId(null);
+                            }}
+                          >
+                            <FileDown className="h-4 w-4" />
+                            Descargar DOCX
+                          </button>
+                          <button
+                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
+                            onClick={() => {
+                              handleDownloadDocument(doc.id, "pdf");
                               setOpenMenuId(null);
                             }}
                           >
                             <Download className="h-4 w-4" />
-                            Descargar
+                            Descargar PDF
                           </button>
                           <button
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
