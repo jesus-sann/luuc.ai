@@ -178,7 +178,7 @@ ${knowledgeContext}
     return NextResponse.json<ApiResponse<null>>(
       {
         success: false,
-        error: "Error generando documento. Intenta de nuevo.",
+        error: `Error generando documento: ${error instanceof Error ? error.message : "Intenta de nuevo."}`,
       },
       { status: 500 }
     );
