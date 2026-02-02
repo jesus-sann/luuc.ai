@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2, Target, Lightbulb, Upload } from "lucide-react";
 import { FileUpload } from "@/components/file-upload";
-import { RiskPanel } from "@/components/risk-panel";
+import { AnalysisModal } from "@/components/analysis-modal";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +37,7 @@ export default function RevisarPage() {
   const [focusContext, setFocusContext] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
+  const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [analysisLanguage, setAnalysisLanguage] = useState("es");
 
@@ -84,6 +85,7 @@ export default function RevisarPage() {
 
       if (data.success) {
         setAnalysisResult(data.data);
+        setShowModal(true);
       } else {
         setError(data.error || "Error analizando documento");
       }
@@ -105,39 +107,21 @@ export default function RevisarPage() {
     setError(null);
   };
 
-  // After analysis: full-width results
-  if (analysisResult) {
-    return (
-      <div>
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-blue-600">
-              Revisión
-            </p>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-              Resultados del Análisis
-            </h1>
-            <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
-              {selectedFile?.name}
-            </p>
-          </div>
-          <Button onClick={handleNewAnalysis} variant="outline" className="w-full sm:w-auto">
-            Nuevo Análisis
-          </Button>
-        </div>
-        <RiskPanel
-          score={analysisResult.score}
-          findings={analysisResult.riesgos}
-          missingClauses={analysisResult.clausulas_faltantes}
-          summary={analysisResult.resumen}
-          observations={analysisResult.observaciones_generales}
-        />
-      </div>
-    );
-  }
-
-  // Before analysis: single centered column
   return (
+    <>
+    {/* Analysis Results Modal */}
+    {analysisResult && (
+      <AnalysisModal
+        open={showModal}
+        onOpenChange={(open) => {
+          setShowModal(open);
+          if (!open) handleNewAnalysis();
+        }}
+        result={analysisResult}
+        filename={selectedFile?.name || "Documento"}
+      />
+    )}
+
     <div>
       {/* Header */}
       <div className="mb-8">
@@ -254,5 +238,6 @@ export default function RevisarPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

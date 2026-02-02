@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Copy, Check, Download, FileDown, X } from "lucide-react";
+import { Copy, Check, Download, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -59,63 +59,74 @@ export function DocumentViewerModal({
     onContentChange?.(value);
   };
 
+  const wordCount = editableContent.split(/\s+/).filter(Boolean).length;
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="flex max-h-[90vh] w-full max-w-4xl flex-col p-0">
+      <DialogContent className="flex max-h-[90vh] w-full max-w-3xl flex-col gap-0 overflow-hidden rounded-2xl p-0">
         {/* Header */}
-        <DialogHeader className="flex-shrink-0 border-b border-slate-200 px-6 py-4 dark:border-slate-700">
-          <div className="flex items-center gap-3 pr-8">
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900">
-              <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div className="min-w-0">
-              <DialogTitle className="truncate text-base font-semibold text-slate-900 dark:text-white">
-                {title}
-              </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500">
-                Puedes editar el contenido antes de descargar
-              </DialogDescription>
-            </div>
-          </div>
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4">
+          <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+            {wordCount} palabras
+          </DialogDescription>
         </DialogHeader>
 
+        {/* Divider */}
+        <div className="mx-6 border-t border-slate-200 dark:border-slate-700" />
+
         {/* Editable Content */}
-        <div className="flex-1 overflow-hidden px-6 py-4">
+        <div className="flex-1 overflow-auto px-6 py-5">
           <textarea
             value={editableContent}
             onChange={(e) => handleContentEdit(e.target.value)}
-            className="h-full min-h-[400px] w-full resize-none rounded-lg border border-slate-200 bg-white p-6 text-sm leading-7 text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            className="min-h-[350px] w-full resize-none border-0 bg-transparent p-0 text-[15px] leading-7 text-slate-600 placeholder:text-slate-400 focus:outline-none focus:ring-0 dark:text-slate-300"
             spellCheck={false}
           />
         </div>
 
-        {/* Footer with Actions */}
-        <div className="flex flex-shrink-0 items-center justify-between border-t border-slate-200 px-6 py-3 dark:border-slate-700">
-          <div className="text-xs text-slate-400">
-            {editableContent.split(/\s+/).filter(Boolean).length} palabras
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleCopy}>
-              {copied ? (
-                <Check className="mr-1.5 h-3.5 w-3.5" />
-              ) : (
-                <Copy className="mr-1.5 h-3.5 w-3.5" />
-              )}
-              {copied ? "Copiado" : "Copiar"}
-            </Button>
-            {documentId && (
-              <>
-                <Button variant="outline" size="sm" onClick={() => handleDownload("docx")}>
-                  <FileDown className="mr-1.5 h-3.5 w-3.5" />
-                  DOCX
-                </Button>
-                <Button size="sm" onClick={() => handleDownload("pdf")} className="bg-blue-600 text-white hover:bg-blue-700">
-                  <Download className="mr-1.5 h-3.5 w-3.5" />
-                  PDF
-                </Button>
-              </>
+        {/* Divider */}
+        <div className="mx-6 border-t border-slate-200 dark:border-slate-700" />
+
+        {/* Footer */}
+        <div className="flex flex-shrink-0 items-center gap-3 px-6 py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopy}
+            className="rounded-xl"
+          >
+            {copied ? (
+              <Check className="mr-1.5 h-3.5 w-3.5" />
+            ) : (
+              <Copy className="mr-1.5 h-3.5 w-3.5" />
             )}
-          </div>
+            {copied ? "Copiado" : "Copiar"}
+          </Button>
+          <div className="flex-1" />
+          {documentId && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleDownload("docx")}
+                className="rounded-xl"
+              >
+                <FileDown className="mr-1.5 h-3.5 w-3.5" />
+                DOCX
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => handleDownload("pdf")}
+                className="rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <Download className="mr-1.5 h-3.5 w-3.5" />
+                PDF
+              </Button>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
