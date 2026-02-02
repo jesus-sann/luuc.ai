@@ -100,7 +100,7 @@ export default function ConfiguracionPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Configuración</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Configuración</h1>
         <p className="text-slate-500">
           Administra tu cuenta, empresa y preferencias
         </p>
@@ -108,7 +108,7 @@ export default function ConfiguracionPage() {
 
       {/* Status de empresa */}
       {!loading && (
-        <Card className={company ? "border-green-200 bg-green-50" : "border-yellow-200 bg-yellow-50"}>
+        <Card className={company ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30" : "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/30"}>
           <CardContent className="flex items-center justify-between py-4">
             <div className="flex items-center gap-3">
               <div className={`rounded-full p-2 ${company ? "bg-green-100" : "bg-yellow-100"}`}>

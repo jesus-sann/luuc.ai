@@ -37,7 +37,7 @@ export function Sidebar() {
   };
 
   return (
-    <div className="flex h-full w-64 flex-col bg-slate-900">
+    <div className="flex h-full w-64 flex-col bg-slate-900 dark:bg-slate-950 dark:border-r dark:border-slate-800">
       {/* Logo */}
       <div className="flex h-16 items-center px-6">
         <Link href="/dashboard" className="flex items-center gap-2">

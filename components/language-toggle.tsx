@@ -10,7 +10,7 @@ const LOCALES = {
 
 type Locale = keyof typeof LOCALES;
 
-export function LanguageToggle() {
+export function LanguageToggle({ variant = "sidebar" }: { variant?: "sidebar" | "compact" }) {
   const [locale, setLocale] = useState<Locale>("es");
   const [mounted, setMounted] = useState(false);
 
@@ -33,6 +33,18 @@ export function LanguageToggle() {
     // Dispatch custom event so other components can react
     window.dispatchEvent(new CustomEvent("locale-change", { detail: next }));
   };
+
+  if (variant === "compact") {
+    return (
+      <button
+        onClick={toggleLocale}
+        className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+        aria-label={`Cambiar idioma a ${locale === "es" ? "English" : "Español"}`}
+      >
+        <span className="text-xs font-semibold uppercase">{locale}</span>
+      </button>
+    );
+  }
 
   return (
     <button
