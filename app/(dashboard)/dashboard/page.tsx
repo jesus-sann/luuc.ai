@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LegalChat } from "@/components/legal-chat";
+import { UsageStats } from "@/components/usage-stats";
 import { useTranslations } from "@/hooks/use-translations";
 
 export default function DashboardPage() {
@@ -156,6 +157,11 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Usage Stats */}
+      <div className="mt-6">
+        <UsageStats />
       </div>
 
       {/* Legal Chat */}
