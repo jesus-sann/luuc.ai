@@ -29,7 +29,13 @@ export interface AuthUser {
 }
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
-  const supabase = await createClient();
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    // During static generation, cookies() throws — return null silently
+    return null;
+  }
   const {
     data: { user: authUser },
   } = await supabase.auth.getUser();
