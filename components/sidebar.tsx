@@ -15,8 +15,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { LanguageToggle } from "@/components/language-toggle";
 import { useTranslations } from "@/hooks/use-translations";
 
 export function Sidebar() {
@@ -86,9 +84,6 @@ export function Sidebar() {
             </div>
           </div>
         )}
-
-        <ThemeToggle />
-        <LanguageToggle />
 
         <Link
           href="/dashboard/configuracion"

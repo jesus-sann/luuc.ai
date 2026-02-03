@@ -11,44 +11,48 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PricingSection } from "@/components/pricing-section";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
 
 export default function LandingPage() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       {/* ── Navbar ── */}
-      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
               <span className="text-lg font-bold text-white">L</span>
             </div>
-            <span className="text-xl font-extrabold text-slate-900">
+            <span className="text-xl font-extrabold text-slate-900 dark:text-white">
               Luuc<span className="text-blue-600">.ai</span>
             </span>
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
             <Link
               href="#features"
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
+              className="text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:text-slate-900 dark:hover:text-white"
             >
               Funcionalidades
             </Link>
             <Link
               href="#demo"
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
+              className="text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:text-slate-900 dark:hover:text-white"
             >
               Demo
             </Link>
             <Link
               href="#pricing"
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
+              className="text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:text-slate-900 dark:hover:text-white"
             >
               Precios
             </Link>
           </nav>
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <ThemeToggle variant="compact" />
+            <LanguageToggle variant="compact" />
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-sm sm:size-default">
                 Iniciar Sesión
@@ -65,9 +69,9 @@ export default function LandingPage() {
       </header>
 
       {/* ── Hero ── */}
-      <section className="bg-gradient-to-b from-blue-50 to-white px-4 pb-12 pt-20 text-center sm:px-6">
+      <section className="bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-950 px-4 pb-12 pt-20 text-center sm:px-6">
         <div className="mx-auto max-w-3xl">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-600 shadow-sm">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 shadow-sm">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
@@ -75,14 +79,14 @@ export default function LandingPage() {
             IA especializada en derecho latinoamericano
           </div>
 
-          <h1 className="mb-5 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-[52px]">
+          <h1 className="mb-5 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-[52px]">
             Genera documentos legales en{" "}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               segundos, no en horas
             </span>
           </h1>
 
-          <p className="mx-auto mb-8 max-w-xl text-lg text-slate-500 sm:text-xl">
+          <p className="mx-auto mb-8 max-w-xl text-lg text-slate-500 dark:text-slate-400 sm:text-xl">
             Redacta contratos, NDAs, políticas y más con inteligencia artificial
             entrenada en normativa colombiana. Preciso, profesional, inmediato.
           </p>
@@ -101,7 +105,7 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-500">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1.5">
               <Check className="h-4 w-4 text-green-500" />
               2,847 documentos generados
@@ -119,23 +123,23 @@ export default function LandingPage() {
       </section>
 
       {/* ── Social Proof ── */}
-      <section className="border-y border-slate-100 bg-slate-50 py-10">
+      <section className="border-y border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 py-10">
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-8 px-4 text-center md:grid-cols-4">
           <div>
             <div className="text-3xl font-extrabold text-blue-600">80%</div>
-            <p className="mt-1 text-sm text-slate-500">Menos tiempo en redacción</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Menos tiempo en redacción</p>
           </div>
           <div>
             <div className="text-3xl font-extrabold text-blue-600">95%</div>
-            <p className="mt-1 text-sm text-slate-500">Precisión jurídica</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Precisión jurídica</p>
           </div>
           <div>
             <div className="text-3xl font-extrabold text-blue-600">10K+</div>
-            <p className="mt-1 text-sm text-slate-500">Documentos generados</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Documentos generados</p>
           </div>
           <div>
             <div className="text-3xl font-extrabold text-blue-600">500+</div>
-            <p className="mt-1 text-sm text-slate-500">Empresas confían en nosotros</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Empresas confían en nosotros</p>
           </div>
         </div>
       </section>
@@ -146,42 +150,42 @@ export default function LandingPage() {
           <p className="mb-2 text-center text-xs font-semibold uppercase tracking-widest text-blue-600">
             Funcionalidades
           </p>
-          <h2 className="mb-3 text-center text-3xl font-bold tracking-tight text-slate-900">
+          <h2 className="mb-3 text-center text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
             Todo lo que necesitas para documentos legales
           </h2>
-          <p className="mx-auto mb-12 max-w-lg text-center text-base text-slate-500">
+          <p className="mx-auto mb-12 max-w-lg text-center text-base text-slate-500 dark:text-slate-400">
             Desde la redacción hasta la revisión de riesgos, en una sola plataforma
           </p>
 
           <div className="grid gap-6 md:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 bg-white p-7 transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-7 transition-all hover:-translate-y-0.5 hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-md">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/50">
                 <FileText className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="mb-2 text-lg font-bold text-slate-900">Redacción con IA</h3>
-              <p className="text-sm leading-relaxed text-slate-500">
+              <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-white">Redacción con IA</h3>
+              <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                 Genera contratos, NDAs, políticas internas y más. Elige entre
                 plantillas predefinidas o describe lo que necesitas con tus propias palabras.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-7 transition-all hover:-translate-y-0.5 hover:border-purple-200 hover:shadow-md">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-7 transition-all hover:-translate-y-0.5 hover:border-purple-200 dark:hover:border-purple-700 hover:shadow-md">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/50">
                 <Search className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="mb-2 text-lg font-bold text-slate-900">Revisión de Riesgos</h3>
-              <p className="text-sm leading-relaxed text-slate-500">
+              <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-white">Revisión de Riesgos</h3>
+              <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                 Sube cualquier documento legal y recibe un análisis detallado de
                 riesgos, cláusulas faltantes y recomendaciones de mejora.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-7 transition-all hover:-translate-y-0.5 hover:border-green-200 hover:shadow-md">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-7 transition-all hover:-translate-y-0.5 hover:border-green-200 dark:hover:border-green-700 hover:shadow-md">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/50">
                 <BookOpen className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="mb-2 text-lg font-bold text-slate-900">Base de Conocimiento</h3>
-              <p className="text-sm leading-relaxed text-slate-500">
+              <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-white">Base de Conocimiento</h3>
+              <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                 Sube los documentos de tu empresa para que la IA aprenda tu estilo,
                 terminología y cláusulas preferidas. Resultados cada vez más precisos.
               </p>
@@ -191,27 +195,27 @@ export default function LandingPage() {
       </section>
 
       {/* ── How It Works ── */}
-      <section className="bg-slate-50 px-4 py-20 sm:px-6">
+      <section className="bg-slate-50 dark:bg-slate-900 px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-4xl">
           <p className="mb-2 text-center text-xs font-semibold uppercase tracking-widest text-blue-600">
             Cómo Funciona
           </p>
-          <h2 className="mb-3 text-center text-3xl font-bold tracking-tight text-slate-900">
+          <h2 className="mb-3 text-center text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
             3 pasos para tu documento
           </h2>
-          <p className="mx-auto mb-12 max-w-lg text-center text-base text-slate-500">
+          <p className="mx-auto mb-12 max-w-lg text-center text-base text-slate-500 dark:text-slate-400">
             Desde la idea hasta el documento listo en menos de 2 minutos
           </p>
 
           <div className="relative grid gap-8 md:grid-cols-3 md:gap-5">
-            <div className="absolute left-[16.5%] right-[16.5%] top-6 hidden h-0.5 bg-slate-200 md:block" />
+            <div className="absolute left-[16.5%] right-[16.5%] top-6 hidden h-0.5 bg-slate-200 dark:bg-slate-700 md:block" />
 
             <div className="relative z-10 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white shadow-md shadow-blue-600/30">
                 1
               </div>
-              <h3 className="mb-1 text-base font-bold text-slate-900">Elige o Describe</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="mb-1 text-base font-bold text-slate-900 dark:text-white">Elige o Describe</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 Selecciona una plantilla o describe en tus palabras qué documento necesitas
               </p>
             </div>
@@ -220,8 +224,8 @@ export default function LandingPage() {
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white shadow-md shadow-blue-600/30">
                 2
               </div>
-              <h3 className="mb-1 text-base font-bold text-slate-900">Personaliza con IA</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="mb-1 text-base font-bold text-slate-900 dark:text-white">Personaliza con IA</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 La IA genera un borrador profesional adaptado a tu empresa y contexto legal
               </p>
             </div>
@@ -230,8 +234,8 @@ export default function LandingPage() {
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white shadow-md shadow-blue-600/30">
                 3
               </div>
-              <h3 className="mb-1 text-base font-bold text-slate-900">Descarga y Usa</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="mb-1 text-base font-bold text-slate-900 dark:text-white">Descarga y Usa</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 Revisa, edita si quieres, y descarga en PDF o DOCX listo para firmar
               </p>
             </div>
@@ -245,21 +249,21 @@ export default function LandingPage() {
           <p className="mb-2 text-center text-xs font-semibold uppercase tracking-widest text-blue-600">
             Demo en Vivo
           </p>
-          <h2 className="mb-3 text-center text-3xl font-bold tracking-tight text-slate-900">
+          <h2 className="mb-3 text-center text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
             Mira cómo funciona
           </h2>
-          <p className="mx-auto mb-10 max-w-lg text-center text-base text-slate-500">
+          <p className="mx-auto mb-10 max-w-lg text-center text-base text-slate-500 dark:text-slate-400">
             Así de simple es generar un documento legal con Luuc.ai
           </p>
 
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
             {/* Chat header */}
-            <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-5 py-3">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-5 py-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">Luuc.ai Asistente</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">Luuc.ai Asistente</p>
                 <p className="text-xs text-green-500">En línea</p>
               </div>
             </div>
@@ -282,14 +286,14 @@ export default function LandingPage() {
               {/* AI response */}
               <div className="flex justify-start">
                 <div className="flex items-start gap-2">
-                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
+                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
                     <Bot className="h-4 w-4 text-blue-600" />
                   </div>
-                  <div className="max-w-lg rounded-2xl rounded-tl-sm border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                    <p className="mb-3 font-medium text-slate-900">
+                  <div className="max-w-lg rounded-2xl rounded-tl-sm border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 px-4 py-3 text-sm text-slate-700 dark:text-slate-300">
+                    <p className="mb-3 font-medium text-slate-900 dark:text-white">
                       He generado tu NDA bilateral. Aquí un resumen:
                     </p>
-                    <div className="space-y-2 rounded-lg bg-white p-3 text-xs">
+                    <div className="space-y-2 rounded-lg bg-white dark:bg-slate-800 p-3 text-xs">
                       <div className="flex items-start gap-2">
                         <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-500" />
                         <span><strong>Tipo:</strong> Acuerdo de Confidencialidad Bilateral</span>
@@ -308,11 +312,11 @@ export default function LandingPage() {
                       </div>
                     </div>
                     <div className="mt-3 flex gap-2">
-                      <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                      <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:text-blue-300">
                         <FileText className="mr-1 h-3 w-3" />
                         Descargar PDF
                       </span>
-                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                      <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300">
                         Editar documento
                       </span>
                     </div>
@@ -322,8 +326,8 @@ export default function LandingPage() {
             </div>
 
             {/* Input bar (decorative) */}
-            <div className="border-t border-slate-100 bg-slate-50 px-5 py-3">
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-400">
+            <div className="border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-5 py-3">
+              <div className="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-400">
                 Describe el documento que necesitas...
                 <ArrowRight className="ml-auto h-4 w-4 text-blue-400" />
               </div>

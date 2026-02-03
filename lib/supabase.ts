@@ -6,7 +6,25 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 // Cliente para uso en el navegador (sin tipos estrictos por ahora)
 export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-// Cliente para uso en el servidor (con service role - bypass RLS)
+/**
+ * ⚠️ SECURITY WARNING: supabaseAdmin BYPASSES Row Level Security (RLS)
+ *
+ * This client uses the service_role key which has FULL access to all data
+ * across ALL tenants. RLS policies are NOT enforced.
+ *
+ * USE ONLY FOR:
+ * - Operations that have already validated user authorization in application code
+ * - Admin operations (user management, company setup, audit logs)
+ * - Background jobs that need cross-tenant access
+ *
+ * ALWAYS:
+ * - Validate user permissions BEFORE using supabaseAdmin
+ * - Include company_id filters for multi-tenant queries
+ * - Log sensitive operations to audit_logs
+ *
+ * PREFER using createClient() from "@/lib/supabase/server" which respects RLS
+ * for standard user operations where possible.
+ */
 export const supabaseAdmin: SupabaseClient = createClient(
   supabaseUrl,
   process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey,
@@ -53,8 +71,15 @@ export interface AnalysisRow {
 // ===========================================
 // Funciones de ayuda para la base de datos
 // ===========================================
+// ⚠️ SECURITY NOTE: These functions use supabaseAdmin (bypasses RLS).
+// Authorization must be validated by the caller BEFORE invoking these functions.
+// Always pass company_id for multi-tenant isolation when applicable.
+// ===========================================
 
-// Documentos
+/**
+ * Save a document to the database
+ * ⚠️ Uses supabaseAdmin - caller MUST validate user authorization first
+ */
 export async function saveDocument(data: {
   user_id?: string;
   company_id?: string;
@@ -89,7 +114,14 @@ export async function saveDocument(data: {
   return document as DocumentRow;
 }
 
+/**
+ * Get documents for a specific user
+ * ⚠️ Uses supabaseAdmin - caller MUST validate user authorization first
+ * TODO: Consider accepting companyId param for multi-tenant filtering
+ */
 export async function getDocuments(userId: string): Promise<DocumentRow[]> {
+  // Note: This only filters by user_id, not company_id
+  // For company-wide access, use a separate function with company_id filter
   const { data, error } = await supabaseAdmin
     .from("documents")
     .select("*")
@@ -104,6 +136,12 @@ export async function getDocuments(userId: string): Promise<DocumentRow[]> {
   return (data || []) as DocumentRow[];
 }
 
+/**
+ * Get a document by ID
+ * ⚠️ Uses supabaseAdmin - caller MUST validate user/company ownership after fetching
+ * This function returns the document regardless of ownership - authorization
+ * must be checked by the API route handler.
+ */
 export async function getDocumentById(id: string): Promise<DocumentRow | null> {
   const { data, error } = await supabaseAdmin
     .from("documents")
@@ -119,7 +157,10 @@ export async function getDocumentById(id: string): Promise<DocumentRow | null> {
   return data as DocumentRow;
 }
 
-// Análisis
+/**
+ * Save an analysis to the database
+ * ⚠️ Uses supabaseAdmin - caller MUST validate user authorization first
+ */
 export async function saveAnalysis(data: {
   user_id?: string;
   company_id?: string; // SEGURIDAD: Para aislamiento multi-tenant
@@ -159,6 +200,10 @@ export async function saveAnalysis(data: {
   return analysis as AnalysisRow;
 }
 
+/**
+ * Get analyses for a specific user
+ * ⚠️ Uses supabaseAdmin - caller MUST validate user authorization first
+ */
 export async function getAnalyses(userId: string): Promise<AnalysisRow[]> {
   const { data, error } = await supabaseAdmin
     .from("analyses")
@@ -174,7 +219,10 @@ export async function getAnalyses(userId: string): Promise<AnalysisRow[]> {
   return (data || []) as AnalysisRow[];
 }
 
-// Logs de uso
+/**
+ * Log usage for billing and analytics
+ * ⚠️ Uses supabaseAdmin - safe because it only inserts, not reads
+ */
 export async function logUsage(data: {
   user_id?: string;
   action_type: string;
@@ -196,7 +244,10 @@ export async function logUsage(data: {
   }
 }
 
-// Usuarios
+/**
+ * Get user by email (admin operation)
+ * ⚠️ Uses supabaseAdmin - use only for system operations, not user-facing queries
+ */
 export async function getUserByEmail(email: string) {
   const { data, error } = await supabaseAdmin
     .from("users")
@@ -212,6 +263,10 @@ export async function getUserByEmail(email: string) {
   return data;
 }
 
+/**
+ * Update user's last login timestamp
+ * ⚠️ Uses supabaseAdmin - safe because it updates user's own record during auth flow
+ */
 export async function updateUserLastLogin(userId: string) {
   const { error } = await supabaseAdmin
     .from("users")

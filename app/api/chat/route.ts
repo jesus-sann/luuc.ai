@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { generateTextSimple } from "@/lib/ai-provider";
+import { withRateLimit } from "@/lib/api-middleware";
 
 const SYSTEM_PROMPT = `You are a corporate legal assistant for Luuc.ai. You ONLY answer questions about:
 - Corporate law and governance
@@ -21,7 +22,7 @@ interface ChatRequestBody {
   history: { role: "user" | "assistant"; content: string }[];
 }
 
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -72,3 +73,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// SECURITY FIX: Aplicar rate limiting al endpoint de chat
+export const POST = withRateLimit(handler, "generate");

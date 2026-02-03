@@ -18,8 +18,6 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { LanguageToggle } from "@/components/language-toggle";
 import { useTranslations } from "@/hooks/use-translations";
 
 export function MobileSidebar() {
@@ -112,9 +110,6 @@ export function MobileSidebar() {
                     </div>
                   </div>
                 )}
-
-                <ThemeToggle />
-                <LanguageToggle />
 
                 <Link
                   href="/dashboard/configuracion"

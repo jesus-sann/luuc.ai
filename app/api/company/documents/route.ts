@@ -5,7 +5,9 @@ import {
   uploadCompanyDocument,
   deleteCompanyDocument,
   getCompanyByUser,
+  getCompanyDocumentById,
 } from "@/lib/company";
+import { auditLog } from "@/lib/audit-log";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse, CompanyDocument } from "@/types";
 import { withRateLimit } from "@/lib/api-middleware";
@@ -104,6 +106,14 @@ async function postHandler(request: NextRequest) {
       );
     }
 
+    // SECURITY FIX: Validar longitud máxima de contenido
+    if (content.length > 500000) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "El documento es muy largo (máximo 500KB)" },
+        { status: 400 }
+      );
+    }
+
     const document = await uploadCompanyDocument(
       companyId,
       user.id,
@@ -157,6 +167,34 @@ async function deleteHandler(request: NextRequest) {
       );
     }
 
+    // SECURITY FIX: Validar que el documento pertenece a la empresa del usuario
+    const document = await getCompanyDocumentById(docId);
+
+    if (!document) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Documento no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    const company = await getCompanyByUser(user.id);
+    const userCompanyId = company?.id || user.company_id;
+
+    if (!userCompanyId || document.company_id !== userCompanyId) {
+      console.error("[SECURITY] Unauthorized company document deletion attempt", {
+        userId: user.id,
+        userCompanyId,
+        documentId: docId,
+        documentCompanyId: document.company_id,
+        timestamp: new Date().toISOString(),
+      });
+
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "No tienes permiso para eliminar este documento" },
+        { status: 403 }
+      );
+    }
+
     const success = await deleteCompanyDocument(docId);
 
     if (!success) {
@@ -165,6 +203,19 @@ async function deleteHandler(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Audit log
+    auditLog({
+      userId: user.id,
+      companyId: userCompanyId,
+      action: "kb.delete",
+      resourceType: "company_document",
+      resourceId: docId,
+      metadata: {
+        title: document.title,
+        category: document.category,
+      },
+    });
 
     return NextResponse.json<ApiResponse<{ deleted: boolean }>>({
       success: true,

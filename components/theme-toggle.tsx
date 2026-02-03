@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { useTranslations } from "@/hooks/use-translations";
 
-export function ThemeToggle() {
+export function ThemeToggle({ variant = "sidebar" }: { variant?: "sidebar" | "compact" }) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const t = useTranslations();
@@ -15,6 +15,18 @@ export function ThemeToggle() {
   if (!mounted) return null;
 
   const isDark = theme === "dark";
+
+  if (variant === "compact") {
+    return (
+      <button
+        onClick={() => setTheme(isDark ? "light" : "dark")}
+        className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+        aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+      >
+        {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      </button>
+    );
+  }
 
   return (
     <button

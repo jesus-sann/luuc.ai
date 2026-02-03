@@ -33,13 +33,42 @@ async function getHandler(
       );
     }
 
-    // Verificar que el documento pertenece al usuario o su empresa
-    if (document.user_id !== user.id && document.company_id !== user.company_id) {
+    // SECURITY FIX: Validar aislamiento multi-tenant con manejo estricto de null
+    const userOwnsDocument = document.user_id === user.id;
+    const documentBelongsToUserCompany =
+      user.company_id &&
+      document.company_id &&
+      document.company_id === user.company_id;
+
+    if (!userOwnsDocument && !documentBelongsToUserCompany) {
+      // Security log: intento de acceso no autorizado
+      console.error("[SECURITY] Unauthorized document access attempt", {
+        userId: user.id,
+        userCompanyId: user.company_id,
+        documentId: params.id,
+        documentUserId: document.user_id,
+        documentCompanyId: document.company_id,
+        timestamp: new Date().toISOString(),
+      });
+
       return NextResponse.json<ApiResponse<null>>(
         { success: false, error: "No tienes permiso para ver este documento" },
         { status: 403 }
       );
     }
+
+    // Audit log para acceso a documento
+    auditLog({
+      userId: user.id,
+      companyId: user.company_id || undefined,
+      action: "document.view",
+      resourceType: "document",
+      resourceId: params.id,
+      metadata: {
+        title: document.title,
+        docType: document.doc_type,
+      },
+    });
 
     return NextResponse.json<ApiResponse<any>>({
       success: true,
@@ -240,6 +269,21 @@ async function patchHandler(
     if (typeof content !== "string") {
       return NextResponse.json<ApiResponse<null>>(
         { success: false, error: "Contenido inválido" },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY FIX: Validar longitud de contenido
+    if (content.length > 500000) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Contenido demasiado largo (máximo 500KB)" },
+        { status: 400 }
+      );
+    }
+
+    if (content.trim().length === 0) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "El contenido no puede estar vacío" },
         { status: 400 }
       );
     }
