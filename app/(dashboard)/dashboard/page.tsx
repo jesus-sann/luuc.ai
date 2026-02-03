@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LegalChat } from "@/components/legal-chat";
 import { useTranslations } from "@/hooks/use-translations";
 
 export default function DashboardPage() {
@@ -155,6 +156,11 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Legal Chat */}
+      <div className="mt-6">
+        <LegalChat />
       </div>
 
       {/* MVP note */}

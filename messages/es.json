@@ -173,6 +173,17 @@
       "badge": "Próximamente"
     }
   },
+  "disclaimer": {
+    "ai": "El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico."
+  },
+  "chat": {
+    "title": "Asistente Legal",
+    "placeholder": "Escribe tu consulta legal...",
+    "send": "Enviar",
+    "empty": "Haz una pregunta sobre derecho corporativo, contratos o cumplimiento normativo.",
+    "error": "Error al procesar tu consulta. Intenta de nuevo.",
+    "thinking": "Analizando..."
+  },
   "capabilities": {
     "claudeAI": {
       "title": "Claude AI",

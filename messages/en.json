@@ -173,6 +173,17 @@
       "badge": "Coming soon"
     }
   },
+  "disclaimer": {
+    "ai": "AI-generated content is a draft that must be reviewed by a legal professional. Luuc.ai does not replace legal advice."
+  },
+  "chat": {
+    "title": "Legal Assistant",
+    "placeholder": "Type your legal question...",
+    "send": "Send",
+    "empty": "Ask a question about corporate law, contracts, or regulatory compliance.",
+    "error": "Error processing your query. Please try again.",
+    "thinking": "Analyzing..."
+  },
   "capabilities": {
     "claudeAI": {
       "title": "Claude AI",

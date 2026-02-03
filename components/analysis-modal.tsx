@@ -200,6 +200,11 @@ export function AnalysisModal({
         <div className="mx-6 border-t border-slate-200 dark:border-slate-700" />
 
         {/* Footer */}
+        <div className="flex-shrink-0 px-6 pt-3">
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 text-center">
+            El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico.
+          </p>
+        </div>
         <div className="flex-shrink-0 px-6 py-4">
           <Button
             onClick={() => onOpenChange(false)}

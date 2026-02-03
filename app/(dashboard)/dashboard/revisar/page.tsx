@@ -209,6 +209,11 @@ export default function RevisarPage() {
           </Select>
         </div>
 
+        {/* Disclaimer */}
+        <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
+          El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico.
+        </p>
+
         {/* Analyze Button */}
         {selectedFile && (
           <Button

@@ -284,6 +284,10 @@ export default function CreacionPersonalizadaPage() {
                 </div>
               )}
 
+              <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
+                El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico.
+              </p>
+
               <Button type="submit" className="w-full" size="lg" disabled={isLoading || !tipoDocumento || !descripcion}>
                 {isLoading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generando borrador...</>
