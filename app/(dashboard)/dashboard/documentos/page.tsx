@@ -6,8 +6,9 @@ import { FileText, Search, Calendar, MoreVertical, Download, Trash2, Eye, Copy, 
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Document, Analysis } from "@/types";
+import { Document, Analysis, AnalysisResponse } from "@/types";
 import { DocumentViewerModal } from "@/components/document-viewer-modal";
+import { AnalysisModal } from "@/components/analysis-modal";
 
 export default function DocumentosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,6 +21,8 @@ export default function DocumentosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewingDoc, setViewingDoc] = useState<Document | null>(null);
+  const [viewingAnalysis, setViewingAnalysis] = useState<{ result: AnalysisResponse; filename: string } | null>(null);
+  const [editedContent, setEditedContent] = useState<string | null>(null);
 
   // Fetch documents and analyses on mount
   useEffect(() => {
@@ -51,9 +54,6 @@ export default function DocumentosPage() {
       setLoading(false);
     }
   };
-
-  const escapeHtml = (str: string) =>
-    str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
   const handleViewDocument = (doc: Document) => {
     setViewingDoc(doc);
@@ -115,41 +115,16 @@ export default function DocumentosPage() {
       if (res.ok) {
         const data = await res.json();
         const analysis = data.data;
-
-        // Open in new window with analysis details
-        const newWindow = window.open("", "_blank");
-        if (newWindow) {
-          newWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <title>Análisis: ${escapeHtml(analysis.filename)}</title>
-              <style>
-                body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
-                h1 { color: #1e293b; }
-                h2 { color: #334155; margin-top: 30px; }
-                .risk-score { font-size: 24px; font-weight: bold; color: #dc2626; }
-                .summary { background: #f1f5f9; padding: 20px; border-radius: 8px; }
-                .risk-item { background: #fff; border-left: 4px solid #dc2626; padding: 15px; margin: 10px 0; }
-              </style>
-            </head>
-            <body>
-              <h1>${escapeHtml(analysis.filename)}</h1>
-              <div class="risk-score">Puntuación de Riesgo: ${analysis.risk_score}/10</div>
-              <h2>Resumen</h2>
-              <div class="summary">${escapeHtml(analysis.summary || '')}</div>
-              <h2>Hallazgos</h2>
-              ${analysis.findings.map((f: any) => `
-                <div class="risk-item">
-                  <strong>${escapeHtml(f.nivel)}:</strong> ${escapeHtml(f.descripcion)}<br/>
-                  <em>Recomendación: ${escapeHtml(f.recomendacion)}</em>
-                </div>
-              `).join('')}
-            </body>
-            </html>
-          `);
-          newWindow.document.close();
-        }
+        setViewingAnalysis({
+          result: {
+            score: analysis.risk_score,
+            riesgos: analysis.findings || [],
+            clausulas_faltantes: analysis.recommendations || [],
+            resumen: analysis.summary || "",
+            observaciones_generales: "",
+          },
+          filename: analysis.filename,
+        });
       }
     } catch (err) {
       console.error("Error viewing analysis:", err);
@@ -489,10 +464,44 @@ export default function DocumentosPage() {
       {viewingDoc && (
         <DocumentViewerModal
           open={!!viewingDoc}
-          onOpenChange={(open) => { if (!open) setViewingDoc(null); }}
+          onOpenChange={async (open) => {
+            if (!open) {
+              // Save edits on close
+              if (editedContent !== null && editedContent !== viewingDoc.content) {
+                try {
+                  await fetch(`/api/documents/${viewingDoc.id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ content: editedContent }),
+                  });
+                  // Update local state
+                  setDocuments((prev) =>
+                    prev.map((d) =>
+                      d.id === viewingDoc.id ? { ...d, content: editedContent } : d
+                    )
+                  );
+                } catch (err) {
+                  console.error("Error saving document:", err);
+                }
+              }
+              setEditedContent(null);
+              setViewingDoc(null);
+            }
+          }}
           title={viewingDoc.title}
           content={viewingDoc.content}
           documentId={viewingDoc.id}
+          onContentChange={(content) => setEditedContent(content)}
+        />
+      )}
+
+      {/* Analysis Modal */}
+      {viewingAnalysis && (
+        <AnalysisModal
+          open={!!viewingAnalysis}
+          onOpenChange={(open) => { if (!open) setViewingAnalysis(null); }}
+          result={viewingAnalysis.result}
+          filename={viewingAnalysis.filename}
         />
       )}
     </div>

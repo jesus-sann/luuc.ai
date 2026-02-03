@@ -9,6 +9,7 @@ export type AuditAction =
   | "document.review"
   | "document.delete"
   | "document.duplicate"
+  | "document.update"
   | "kb.upload"
   | "kb.delete"
   | "settings.update";

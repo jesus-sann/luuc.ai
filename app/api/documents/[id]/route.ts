@@ -200,6 +200,86 @@ async function deleteHandler(
   }
 }
 
+/**
+ * PATCH /api/documents/[id]
+ * Update document content
+ */
+async function patchHandler(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "No autenticado" },
+        { status: 401 }
+      );
+    }
+
+    const document = await getDocumentById(params.id);
+
+    if (!document) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Documento no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    if (document.user_id !== user.id) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "No tienes permiso para editar este documento" },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const { content } = body;
+
+    if (typeof content !== "string") {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Contenido inválido" },
+        { status: 400 }
+      );
+    }
+
+    const { error } = await supabaseAdmin
+      .from("documents")
+      .update({ content, updated_at: new Date().toISOString() })
+      .eq("id", params.id);
+
+    if (error) {
+      console.error("Error updating document:", error);
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Error al actualizar documento" },
+        { status: 500 }
+      );
+    }
+
+    auditLog({
+      userId: user.id,
+      companyId: document.company_id || undefined,
+      action: "document.update",
+      resourceType: "document",
+      resourceId: params.id,
+      metadata: { title: document.title },
+    });
+
+    return NextResponse.json<ApiResponse<{ updated: boolean }>>({
+      success: true,
+      data: { updated: true },
+    });
+  } catch (error) {
+    console.error("Error en PATCH /api/documents/[id]:", error);
+    return NextResponse.json<ApiResponse<null>>(
+      { success: false, error: "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
+}
+
 export const GET = withRateLimit(getHandler, "read");
 export const POST = withRateLimit(postHandler, "crud");
+export const PATCH = withRateLimit(patchHandler, "crud");
 export const DELETE = withRateLimit(deleteHandler, "crud");

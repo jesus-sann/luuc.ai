@@ -81,3 +81,11 @@ export async function requireAuth(): Promise<AuthUser> {
   }
   return user;
 }
+
+export async function requireAdmin(): Promise<AuthUser> {
+  const user = await requireAuth();
+  if (user.role !== "admin" && user.role !== "owner") {
+    throw new Error("Acceso de administrador requerido");
+  }
+  return user;
+}
