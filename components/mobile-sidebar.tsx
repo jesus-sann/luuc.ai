@@ -10,15 +10,59 @@ import {
   LogOut,
   Settings,
   Loader2,
-  User,
+  User as UserIcon,
   BookOpen,
   Menu,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "@/hooks/use-translations";
+import type { User } from "@supabase/supabase-js";
+
+function MobileTrialSection({ user }: { user: User }) {
+  const trialEndsAt = user.user_metadata?.trial_ends_at;
+  const currentPlan = (user.user_metadata?.plan as string) || "free";
+
+  if (currentPlan === "free" || !trialEndsAt) {
+    return (
+      <div className="px-3 pb-3">
+        <Link
+          href="/dashboard/configuracion/planes"
+          className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-3 py-2 text-sm font-medium text-white"
+        >
+          <Zap className="h-4 w-4" />
+          Actualizar Plan
+        </Link>
+      </div>
+    );
+  }
+
+  const trialEnd = new Date(trialEndsAt);
+  const now = new Date();
+  const daysLeft = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  const bgColor = daysLeft <= 3 ? "bg-orange-900/30" : daysLeft <= 7 ? "bg-yellow-900/30" : "bg-blue-900/30";
+  const textColor = daysLeft <= 3 ? "text-orange-400" : daysLeft <= 7 ? "text-yellow-400" : "text-blue-400";
+
+  return (
+    <div className="px-3 pb-3">
+      <div className={`rounded-lg ${bgColor} p-3`}>
+        <p className={`text-xs font-medium ${textColor}`}>
+          {daysLeft} {daysLeft === 1 ? "día" : "días"} de prueba
+        </p>
+        <Link
+          href="/dashboard/configuracion/planes"
+          className="mt-2 flex items-center justify-center gap-1.5 rounded bg-slate-700 px-2 py-1.5 text-xs font-medium text-white"
+        >
+          <Zap className="h-3 w-3" />
+          Ver planes
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export function MobileSidebar() {
   const pathname = usePathname();
@@ -94,13 +138,16 @@ export function MobileSidebar() {
                 })}
               </nav>
 
+              {/* Trial Section */}
+              {user && <MobileTrialSection user={user} />}
+
               {/* Bottom section */}
               <div className="border-t border-slate-700 p-3">
                 {/* User Info */}
                 {user && (
                   <div className="mb-3 flex items-center gap-3 rounded-lg px-3 py-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700">
-                      <User className="h-4 w-4 text-slate-300" />
+                      <UserIcon className="h-4 w-4 text-slate-300" />
                     </div>
                     <div className="flex-1 truncate">
                       <p className="truncate text-sm font-medium text-white">

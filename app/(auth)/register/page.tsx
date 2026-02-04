@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Loader2, Mail, Lock, User, Building, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Loader2, Mail, Lock, User, Building, AlertCircle, Eye, EyeOff, Sparkles, Crown, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,8 +16,26 @@ import {
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 
+const PLAN_INFO: Record<string, { name: string; icon: typeof Zap; color: string; trial: number }> = {
+  free: { name: "Free", icon: Zap, color: "bg-slate-100 text-slate-600", trial: 14 },
+  plus: { name: "Plus", icon: Crown, color: "bg-blue-100 text-blue-600", trial: 14 },
+  pro: { name: "Pro", icon: Sparkles, color: "bg-purple-100 text-purple-600", trial: 14 },
+};
+
 export default function RegisterPage() {
-  const router = useRouter();
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-slate-400" /></div>}>
+      <RegisterContent />
+    </Suspense>
+  );
+}
+
+function RegisterContent() {
+  const searchParams = useSearchParams();
+  const selectedPlan = searchParams.get("plan") || "free";
+  const planInfo = PLAN_INFO[selectedPlan] || PLAN_INFO.free;
+  const PlanIcon = planInfo.icon;
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
@@ -49,6 +67,9 @@ export default function RegisterPage() {
 
     const supabase = createClient();
 
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + planInfo.trial);
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -57,6 +78,8 @@ export default function RegisterPage() {
         data: {
           full_name: name,
           company: company,
+          plan: selectedPlan,
+          trial_ends_at: trialEndsAt.toISOString(),
         },
       },
     });
@@ -88,6 +111,21 @@ export default function RegisterPage() {
           <CardDescription>
             Regístrate para comenzar a usar Luuc.ai
           </CardDescription>
+
+          {/* Selected Plan Badge */}
+          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
+            <div className="flex items-center justify-center gap-2">
+              <div className={`rounded-lg p-1.5 ${planInfo.color}`}>
+                <PlanIcon className="h-4 w-4" />
+              </div>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Plan {planInfo.name}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-green-600 dark:text-green-400">
+              {planInfo.trial} días de prueba gratis incluidos
+            </p>
+          </div>
         </CardHeader>
         <CardContent>
           {error && (

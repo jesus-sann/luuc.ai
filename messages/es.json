@@ -290,5 +290,23 @@
       "copyright": "Luuc.ai. Todos los derechos reservados.",
       "madeIn": "Hecho en Colombia"
     }
+  },
+  "trial": {
+    "daysRemaining": "{days} {days, plural, one {día} other {días}} restantes de prueba",
+    "expired": "Tu prueba gratis ha expirado",
+    "expiredDescription": "Actualiza tu plan para continuar usando todas las funciones.",
+    "upgradeNow": "Actualizar ahora",
+    "upgradePlan": "Actualizar Plan",
+    "viewPlans": "Ver planes",
+    "trialEnds": "Tu prueba del plan {plan} termina el {date}.",
+    "freeTrial": "{days} días de prueba gratis incluidos"
+  },
+  "plans": {
+    "free": "Free",
+    "plus": "Plus",
+    "pro": "Pro",
+    "current": "Plan actual",
+    "upgrade": "Actualizar a {plan}",
+    "included": "Incluido"
   }
 }

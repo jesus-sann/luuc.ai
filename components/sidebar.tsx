@@ -10,12 +10,79 @@ import {
   LogOut,
   Settings,
   Loader2,
-  User,
+  User as UserIcon,
   BookOpen,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslations } from "@/hooks/use-translations";
+import type { User } from "@supabase/supabase-js";
+
+function TrialSection({ user }: { user: User }) {
+  const trialEndsAt = user.user_metadata?.trial_ends_at;
+  const currentPlan = (user.user_metadata?.plan as string) || "free";
+
+  // Show upgrade button for free users
+  if (currentPlan === "free" || !trialEndsAt) {
+    return (
+      <div className="px-3 pb-3">
+        <Link
+          href="/dashboard/configuracion/planes"
+          className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-3 py-2.5 text-sm font-medium text-white transition-all hover:from-blue-700 hover:to-purple-700"
+        >
+          <Zap className="h-4 w-4" />
+          Actualizar Plan
+        </Link>
+      </div>
+    );
+  }
+
+  const trialEnd = new Date(trialEndsAt);
+  const now = new Date();
+  const daysLeft = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  const isExpired = daysLeft === 0;
+
+  if (isExpired) {
+    return (
+      <div className="px-3 pb-3">
+        <div className="rounded-lg bg-red-900/50 p-3">
+          <p className="text-xs font-medium text-red-300">Prueba expirada</p>
+          <Link
+            href="/dashboard/configuracion/planes"
+            className="mt-2 flex items-center justify-center gap-1.5 rounded bg-red-600 px-2 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+          >
+            <Zap className="h-3 w-3" />
+            Actualizar ahora
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const urgencyColor = daysLeft <= 3 ? "text-orange-400" : daysLeft <= 7 ? "text-yellow-400" : "text-blue-400";
+  const bgColor = daysLeft <= 3 ? "bg-orange-900/30" : daysLeft <= 7 ? "bg-yellow-900/30" : "bg-blue-900/30";
+
+  return (
+    <div className="px-3 pb-3">
+      <div className={`rounded-lg ${bgColor} p-3`}>
+        <p className={`text-xs font-medium ${urgencyColor}`}>
+          {daysLeft} {daysLeft === 1 ? "día" : "días"} de prueba
+        </p>
+        <p className="mt-0.5 text-[10px] text-slate-400">
+          Plan {currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}
+        </p>
+        <Link
+          href="/dashboard/configuracion/planes"
+          className="mt-2 flex items-center justify-center gap-1.5 rounded bg-slate-700 px-2 py-1.5 text-xs font-medium text-white hover:bg-slate-600"
+        >
+          <Zap className="h-3 w-3" />
+          Ver planes
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -68,13 +135,16 @@ export function Sidebar() {
         })}
       </nav>
 
+      {/* Trial Banner / Upgrade */}
+      {user && <TrialSection user={user} />}
+
       {/* Bottom section */}
       <div className="border-t border-slate-700 p-3">
         {/* User Info */}
         {user && (
           <div className="mb-3 flex items-center gap-3 rounded-lg px-3 py-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700">
-              <User className="h-4 w-4 text-slate-300" />
+              <UserIcon className="h-4 w-4 text-slate-300" />
             </div>
             <div className="flex-1 truncate">
               <p className="truncate text-sm font-medium text-white">
