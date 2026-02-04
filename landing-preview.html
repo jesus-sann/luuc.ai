@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luuc.ai — Landing Page Preview</title>
+<style>
+  :root {
+    --blue-50: #eff6ff;
+    --blue-100: #dbeafe;
+    --blue-500: #3b82f6;
+    --blue-600: #2563eb;
+    --blue-700: #1d4ed8;
+    --blue-900: #1e3a5f;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --amber-500: #f59e0b;
+    --amber-600: #d97706;
+    --red-500: #ef4444;
+    --green-500: #22c55e;
+    --green-50: #f0fdf4;
+    --white: #ffffff;
+    --radius: 12px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
+    color: var(--slate-800);
+    background: var(--white);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAVBAR ── */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--slate-100);
+    padding: 0 24px;
+  }
+  .navbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--blue-600);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--slate-800); }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--slate-600);
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--slate-900); }
+  .nav-cta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--slate-700);
+  }
+  .btn-ghost:hover { background: var(--slate-100); }
+  .btn-primary {
+    background: var(--blue-600);
+    color: white;
+    box-shadow: 0 1px 2px rgba(37,99,235,0.3);
+  }
+  .btn-primary:hover { background: var(--blue-700); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+  .btn-large {
+    padding: 14px 28px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--blue-600);
+    border: 1.5px solid var(--blue-200, #bfdbfe);
+  }
+  .btn-outline:hover { background: var(--blue-50); }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 80px 24px 48px;
+    text-align: center;
+    background: linear-gradient(180deg, var(--blue-50) 0%, var(--white) 100%);
+  }
+  .hero-inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--white);
+    border: 1px solid var(--slate-200);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-600);
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .hero-badge .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green-500);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .hero h1 {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    color: var(--slate-900);
+    margin-bottom: 20px;
+  }
+  .hero h1 .highlight {
+    background: linear-gradient(135deg, var(--blue-600), #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p.subtitle {
+    font-size: 19px;
+    color: var(--slate-500);
+    max-width: 560px;
+    margin: 0 auto 32px;
+    line-height: 1.6;
+  }
+  .hero-ctas {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  .trust-row {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--slate-500);
+  }
+  .trust-item svg { color: var(--green-500); }
+
+  /* ── DEMO CHAT ── */
+  .demo-section {
+    padding: 48px 24px 80px;
+    background: var(--white);
+  }
+  .demo-inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .demo-label {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--blue-600);
+    margin-bottom: 8px;
+  }
+  .demo-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 8px;
+  }
+  .demo-subtitle {
+    text-align: center;
+    font-size: 15px;
+    color: var(--slate-500);
+    margin-bottom: 32px;
+  }
+  .chat-card {
+    background: var(--white);
+    border: 1px solid var(--slate-200);
+    border-radius: 16px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+  }
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--slate-100);
+    background: var(--slate-50);
+  }
+  .chat-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--blue-500), #7c3aed);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+  }
+  .chat-header-text h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--slate-800);
+  }
+  .chat-header-text span {
+    font-size: 12px;
+    color: var(--slate-400);
+  }
+  .chat-body { padding: 20px; }
+
+  .chat-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .chat-input {
+    flex: 1;
+    padding: 14px 16px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--slate-800);
+    outline: none;
+    transition: border-color 0.15s;
+    background: var(--white);
+  }
+  .chat-input:focus { border-color: var(--blue-500); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .chat-input::placeholder { color: var(--slate-400); }
+  .chat-send {
+    padding: 14px 24px;
+    background: var(--blue-600);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .chat-send:hover { background: var(--blue-700); }
+  .chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* States */
+  .state-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--slate-400);
+  }
+  .state-empty svg { margin-bottom: 12px; }
+  .state-empty p { font-size: 14px; }
+
+  .state-loading {
+    padding: 24px 0;
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--slate-100) 25%, var(--slate-200) 50%, var(--slate-100) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .skeleton-title { height: 20px; width: 60%; margin-bottom: 16px; }
+  .skeleton-line { height: 14px; width: 100%; }
+  .skeleton-line.short { width: 80%; }
+  .skeleton-line.shorter { width: 45%; }
+  .loading-text {
+    text-align: center;
+    font-size: 13px;
+    color: var(--blue-600);
+    margin-top: 16px;
+    font-weight: 500;
+  }
+  .loading-text .dots::after {
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+  }
+  @keyframes dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+  }
+
+  .state-result { position: relative; }
+  .doc-preview {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--slate-700);
+    padding: 24px;
+    background: var(--slate-50);
+    border-radius: 10px;
+    border: 1px solid var(--slate-200);
+    max-height: 340px;
+    overflow: hidden;
+    position: relative;
+  }
+  .doc-preview h3 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 16px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .doc-preview p { margin-bottom: 12px; }
+  .doc-preview .clause { font-weight: 600; color: var(--slate-800); }
+  .blur-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: linear-gradient(180deg, transparent 0%, rgba(248,250,252,0.8) 30%, rgba(248,250,252,1) 100%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 24px;
+  }
+  .cta-card {
+    background: var(--white);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    padding: 20px 28px;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    max-width: 380px;
+  }
+  .cta-card .lock-icon {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  .cta-card p {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+    font-size: 14px;
+    color: var(--slate-600);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .cta-card .btn { width: 100%; }
+
+  .usage-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px;
+    font-size: 13px;
+    color: var(--slate-500);
+    border-top: 1px solid var(--slate-100);
+  }
+  .usage-indicator.warning { color: var(--amber-600); }
+  .usage-indicator.exhausted { color: var(--red-500); }
+  .usage-dots {
+    display: flex;
+    gap: 4px;
+  }
+  .usage-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--blue-500);
+  }
+  .usage-dot.used { background: var(--slate-300); }
+
+  /* ── SOCIAL PROOF ── */
+  .social-proof {
+    padding: 40px 24px;
+    background: var(--slate-50);
+    border-top: 1px solid var(--slate-100);
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .social-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    text-align: center;
+  }
+  .stat-card {
+    padding: 16px;
+  }
+  .stat-number {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--blue-600);
+    letter-spacing: -0.5px;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--slate-500);
+    margin-top: 4px;
+  }
+
+  /* ── FEATURES ── */
+  .features {
+    padding: 80px 24px;
+    background: var(--white);
+  }
+  .features-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .section-label {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--blue-600);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .section-subtitle {
+    text-align: center;
+    font-size: 16px;
+    color: var(--slate-500);
+    max-width: 500px;
+    margin: 0 auto 48px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .feature-card {
+    background: var(--white);
+    border: 1px solid var(--slate-200);
+    border-radius: 14px;
+    padding: 28px;
+    transition: all 0.2s;
+  }
+  .feature-card:hover { border-color: var(--blue-200, #bfdbfe); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+  .feature-icon.blue { background: var(--blue-100); color: var(--blue-600); }
+  .feature-icon.purple { background: #f3e8ff; color: #7c3aed; }
+  .feature-icon.green { background: var(--green-50); color: #16a34a; }
+  .feature-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 8px;
+  }
+  .feature-card p {
+    font-size: 14px;
+    color: var(--slate-500);
+    line-height: 1.6;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how-it-works {
+    padding: 80px 24px;
+    background: var(--slate-50);
+  }
+  .how-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    position: relative;
+  }
+  .steps-grid::before {
+    content: '';
+    position: absolute;
+    top: 36px;
+    left: 16.5%;
+    right: 16.5%;
+    height: 2px;
+    background: var(--slate-200);
+    z-index: 0;
+  }
+  .step-card {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .step-number {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--blue-600);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 auto 16px;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+  }
+  .step-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 6px;
+  }
+  .step-card p {
+    font-size: 13px;
+    color: var(--slate-500);
+    line-height: 1.5;
+  }
+
+  /* ── PRICING ── */
+  .pricing {
+    padding: 80px 24px;
+    background: var(--white);
+  }
+  .pricing-inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .price-card {
+    border: 1px solid var(--slate-200);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+  }
+  .price-card.popular {
+    border-color: var(--blue-500);
+    box-shadow: 0 0 0 1px var(--blue-500), var(--shadow-lg);
+  }
+  .price-card.popular::before {
+    content: 'Recomendado';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--blue-600);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 16px;
+    border-radius: 100px;
+  }
+  .price-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .price-card .price-desc {
+    font-size: 13px;
+    color: var(--slate-500);
+    margin-bottom: 20px;
+  }
+  .price-amount {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -1px;
+  }
+  .price-amount span { font-size: 16px; font-weight: 500; color: var(--slate-500); }
+  .price-period {
+    font-size: 14px;
+    color: var(--slate-400);
+    margin-bottom: 24px;
+  }
+  .price-features {
+    list-style: none;
+    margin-bottom: 24px;
+  }
+  .price-features li {
+    font-size: 14px;
+    color: var(--slate-600);
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .price-features li::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--green-50);
+    flex-shrink: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 11px;
+  }
+  .price-card .btn { width: 100%; }
+
+  /* ── CTA ── */
+  .final-cta {
+    padding: 80px 24px;
+    background: linear-gradient(135deg, var(--blue-600) 0%, #4f46e5 100%);
+    text-align: center;
+  }
+  .final-cta h2 {
+    font-size: 34px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .final-cta p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 28px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .btn-white {
+    background: white;
+    color: var(--blue-600);
+    font-weight: 700;
+    box-shadow: var(--shadow-lg);
+  }
+  .btn-white:hover { transform: translateY(-2px); box-shadow: var(--shadow-xl); }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 48px 24px 32px;
+    background: var(--slate-900);
+    color: var(--slate-400);
+  }
+  .footer-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+  }
+  .footer-brand .logo { color: var(--blue-400); }
+  .footer-brand .logo span { color: var(--slate-300); }
+  .footer-brand p {
+    font-size: 13px;
+    margin-top: 12px;
+    line-height: 1.6;
+    color: var(--slate-500);
+  }
+  .footer-col h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate-300);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  .footer-col a {
+    display: block;
+    font-size: 14px;
+    color: var(--slate-500);
+    text-decoration: none;
+    padding: 4px 0;
+    transition: color 0.15s;
+  }
+  .footer-col a:hover { color: var(--slate-300); }
+  .footer-bottom {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  /* ── STATE TABS (for preview switching) ── */
+  .preview-controls {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--slate-900);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: var(--shadow-xl);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .preview-controls .label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--slate-500);
+    padding: 0 8px;
+  }
+  .preview-controls button {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--slate-400);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+  }
+  .preview-controls button:hover { background: rgba(255,255,255,0.1); color: white; }
+  .preview-controls button.active { background: var(--blue-600); color: white; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 34px; }
+    .hero p.subtitle { font-size: 16px; }
+    .hero-ctas { flex-direction: column; align-items: center; }
+    .social-inner { grid-template-columns: repeat(2, 1fr); }
+    .features-grid { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: 1fr; gap: 32px; }
+    .steps-grid::before { display: none; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    .chat-input-row { flex-direction: column; }
+    .chat-send { width: 100%; }
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ NAVBAR ══════════ -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="#" class="logo">Luuc<span>.ai</span></a>
+    <ul class="nav-links">
+      <li><a href="#features">Funcionalidades</a></li>
+      <li><a href="#pricing">Precios</a></li>
+      <li><a href="#demo">Demo</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#" class="btn btn-ghost">Iniciar Sesion</a>
+      <a href="#" class="btn btn-primary">Registrarse</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      IA especializada en derecho latinoamericano
+    </div>
+    <h1>Genera documentos legales<br>en <span class="highlight">segundos, no en horas</span></h1>
+    <p class="subtitle">
+      Redacta contratos, NDAs, politicas y mas con inteligencia artificial
+      entrenada en normativa colombiana. Preciso, profesional, inmediato.
+    </p>
+    <div class="hero-ctas">
+      <a href="#" class="btn btn-primary btn-large">Empieza Gratis &rarr;</a>
+      <a href="#demo" class="btn btn-outline btn-large">Probar Demo &darr;</a>
+    </div>
+    <div class="trust-row">
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        2,847 documentos generados
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Cumple normativa colombiana
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Sin tarjeta de credito
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ DEMO CHAT ══════════ -->
+<section class="demo-section" id="demo">
+  <div class="demo-inner">
+    <div class="demo-label">Demo Interactivo</div>
+    <h2 class="demo-title">Prueba la IA sin registrarte</h2>
+    <p class="demo-subtitle">Describe el documento que necesitas y genera un borrador en segundos</p>
+
+    <div class="chat-card">
+      <div class="chat-header">
+        <div class="chat-avatar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div class="chat-header-text">
+          <h4>Asistente Legal Luuc.ai</h4>
+          <span>Claude Haiku &middot; Respuesta en ~3 segundos</span>
+        </div>
+      </div>
+
+      <div class="chat-body">
+        <div class="chat-input-row">
+          <input type="text" class="chat-input" id="demoInput"
+                 placeholder='Ej: "Contrato de arrendamiento para oficina en Bogota"'
+                 value="Contrato de prestacion de servicios profesionales de consultoria legal">
+          <button class="chat-send" id="demoSend" onclick="switchState('loading')">
+            Generar &rarr;
+          </button>
+        </div>
+
+        <!-- STATE: Empty -->
+        <div id="stateEmpty" class="state-empty hidden">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--slate-300)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <p>Escribe tu solicitud arriba para ver un ejemplo<br>del documento generado por nuestra IA</p>
+        </div>
+
+        <!-- STATE: Loading -->
+        <div id="stateLoading" class="state-loading hidden">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-line" style="height:12px"></div>
+          <div class="skeleton skeleton-line" style="height:12px"></div>
+          <div class="skeleton skeleton-line short" style="height:12px"></div>
+          <div style="height:12px"></div>
+          <div class="skeleton skeleton-line" style="height:12px"></div>
+          <div class="skeleton skeleton-line" style="height:12px"></div>
+          <div class="skeleton skeleton-line shorter" style="height:12px"></div>
+          <div class="loading-text">Generando documento<span class="dots"></span></div>
+        </div>
+
+        <!-- STATE: Result -->
+        <div id="stateResult" class="state-result">
+          <div class="doc-preview">
+            <h3>Contrato de Prestacion de Servicios Profesionales</h3>
+            <p>Entre las partes que suscriben el presente instrumento, a saber:</p>
+            <p><span class="clause">PRIMERA: PARTES CONTRATANTES.</span> De una parte, <strong>[NOMBRE DE LA EMPRESA CONTRATANTE]</strong>, sociedad comercial debidamente constituida bajo las leyes de la Republica de Colombia, identificada con NIT [NUMERO], con domicilio principal en la ciudad de [CIUDAD], representada legalmente por [NOMBRE DEL REPRESENTANTE], identificado con cedula de ciudadania numero [NUMERO], en adelante denominada "EL CONTRATANTE".</p>
+            <p>De otra parte, <strong>[NOMBRE DEL PROFESIONAL]</strong>, persona natural, mayor de edad, identificado con cedula de ciudadania numero [NUMERO], con domicilio en [CIUDAD], profesional en [PROFESION], con tarjeta profesional numero [NUMERO], en adelante denominado "EL CONTRATISTA".</p>
+            <p><span class="clause">SEGUNDA: OBJETO DEL CONTRATO.</span> EL CONTRATISTA se obliga para con EL CONTRATANTE a prestar sus servicios profesionales de consultoria legal, los cuales comprenden, sin limitarse a: (a) asesoria juridica integral en materia corporativa y comercial; (b) revision y elaboracion de contratos comerciales; (c) acompanamiento en procesos de negociacion...</p>
+            <p><span class="clause">TERCERA: PLAZO.</span> El presente contrato tendra una duracion de [NUMERO] meses, contados a partir de la fecha de firma del mismo, pudiendo ser prorrogado...</p>
+            <p><span class="clause">CUARTA: VALOR Y FORMA DE PAGO.</span> Como contraprestacion por los servicios prestados, EL CONTRATANTE pagara a EL CONTRATISTA la suma de...</p>
+            <div class="blur-overlay">
+              <div class="cta-card">
+                <div class="lock-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--slate-400)"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <p><strong>Registrate gratis</strong> para ver el documento completo y descargarlo en PDF o DOCX</p>
+                <a href="#" class="btn btn-primary">Crear Cuenta Gratis &rarr;</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATE: Error -->
+        <div id="stateError" class="hidden" style="text-align:center; padding:32px 20px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:#fef2f2;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <p style="font-size:15px;font-weight:600;color:var(--slate-800);margin-bottom:4px;">Has alcanzado el limite de intentos</p>
+          <p style="font-size:13px;color:var(--slate-500);margin-bottom:16px;">Crea una cuenta gratis para generar documentos ilimitados</p>
+          <a href="#" class="btn btn-primary">Registrarse Gratis &rarr;</a>
+        </div>
+      </div>
+
+      <!-- Usage Indicator -->
+      <div class="usage-indicator" id="usageNormal">
+        <div class="usage-dots">
+          <div class="usage-dot used"></div>
+          <div class="usage-dot"></div>
+          <div class="usage-dot"></div>
+        </div>
+        2 intentos gratis restantes
+      </div>
+      <div class="usage-indicator warning hidden" id="usageWarning">
+        <div class="usage-dots">
+          <div class="usage-dot used"></div>
+          <div class="usage-dot used"></div>
+          <div class="usage-dot"></div>
+        </div>
+        1 intento gratis restante
+      </div>
+      <div class="usage-indicator exhausted hidden" id="usageExhausted">
+        <div class="usage-dots">
+          <div class="usage-dot used"></div>
+          <div class="usage-dot used"></div>
+          <div class="usage-dot used"></div>
+        </div>
+        Sin intentos restantes
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SOCIAL PROOF ══════════ -->
+<section class="social-proof">
+  <div class="social-inner">
+    <div class="stat-card">
+      <div class="stat-number">80%</div>
+      <div class="stat-label">Menos tiempo en redaccion</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">95%</div>
+      <div class="stat-label">Precision juridica</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">10K+</div>
+      <div class="stat-label">Documentos generados</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">500+</div>
+      <div class="stat-label">Empresas confian en nosotros</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FEATURES ══════════ -->
+<section class="features" id="features">
+  <div class="features-inner">
+    <div class="section-label">Funcionalidades</div>
+    <h2 class="section-title">Todo lo que necesitas para documentos legales</h2>
+    <p class="section-subtitle">Desde la redaccion hasta la revision de riesgos, en una sola plataforma</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <h3>Redaccion con IA</h3>
+        <p>Genera contratos, NDAs, politicas internas y mas. Elige entre plantillas predefinidas o describe lo que necesitas con tus propias palabras.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h3>Revision de Riesgos</h3>
+        <p>Sube cualquier documento legal y recibe un analisis detallado de riesgos, clausulas faltantes y recomendaciones de mejora.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <h3>Base de Conocimiento</h3>
+        <p>Sube los documentos de tu empresa para que la IA aprenda tu estilo, terminologia y clausulas preferidas. Resultados cada vez mas precisos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ HOW IT WORKS ══════════ -->
+<section class="how-it-works">
+  <div class="how-inner">
+    <div class="section-label">Como Funciona</div>
+    <h2 class="section-title">3 pasos para tu documento</h2>
+    <p class="section-subtitle">Desde la idea hasta el documento listo en menos de 2 minutos</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3>Elige o Describe</h3>
+        <p>Selecciona una plantilla o describe en tus palabras que documento necesitas</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3>Personaliza con IA</h3>
+        <p>La IA genera un borrador profesional adaptado a tu empresa y contexto legal</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3>Descarga y Usa</h3>
+        <p>Revisa, edita si quieres, y descarga en PDF o DOCX listo para firmar</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PRICING ══════════ -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-label">Precios</div>
+    <h2 class="section-title">Simple y transparente</h2>
+    <p class="section-subtitle">Empieza gratis, escala cuando lo necesites</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>Gratis</h3>
+        <p class="price-desc">Para probar la plataforma</p>
+        <div class="price-amount">$0</div>
+        <div class="price-period">por siempre</div>
+        <ul class="price-features">
+          <li>10 documentos por mes</li>
+          <li>5 analisis de riesgo</li>
+          <li>Plantillas basicas</li>
+          <li>Exportar en PDF</li>
+        </ul>
+        <a href="#" class="btn btn-outline btn-large">Empezar Gratis</a>
+      </div>
+      <div class="price-card popular">
+        <h3>Pro</h3>
+        <p class="price-desc">Para firmas y equipos legales</p>
+        <div class="price-amount">$79<span> USD/mes</span></div>
+        <div class="price-period">facturado mensualmente</div>
+        <ul class="price-features">
+          <li>Documentos ilimitados</li>
+          <li>Analisis ilimitados</li>
+          <li>Base de Conocimiento</li>
+          <li>Exportar PDF + DOCX</li>
+          <li>Soporte prioritario</li>
+          <li>Multi-usuario (hasta 5)</li>
+        </ul>
+        <a href="#" class="btn btn-primary btn-large">Comenzar Prueba Gratis</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FINAL CTA ══════════ -->
+<section class="final-cta">
+  <h2>Deja de perder horas en documentos legales</h2>
+  <p>Unete a cientos de empresas que ya usan Luuc.ai para automatizar su documentacion juridica</p>
+  <a href="#" class="btn btn-white btn-large">Crear Cuenta Gratis &rarr;</a>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#" class="logo">Luuc<span>.ai</span></a>
+      <p>Automatizacion de documentos legales con inteligencia artificial para Latinoamerica.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Producto</h4>
+      <a href="#">Funcionalidades</a>
+      <a href="#">Precios</a>
+      <a href="#">Demo</a>
+      <a href="#">Plantillas</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="#">Terminos de Uso</a>
+      <a href="#">Politica de Privacidad</a>
+      <a href="#">Cookies</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <a href="#">soporte@luuc.ai</a>
+      <a href="#">Twitter</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 Luuc.ai. Todos los derechos reservados.</span>
+    <span>Hecho en Colombia</span>
+  </div>
+</footer>
+
+<!-- ══════════ PREVIEW STATE SWITCHER ══════════ -->
+<div class="preview-controls">
+  <div class="label">Demo State</div>
+  <button onclick="switchState('empty')">Empty</button>
+  <button onclick="switchState('loading')">Loading</button>
+  <button class="active" onclick="switchState('result')">Result</button>
+  <button onclick="switchState('error')">Error</button>
+  <div class="label" style="margin-top:8px">Usage</div>
+  <button onclick="switchUsage('normal')" class="active">2 left</button>
+  <button onclick="switchUsage('warning')">1 left</button>
+  <button onclick="switchUsage('exhausted')">0 left</button>
+</div>
+
+<script>
+function switchState(state) {
+  document.getElementById('stateEmpty').classList.add('hidden');
+  document.getElementById('stateLoading').classList.add('hidden');
+  document.getElementById('stateResult').classList.add('hidden');
+  document.getElementById('stateError').classList.add('hidden');
+  document.getElementById('state' + state.charAt(0).toUpperCase() + state.slice(1)).classList.remove('hidden');
+
+  document.querySelectorAll('.preview-controls button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const send = document.getElementById('demoSend');
+  const input = document.getElementById('demoInput');
+  if (state === 'loading') {
+    send.disabled = true;
+    send.textContent = 'Generando...';
+    input.disabled = true;
+    setTimeout(() => switchState('result'), 3000);
+  } else {
+    send.disabled = false;
+    send.innerHTML = 'Generar &rarr;';
+    input.disabled = false;
+  }
+}
+
+function switchUsage(level) {
+  document.getElementById('usageNormal').classList.add('hidden');
+  document.getElementById('usageWarning').classList.add('hidden');
+  document.getElementById('usageExhausted').classList.add('hidden');
+  if (level === 'normal') document.getElementById('usageNormal').classList.remove('hidden');
+  if (level === 'warning') document.getElementById('usageWarning').classList.remove('hidden');
+  if (level === 'exhausted') document.getElementById('usageExhausted').classList.remove('hidden');
+}
+</script>
+
+</body>
+</html>

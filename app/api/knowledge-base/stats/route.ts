@@ -1,4 +1,6 @@
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getCompanyByUser } from "@/lib/company";
