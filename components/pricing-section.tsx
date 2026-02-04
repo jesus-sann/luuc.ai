@@ -99,8 +99,6 @@ interface PricingSectionProps {
 }
 
 export function PricingSection({ showHeader = true, currency = "USD" }: PricingSectionProps) {
-  const t = useTranslations();
-
   return (
     <section className="py-16">
       {showHeader && (
