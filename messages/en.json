@@ -197,5 +197,98 @@
       "title": "Speed",
       "text": "Generate professional drafts in seconds, not hours"
     }
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "demo": "Demo",
+      "pricing": "Pricing",
+      "login": "Sign In",
+      "register": "Sign Up"
+    },
+    "hero": {
+      "badge": "AI specialized in Latin American law",
+      "title": "Generate legal documents in",
+      "titleHighlight": "seconds, not hours",
+      "description": "Draft contracts, NDAs, policies and more with artificial intelligence trained on Colombian regulations. Precise, professional, immediate.",
+      "cta": "Start Free",
+      "secondaryCta": "View Features",
+      "stat1": "2,847 documents generated",
+      "stat2": "Complies with Colombian regulations",
+      "stat3": "No credit card required"
+    },
+    "social": {
+      "stat1": "Less time drafting",
+      "stat2": "Legal accuracy",
+      "stat3": "Documents generated",
+      "stat4": "Companies trust us"
+    },
+    "features": {
+      "label": "Features",
+      "title": "Everything you need for legal documents",
+      "description": "From drafting to risk review, in a single platform",
+      "drafting": {
+        "title": "AI Drafting",
+        "description": "Generate contracts, NDAs, internal policies and more. Choose from predefined templates or describe what you need in your own words."
+      },
+      "review": {
+        "title": "Risk Review",
+        "description": "Upload any legal document and receive a detailed analysis of risks, missing clauses and improvement recommendations."
+      },
+      "knowledge": {
+        "title": "Knowledge Base",
+        "description": "Upload your company's documents so the AI learns your style, terminology and preferred clauses. Increasingly accurate results."
+      }
+    },
+    "howItWorks": {
+      "label": "How It Works",
+      "title": "3 steps to your document",
+      "description": "From idea to ready document in less than 2 minutes",
+      "step1": {
+        "title": "Choose or Describe",
+        "description": "Select a template or describe in your own words what document you need"
+      },
+      "step2": {
+        "title": "Customize with AI",
+        "description": "The AI generates a professional draft tailored to your company and legal context"
+      },
+      "step3": {
+        "title": "Download and Use",
+        "description": "Review, edit if you want, and download in PDF or DOCX ready to sign"
+      }
+    },
+    "demo": {
+      "label": "Live Demo",
+      "title": "See how it works",
+      "description": "This is how simple it is to generate a legal document with Luuc.ai",
+      "assistant": "Luuc.ai Assistant",
+      "online": "Online",
+      "userMessage": "I need an NDA to protect confidential information between my startup and a technology provider in Colombia",
+      "aiResponse": "I've generated your bilateral NDA. Here's a summary:",
+      "type": "Type:",
+      "typeValue": "Bilateral Confidentiality Agreement",
+      "jurisdiction": "Jurisdiction:",
+      "jurisdictionValue": "Colombia — Law 1581 of 2012",
+      "term": "Term:",
+      "termValue": "2 years with automatic renewal",
+      "clauses": "Clauses:",
+      "clausesValue": "12 clauses including penalties and dispute resolution",
+      "downloadPdf": "Download PDF",
+      "editDoc": "Edit document",
+      "inputPlaceholder": "Describe the document you need...",
+      "disclaimer": "* Illustrative example. Real documents include all complete clauses."
+    },
+    "footer": {
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal",
+      "about": "About us",
+      "contact": "Contact",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies",
+      "copyright": "Luuc.ai. All rights reserved.",
+      "madeIn": "Made in Colombia"
+    }
   }
 }

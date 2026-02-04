@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   ArrowRight,
@@ -13,9 +15,11 @@ import { Button } from "@/components/ui/button";
 import { PricingSection } from "@/components/pricing-section";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
+import { useTranslations } from "@/hooks/use-translations";
 
 export default function LandingPage() {
   const currentYear = new Date().getFullYear();
+  const t = useTranslations();
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
@@ -35,19 +39,19 @@ export default function LandingPage() {
               href="#features"
               className="text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:text-slate-900 dark:hover:text-white"
             >
-              Funcionalidades
+              {t("landing.nav.features")}
             </Link>
             <Link
               href="#demo"
               className="text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:text-slate-900 dark:hover:text-white"
             >
-              Demo
+              {t("landing.nav.demo")}
             </Link>
             <Link
               href="#pricing"
               className="text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:text-slate-900 dark:hover:text-white"
             >
-              Precios
+              {t("landing.nav.pricing")}
             </Link>
           </nav>
           <div className="flex items-center gap-1 sm:gap-2">
@@ -55,12 +59,12 @@ export default function LandingPage() {
             <LanguageToggle variant="compact" />
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-sm sm:size-default">
-                Iniciar Sesión
+                {t("landing.nav.login")}
               </Button>
             </Link>
             <Link href="/register">
               <Button size="sm" className="text-sm sm:size-default">
-                Registrarse
+                {t("landing.nav.register")}
                 <ArrowRight className="ml-1.5 h-4 w-4 hidden sm:inline" />
               </Button>
             </Link>
@@ -76,31 +80,30 @@ export default function LandingPage() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
             </span>
-            IA especializada en derecho latinoamericano
+            {t("landing.hero.badge")}
           </div>
 
           <h1 className="mb-5 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-[52px]">
-            Genera documentos legales en{" "}
+            {t("landing.hero.title")}{" "}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              segundos, no en horas
+              {t("landing.hero.titleHighlight")}
             </span>
           </h1>
 
           <p className="mx-auto mb-8 max-w-xl text-lg text-slate-500 dark:text-slate-400 sm:text-xl">
-            Redacta contratos, NDAs, políticas y más con inteligencia artificial
-            entrenada en normativa colombiana. Preciso, profesional, inmediato.
+            {t("landing.hero.description")}
           </p>
 
           <div className="mb-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/register">
               <Button size="lg" className="text-base">
-                Empieza Gratis
+                {t("landing.hero.cta")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <Link href="#features">
               <Button size="lg" variant="outline" className="text-base">
-                Ver Funcionalidades
+                {t("landing.hero.secondaryCta")}
               </Button>
             </Link>
           </div>
@@ -108,15 +111,15 @@ export default function LandingPage() {
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1.5">
               <Check className="h-4 w-4 text-green-500" />
-              2,847 documentos generados
+              {t("landing.hero.stat1")}
             </span>
             <span className="flex items-center gap-1.5">
               <Check className="h-4 w-4 text-green-500" />
-              Cumple normativa colombiana
+              {t("landing.hero.stat2")}
             </span>
             <span className="flex items-center gap-1.5">
               <Check className="h-4 w-4 text-green-500" />
-              Sin tarjeta de crédito
+              {t("landing.hero.stat3")}
             </span>
           </div>
         </div>
@@ -127,19 +130,19 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-8 px-4 text-center md:grid-cols-4">
           <div>
             <div className="text-3xl font-extrabold text-blue-600">80%</div>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Menos tiempo en redacción</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t("landing.social.stat1")}</p>
           </div>
           <div>
             <div className="text-3xl font-extrabold text-blue-600">95%</div>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Precisión jurídica</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t("landing.social.stat2")}</p>
           </div>
           <div>
             <div className="text-3xl font-extrabold text-blue-600">10K+</div>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Documentos generados</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t("landing.social.stat3")}</p>
           </div>
           <div>
             <div className="text-3xl font-extrabold text-blue-600">500+</div>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Empresas confían en nosotros</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t("landing.social.stat4")}</p>
           </div>
         </div>
       </section>
@@ -148,13 +151,13 @@ export default function LandingPage() {
       <section id="features" className="px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-5xl">
           <p className="mb-2 text-center text-xs font-semibold uppercase tracking-widest text-blue-600">
-            Funcionalidades
+            {t("landing.features.label")}
           </p>
           <h2 className="mb-3 text-center text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Todo lo que necesitas para documentos legales
+            {t("landing.features.title")}
           </h2>
           <p className="mx-auto mb-12 max-w-lg text-center text-base text-slate-500 dark:text-slate-400">
-            Desde la redacción hasta la revisión de riesgos, en una sola plataforma
+            {t("landing.features.description")}
           </p>
 
           <div className="grid gap-6 md:grid-cols-3">
@@ -162,10 +165,9 @@ export default function LandingPage() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/50">
                 <FileText className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-white">Redacción con IA</h3>
+              <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-white">{t("landing.features.drafting.title")}</h3>
               <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                Genera contratos, NDAs, políticas internas y más. Elige entre
-                plantillas predefinidas o describe lo que necesitas con tus propias palabras.
+                {t("landing.features.drafting.description")}
               </p>
             </div>
 
@@ -173,10 +175,9 @@ export default function LandingPage() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/50">
                 <Search className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-white">Revisión de Riesgos</h3>
+              <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-white">{t("landing.features.review.title")}</h3>
               <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                Sube cualquier documento legal y recibe un análisis detallado de
-                riesgos, cláusulas faltantes y recomendaciones de mejora.
+                {t("landing.features.review.description")}
               </p>
             </div>
 
@@ -184,10 +185,9 @@ export default function LandingPage() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/50">
                 <BookOpen className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-white">Base de Conocimiento</h3>
+              <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-white">{t("landing.features.knowledge.title")}</h3>
               <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                Sube los documentos de tu empresa para que la IA aprenda tu estilo,
-                terminología y cláusulas preferidas. Resultados cada vez más precisos.
+                {t("landing.features.knowledge.description")}
               </p>
             </div>
           </div>
@@ -198,13 +198,13 @@ export default function LandingPage() {
       <section className="bg-slate-50 dark:bg-slate-900 px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-4xl">
           <p className="mb-2 text-center text-xs font-semibold uppercase tracking-widest text-blue-600">
-            Cómo Funciona
+            {t("landing.howItWorks.label")}
           </p>
           <h2 className="mb-3 text-center text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            3 pasos para tu documento
+            {t("landing.howItWorks.title")}
           </h2>
           <p className="mx-auto mb-12 max-w-lg text-center text-base text-slate-500 dark:text-slate-400">
-            Desde la idea hasta el documento listo en menos de 2 minutos
+            {t("landing.howItWorks.description")}
           </p>
 
           <div className="relative grid gap-8 md:grid-cols-3 md:gap-5">
@@ -214,9 +214,9 @@ export default function LandingPage() {
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white shadow-md shadow-blue-600/30">
                 1
               </div>
-              <h3 className="mb-1 text-base font-bold text-slate-900 dark:text-white">Elige o Describe</h3>
+              <h3 className="mb-1 text-base font-bold text-slate-900 dark:text-white">{t("landing.howItWorks.step1.title")}</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Selecciona una plantilla o describe en tus palabras qué documento necesitas
+                {t("landing.howItWorks.step1.description")}
               </p>
             </div>
 
@@ -224,9 +224,9 @@ export default function LandingPage() {
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white shadow-md shadow-blue-600/30">
                 2
               </div>
-              <h3 className="mb-1 text-base font-bold text-slate-900 dark:text-white">Personaliza con IA</h3>
+              <h3 className="mb-1 text-base font-bold text-slate-900 dark:text-white">{t("landing.howItWorks.step2.title")}</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                La IA genera un borrador profesional adaptado a tu empresa y contexto legal
+                {t("landing.howItWorks.step2.description")}
               </p>
             </div>
 
@@ -234,9 +234,9 @@ export default function LandingPage() {
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white shadow-md shadow-blue-600/30">
                 3
               </div>
-              <h3 className="mb-1 text-base font-bold text-slate-900 dark:text-white">Descarga y Usa</h3>
+              <h3 className="mb-1 text-base font-bold text-slate-900 dark:text-white">{t("landing.howItWorks.step3.title")}</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Revisa, edita si quieres, y descarga en PDF o DOCX listo para firmar
+                {t("landing.howItWorks.step3.description")}
               </p>
             </div>
           </div>
@@ -247,13 +247,13 @@ export default function LandingPage() {
       <section id="demo" className="px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-4xl">
           <p className="mb-2 text-center text-xs font-semibold uppercase tracking-widest text-blue-600">
-            Demo en Vivo
+            {t("landing.demo.label")}
           </p>
           <h2 className="mb-3 text-center text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Mira cómo funciona
+            {t("landing.demo.title")}
           </h2>
           <p className="mx-auto mb-10 max-w-lg text-center text-base text-slate-500 dark:text-slate-400">
-            Así de simple es generar un documento legal con Luuc.ai
+            {t("landing.demo.description")}
           </p>
 
           <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
@@ -263,8 +263,8 @@ export default function LandingPage() {
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">Luuc.ai Asistente</p>
-                <p className="text-xs text-green-500">En línea</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">{t("landing.demo.assistant")}</p>
+                <p className="text-xs text-green-500">{t("landing.demo.online")}</p>
               </div>
             </div>
 
@@ -276,9 +276,9 @@ export default function LandingPage() {
                   <div className="max-w-sm rounded-2xl rounded-tr-sm bg-blue-600 px-4 py-3 text-sm text-white">
                     <div className="mb-1 flex items-center gap-1.5">
                       <MessageSquare className="h-3.5 w-3.5 opacity-70" />
-                      <span className="text-xs font-medium opacity-80">Tú</span>
+                      <span className="text-xs font-medium opacity-80">You</span>
                     </div>
-                    Necesito un NDA para proteger información confidencial entre mi startup y un proveedor de tecnología en Colombia
+                    {t("landing.demo.userMessage")}
                   </div>
                 </div>
               </div>
@@ -291,33 +291,33 @@ export default function LandingPage() {
                   </div>
                   <div className="max-w-lg rounded-2xl rounded-tl-sm border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 px-4 py-3 text-sm text-slate-700 dark:text-slate-300">
                     <p className="mb-3 font-medium text-slate-900 dark:text-white">
-                      He generado tu NDA bilateral. Aquí un resumen:
+                      {t("landing.demo.aiResponse")}
                     </p>
                     <div className="space-y-2 rounded-lg bg-white dark:bg-slate-800 p-3 text-xs">
                       <div className="flex items-start gap-2">
                         <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-500" />
-                        <span><strong>Tipo:</strong> Acuerdo de Confidencialidad Bilateral</span>
+                        <span><strong>{t("landing.demo.type")}</strong> {t("landing.demo.typeValue")}</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-500" />
-                        <span><strong>Jurisdicción:</strong> Colombia — Ley 1581 de 2012</span>
+                        <span><strong>{t("landing.demo.jurisdiction")}</strong> {t("landing.demo.jurisdictionValue")}</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-500" />
-                        <span><strong>Vigencia:</strong> 2 años con renovación automática</span>
+                        <span><strong>{t("landing.demo.term")}</strong> {t("landing.demo.termValue")}</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-500" />
-                        <span><strong>Cláusulas:</strong> 12 cláusulas incluyendo penalidades y resolución de conflictos</span>
+                        <span><strong>{t("landing.demo.clauses")}</strong> {t("landing.demo.clausesValue")}</span>
                       </div>
                     </div>
                     <div className="mt-3 flex gap-2">
                       <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:text-blue-300">
                         <FileText className="mr-1 h-3 w-3" />
-                        Descargar PDF
+                        {t("landing.demo.downloadPdf")}
                       </span>
                       <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-                        Editar documento
+                        {t("landing.demo.editDoc")}
                       </span>
                     </div>
                   </div>
@@ -328,14 +328,14 @@ export default function LandingPage() {
             {/* Input bar (decorative) */}
             <div className="border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-5 py-3">
               <div className="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-400">
-                Describe el documento que necesitas...
+                {t("landing.demo.inputPlaceholder")}
                 <ArrowRight className="ml-auto h-4 w-4 text-blue-400" />
               </div>
             </div>
           </div>
 
           <p className="mt-4 text-center text-xs text-slate-400">
-            * Ejemplo ilustrativo. Los documentos reales incluyen todas las cláusulas completas.
+            {t("landing.demo.disclaimer")}
           </p>
         </div>
       </section>
@@ -348,17 +348,17 @@ export default function LandingPage() {
       {/* ── Final CTA ── */}
       <section className="bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-20 text-center">
         <h2 className="mb-3 text-3xl font-extrabold text-white sm:text-4xl">
-          Deja de perder horas en documentos legales
+          {t("landing.hero.title")} {t("landing.hero.titleHighlight")}
         </h2>
         <p className="mx-auto mb-8 max-w-lg text-base text-blue-100">
-          Únete a cientos de empresas que ya usan Luuc.ai para automatizar su documentación jurídica
+          {t("landing.hero.description")}
         </p>
         <Link href="/register">
           <Button
             size="lg"
             className="bg-white text-base font-bold text-blue-600 shadow-lg hover:bg-slate-50"
           >
-            Crear Cuenta Gratis
+            {t("landing.hero.cta")}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>
@@ -378,34 +378,33 @@ export default function LandingPage() {
                 </span>
               </Link>
               <p className="mt-3 text-sm leading-relaxed text-slate-500">
-                Automatización de documentos legales con inteligencia artificial para Latinoamérica.
+                {t("landing.hero.description")}
               </p>
             </div>
             <div>
-              <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Producto</h4>
+              <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">{t("landing.footer.product")}</h4>
               <div className="flex flex-col gap-2">
-                <Link href="#features" className="text-sm text-slate-500 hover:text-slate-300">Funcionalidades</Link>
-                <Link href="#pricing" className="text-sm text-slate-500 hover:text-slate-300">Precios</Link>
-                <Link href="/register" className="text-sm text-slate-500 hover:text-slate-300">Plantillas</Link>
+                <Link href="#features" className="text-sm text-slate-500 hover:text-slate-300">{t("landing.nav.features")}</Link>
+                <Link href="#pricing" className="text-sm text-slate-500 hover:text-slate-300">{t("landing.nav.pricing")}</Link>
               </div>
             </div>
             <div>
-              <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Legal</h4>
+              <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">{t("landing.footer.legal")}</h4>
               <div className="flex flex-col gap-2">
-                <Link href="/terminos" className="text-sm text-slate-500 hover:text-slate-300">Términos de Uso</Link>
-                <Link href="/privacidad" className="text-sm text-slate-500 hover:text-slate-300">Política de Privacidad</Link>
+                <Link href="/terminos" className="text-sm text-slate-500 hover:text-slate-300">{t("landing.footer.terms")}</Link>
+                <Link href="/privacidad" className="text-sm text-slate-500 hover:text-slate-300">{t("landing.footer.privacy")}</Link>
               </div>
             </div>
             <div>
-              <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Contacto</h4>
+              <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">{t("landing.footer.contact")}</h4>
               <div className="flex flex-col gap-2">
                 <Link href="mailto:contacto@luuc.ai" className="text-sm text-slate-500 hover:text-slate-300">contacto@luuc.ai</Link>
               </div>
             </div>
           </div>
           <div className="flex flex-col items-center justify-between gap-2 border-t border-white/10 pt-6 text-xs text-slate-500 sm:flex-row">
-            <span>&copy; {currentYear} Luuc.ai. Todos los derechos reservados.</span>
-            <span>Hecho en Colombia</span>
+            <span>&copy; {currentYear} {t("landing.footer.copyright")}</span>
+            <span>{t("landing.footer.madeIn")}</span>
           </div>
         </div>
       </footer>

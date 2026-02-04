@@ -197,5 +197,98 @@
       "title": "Velocidad",
       "text": "Genera borradores profesionales en segundos, no horas"
     }
+  },
+  "landing": {
+    "nav": {
+      "features": "Funcionalidades",
+      "demo": "Demo",
+      "pricing": "Precios",
+      "login": "Iniciar Sesión",
+      "register": "Registrarse"
+    },
+    "hero": {
+      "badge": "IA especializada en derecho latinoamericano",
+      "title": "Genera documentos legales en",
+      "titleHighlight": "segundos, no en horas",
+      "description": "Redacta contratos, NDAs, políticas y más con inteligencia artificial entrenada en normativa colombiana. Preciso, profesional, inmediato.",
+      "cta": "Empieza Gratis",
+      "secondaryCta": "Ver Funcionalidades",
+      "stat1": "2,847 documentos generados",
+      "stat2": "Cumple normativa colombiana",
+      "stat3": "Sin tarjeta de crédito"
+    },
+    "social": {
+      "stat1": "Menos tiempo en redacción",
+      "stat2": "Precisión jurídica",
+      "stat3": "Documentos generados",
+      "stat4": "Empresas confían en nosotros"
+    },
+    "features": {
+      "label": "Funcionalidades",
+      "title": "Todo lo que necesitas para documentos legales",
+      "description": "Desde la redacción hasta la revisión de riesgos, en una sola plataforma",
+      "drafting": {
+        "title": "Redacción con IA",
+        "description": "Genera contratos, NDAs, políticas internas y más. Elige entre plantillas predefinidas o describe lo que necesitas con tus propias palabras."
+      },
+      "review": {
+        "title": "Revisión de Riesgos",
+        "description": "Sube cualquier documento legal y recibe un análisis detallado de riesgos, cláusulas faltantes y recomendaciones de mejora."
+      },
+      "knowledge": {
+        "title": "Base de Conocimiento",
+        "description": "Sube los documentos de tu empresa para que la IA aprenda tu estilo, terminología y cláusulas preferidas. Resultados cada vez más precisos."
+      }
+    },
+    "howItWorks": {
+      "label": "Cómo Funciona",
+      "title": "3 pasos para tu documento",
+      "description": "Desde la idea hasta el documento listo en menos de 2 minutos",
+      "step1": {
+        "title": "Elige o Describe",
+        "description": "Selecciona una plantilla o describe en tus palabras qué documento necesitas"
+      },
+      "step2": {
+        "title": "Personaliza con IA",
+        "description": "La IA genera un borrador profesional adaptado a tu empresa y contexto legal"
+      },
+      "step3": {
+        "title": "Descarga y Usa",
+        "description": "Revisa, edita si quieres, y descarga en PDF o DOCX listo para firmar"
+      }
+    },
+    "demo": {
+      "label": "Demo en Vivo",
+      "title": "Mira cómo funciona",
+      "description": "Así de simple es generar un documento legal con Luuc.ai",
+      "assistant": "Luuc.ai Asistente",
+      "online": "En línea",
+      "userMessage": "Necesito un NDA para proteger información confidencial entre mi startup y un proveedor de tecnología en Colombia",
+      "aiResponse": "He generado tu NDA bilateral. Aquí un resumen:",
+      "type": "Tipo:",
+      "typeValue": "Acuerdo de Confidencialidad Bilateral",
+      "jurisdiction": "Jurisdicción:",
+      "jurisdictionValue": "Colombia — Ley 1581 de 2012",
+      "term": "Vigencia:",
+      "termValue": "2 años con renovación automática",
+      "clauses": "Cláusulas:",
+      "clausesValue": "12 cláusulas incluyendo penalidades y resolución de conflictos",
+      "downloadPdf": "Descargar PDF",
+      "editDoc": "Editar documento",
+      "inputPlaceholder": "Describe el documento que necesitas...",
+      "disclaimer": "* Ejemplo ilustrativo. Los documentos reales incluyen todas las cláusulas completas."
+    },
+    "footer": {
+      "product": "Producto",
+      "company": "Empresa",
+      "legal": "Legal",
+      "about": "Sobre nosotros",
+      "contact": "Contacto",
+      "privacy": "Privacidad",
+      "terms": "Términos",
+      "cookies": "Cookies",
+      "copyright": "Luuc.ai. Todos los derechos reservados.",
+      "madeIn": "Hecho en Colombia"
+    }
   }
 }
