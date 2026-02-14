@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslations } from "@/hooks/use-translations";
 
 const PLAN_INFO: Record<string, { name: string; icon: typeof Zap; color: string; trial: number }> = {
   free: { name: "Free", icon: Zap, color: "bg-slate-100 text-slate-600", trial: 14 },
@@ -31,6 +32,7 @@ export default function RegisterPage() {
 }
 
 function RegisterContent() {
+  const t = useTranslations();
   const searchParams = useSearchParams();
   const selectedPlan = searchParams.get("plan") || "free";
   const planInfo = PLAN_INFO[selectedPlan] || PLAN_INFO.free;
@@ -107,9 +109,9 @@ function RegisterContent() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
             <span className="text-2xl font-bold text-white">L</span>
           </div>
-          <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
+          <CardTitle className="text-2xl">{t("auth.createYourAccount")}</CardTitle>
           <CardDescription>
-            Regístrate para comenzar a usar Luuc.ai
+            {t("auth.createYourAccountDesc")}
           </CardDescription>
 
           {/* Selected Plan Badge */}
@@ -119,11 +121,11 @@ function RegisterContent() {
                 <PlanIcon className="h-4 w-4" />
               </div>
               <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Plan {planInfo.name}
+                {t("plans." + selectedPlan)} Plan
               </span>
             </div>
             <p className="mt-1 text-xs text-green-600 dark:text-green-400">
-              {planInfo.trial} días de prueba gratis incluidos
+              {t("trial.freeTrial").replace("{days}", String(planInfo.trial))}
             </p>
           </div>
         </CardHeader>
@@ -142,9 +144,9 @@ function RegisterContent() {
           )}
 
           <form onSubmit={handleRegister} className="space-y-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Información personal</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{t("auth.personalInfo")}</p>
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre completo</Label>
+              <Label htmlFor="name">{t("auth.name")}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
@@ -161,7 +163,7 @@ function RegisterContent() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
@@ -178,7 +180,7 @@ function RegisterContent() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="company">Empresa (opcional)</Label>
+              <Label htmlFor="company">{t("auth.company")}</Label>
               <div className="relative">
                 <Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
@@ -194,10 +196,10 @@ function RegisterContent() {
             </div>
 
             <div className="border-t border-slate-100 pt-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Seguridad</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">{t("auth.security")}</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
@@ -219,11 +221,11 @@ function RegisterContent() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-xs text-slate-500">Mínimo 6 caracteres</p>
+              <p className="text-xs text-slate-500">{t("auth.minChars")}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+              <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
@@ -250,39 +252,39 @@ function RegisterContent() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creando cuenta...
+                  {t("common.loading")}
                 </>
               ) : (
-                "Crear Cuenta"
+                t("auth.registerButton")
               )}
             </Button>
           </form>
 
           <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
             <p className="mb-2 text-sm text-slate-600">
-              ¿Ya tienes cuenta?
+              {t("auth.hasAccount")}
             </p>
             <Link href="/login">
               <Button variant="outline" className="w-full">
-                Iniciar Sesión
+                {t("auth.login")}
               </Button>
             </Link>
           </div>
 
           <div className="mt-4 text-center">
             <Link href="/" className="text-sm text-slate-500 hover:text-slate-700">
-              ← Volver al inicio
+              ← {t("common.back")}
             </Link>
           </div>
 
           <p className="mt-6 text-center text-xs text-slate-400">
-            Al registrarte, aceptas nuestros{" "}
+            {t("auth.termsAgree")}{" "}
             <Link href="/terminos" className="underline">
-              Términos de Servicio
+              {t("auth.termsOfService")}
             </Link>{" "}
-            y{" "}
+            {t("auth.and")}{" "}
             <Link href="/privacidad" className="underline">
-              Política de Privacidad
+              {t("auth.privacyPolicy")}
             </Link>
           </p>
         </CardContent>

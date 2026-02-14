@@ -20,6 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
+import { useTranslations } from "@/hooks/use-translations";
 
 interface Company {
   id: string;
@@ -28,56 +29,57 @@ interface Company {
   status: string;
 }
 
-const settingsSections = [
-  {
-    title: "Mi Empresa",
-    description: "Configura los datos de tu firma o empresa",
-    icon: Building2,
-    href: "/dashboard/configuracion/empresa",
-    color: "bg-blue-500",
-  },
-  {
-    title: "Documentos de Referencia",
-    description: "Sube documentos aprobados para que la IA aprenda tu estilo",
-    icon: FileText,
-    href: "/dashboard/configuracion/documentos",
-    color: "bg-green-500",
-  },
-  {
-    title: "Mi Perfil",
-    description: "Actualiza tu información personal",
-    icon: User,
-    href: "/dashboard/configuracion/perfil",
-    color: "bg-purple-500",
-  },
-  {
-    title: "Notificaciones",
-    description: "Configura tus preferencias de notificaciones",
-    icon: Bell,
-    href: "/dashboard/configuracion/notificaciones",
-    color: "bg-orange-500",
-    comingSoon: true,
-  },
-  {
-    title: "Seguridad",
-    description: "Cambia tu contraseña y configura la autenticación",
-    icon: Shield,
-    href: "/dashboard/configuracion/seguridad",
-    color: "bg-red-500",
-  },
-  {
-    title: "Planes y Facturación",
-    description: "Administra tu suscripción y método de pago",
-    icon: CreditCard,
-    href: "/dashboard/configuracion/planes",
-    color: "bg-indigo-500",
-  },
-];
-
 export default function ConfiguracionPage() {
+  const t = useTranslations();
   const { user } = useAuth();
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const settingsSections = [
+    {
+      title: t("configuracion.company"),
+      description: t("configuracion.companyDesc"),
+      icon: Building2,
+      href: "/dashboard/configuracion/empresa",
+      color: "bg-blue-500",
+    },
+    {
+      title: t("configuracion.refDocs"),
+      description: t("configuracion.refDocsDesc"),
+      icon: FileText,
+      href: "/dashboard/configuracion/documentos",
+      color: "bg-green-500",
+    },
+    {
+      title: t("configuracion.profile"),
+      description: t("configuracion.profileDesc"),
+      icon: User,
+      href: "/dashboard/configuracion/perfil",
+      color: "bg-purple-500",
+    },
+    {
+      title: t("configuracion.notifications"),
+      description: t("configuracion.notificationsDesc"),
+      icon: Bell,
+      href: "/dashboard/configuracion/notificaciones",
+      color: "bg-orange-500",
+      comingSoon: true,
+    },
+    {
+      title: t("configuracion.security"),
+      description: t("configuracion.securityDesc"),
+      icon: Shield,
+      href: "/dashboard/configuracion/seguridad",
+      color: "bg-red-500",
+    },
+    {
+      title: t("configuracion.plans"),
+      description: t("configuracion.plansDesc"),
+      icon: CreditCard,
+      href: "/dashboard/configuracion/planes",
+      color: "bg-indigo-500",
+    },
+  ];
 
   useEffect(() => {
     const fetchCompany = async () => {
@@ -100,9 +102,9 @@ export default function ConfiguracionPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Configuración</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t("configuracion.title")}</h1>
         <p className="text-slate-500">
-          Administra tu cuenta, empresa y preferencias
+          {t("configuracion.description")}
         </p>
       </div>
 
@@ -116,12 +118,12 @@ export default function ConfiguracionPage() {
               </div>
               <div>
                 <p className={`font-medium ${company ? "text-green-800" : "text-yellow-800"}`}>
-                  {company ? `Empresa: ${company.name}` : "No tienes una empresa configurada"}
+                  {company ? `${t("configuracion.company")}: ${company.name}` : t("configuracion.companyNotConfigured")}
                 </p>
                 <p className={`text-sm ${company ? "text-green-600" : "text-yellow-600"}`}>
                   {company
-                    ? "Los documentos generados usarán el estilo de tu empresa"
-                    : "Configura tu empresa para personalizar los documentos"}
+                    ? t("configuracion.companyConfigured")
+                    : t("configuracion.companyNeeded")}
                 </p>
               </div>
             </div>
@@ -133,7 +135,7 @@ export default function ConfiguracionPage() {
                   : "bg-yellow-600 text-white hover:bg-yellow-700"
               }`}
             >
-              {company ? "Ver empresa" : "Configurar empresa"}
+              {company ? t("configuracion.viewCompany") : t("configuracion.configureCompany")}
             </Link>
           </CardContent>
         </Card>
@@ -166,7 +168,7 @@ export default function ConfiguracionPage() {
                       {section.title}
                       {section.comingSoon && (
                         <span className="ml-2 rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-600">
-                          Próximamente
+                          {t("configuracion.comingSoon")}
                         </span>
                       )}
                     </CardTitle>
@@ -188,17 +190,17 @@ export default function ConfiguracionPage() {
       {user && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Información de la cuenta</CardTitle>
+            <CardTitle className="text-base">{t("configuracion.accountInfo")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-500">Correo electrónico</span>
+              <span className="text-slate-500">{t("configuracion.email")}</span>
               <span className="font-medium">{user.email}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Plan actual</span>
+              <span className="text-slate-500">{t("configuracion.currentPlan")}</span>
               <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 capitalize">
-{(user.user_metadata?.plan as string) || "Free"}
+{(user.user_metadata?.plan as string) || t("common.free")}
               </span>
             </div>
           </CardContent>

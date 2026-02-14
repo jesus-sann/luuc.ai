@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslations } from "@/hooks/use-translations";
 
 interface KBDocument {
   id: string;
@@ -61,6 +62,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export default function KnowledgeBasePage() {
+  const t = useTranslations();
   const [stats, setStats] = useState<KBStats | null>(null);
   const [documents, setDocuments] = useState<KBDocument[]>([]);
   const [categories, setCategories] = useState<KBCategory[]>([]);
@@ -252,11 +254,10 @@ export default function KnowledgeBasePage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
           <BookOpen className="h-8 w-8 text-blue-600" />
-          Base de Conocimiento
+          {t("knowledgeBase.title")}
         </h1>
         <p className="text-slate-600">
-          Alimenta a Luuc con la documentación de tu empresa para generar
-          documentos coherentes con tus estándares
+          {t("knowledgeBase.description")}
         </p>
       </div>
 
@@ -281,7 +282,7 @@ export default function KnowledgeBasePage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Total Archivos</p>
+                  <p className="text-sm text-slate-600">{t("knowledgeBase.totalFiles")}</p>
                   <p className="text-2xl font-bold">{stats.totalDocuments}</p>
                 </div>
                 <FileText className="text-blue-500 h-8 w-8" />
@@ -293,7 +294,7 @@ export default function KnowledgeBasePage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Tamano Total</p>
+                  <p className="text-sm text-slate-600">{t("knowledgeBase.totalSize")}</p>
                   <p className="text-2xl font-bold">
                     {formatFileSize(stats.totalSize)}
                   </p>
@@ -307,7 +308,7 @@ export default function KnowledgeBasePage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Categorias</p>
+                  <p className="text-sm text-slate-600">{t("knowledgeBase.categories")}</p>
                   <p className="text-2xl font-bold">{stats.categoriesCount}</p>
                 </div>
                 <TrendingUp className="text-purple-500 w-8 h-8" />
@@ -319,7 +320,7 @@ export default function KnowledgeBasePage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Mas Usada</p>
+                  <p className="text-sm text-slate-600">{t("knowledgeBase.mostUsed")}</p>
                   <p className="text-sm font-medium capitalize truncate">
                     {stats.mostUsedCategory || "N/A"}
                   </p>
@@ -337,7 +338,7 @@ export default function KnowledgeBasePage() {
           <Search className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
           <Input
             type="text"
-            placeholder="Buscar documentos..."
+            placeholder={t("knowledgeBase.searchPlaceholder")}
             className="pl-10"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
@@ -360,7 +361,7 @@ export default function KnowledgeBasePage() {
         {isUploading ? (
           <div className="flex flex-col items-center">
             <Loader2 className="h-12 h-12 animate-spin text-blue-600 mb-4" />
-            <p className="text-blue-600 font-medium">Procesando archivos...</p>
+            <p className="text-blue-600 font-medium">{t("knowledgeBase.processingFiles")}</p>
           </div>
         ) : (
           <>
@@ -372,24 +373,24 @@ export default function KnowledgeBasePage() {
             {!selectedCategory ? (
               <>
                 <p className="mb-2 text-lg font-medium text-slate-400">
-                  Selecciona una categoría primero
+                  {t("knowledgeBase.selectCategoryFirst")}
                 </p>
                 <p className="text-sm text-slate-400">
-                  Elige una categoría abajo para poder subir archivos
+                  {t("knowledgeBase.selectCategoryBelow")}
                 </p>
               </>
             ) : (
               <>
                 <p className="mb-2 text-lg font-medium">
                   {isDragActive
-                    ? "Suelta los archivos aquí"
-                    : "Arrastra archivos o haz clic para subir"}
+                    ? t("knowledgeBase.dropFilesHere")
+                    : t("knowledgeBase.dragOrClick")}
                 </p>
                 <p className="text-sm text-slate-500">
-                  Soporta: PDF, DOCX, TXT, MD (máx. 10MB)
+                  {t("knowledgeBase.supportedFormats")}
                 </p>
                 <p className="mt-2 text-xs text-slate-400">
-                  Se subirá a:{" "}
+                  {t("knowledgeBase.uploadingTo")}{" "}
                   {categories.find((c) => c.slug === selectedCategory)?.name}
                 </p>
               </>
@@ -403,11 +404,11 @@ export default function KnowledgeBasePage() {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-xl font-bold">
             <Folder className="h-5 w-5" />
-            Categorías
+            {t("knowledgeBase.categories")}
           </h2>
           <Button onClick={() => setShowNewCategoryModal(true)} size="sm">
             <Plus className="mr-2 h-4 w-4" />
-            Nueva Categoría
+            {t("knowledgeBase.newCategory")}
           </Button>
         </div>
 
@@ -431,7 +432,7 @@ export default function KnowledgeBasePage() {
               <p className="font-medium text-sm">{cat.name}</p>
               <p className="text-xs text-slate-500 mt-1">
                 {cat.document_count}{" "}
-                {cat.document_count === 1 ? "archivo" : "archivos"}
+                {cat.document_count === 1 ? t("knowledgeBase.file") : t("knowledgeBase.files")}
               </p>
             </button>
           ))}
@@ -443,8 +444,8 @@ export default function KnowledgeBasePage() {
         <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
           <FileText className="h-5 w-5" />
           {selectedCategory
-            ? `Documentos en "${categories.find((c) => c.slug === selectedCategory)?.name}"`
-            : "Todos los Documentos"}
+            ? `${t("knowledgeBase.documentsIn")} "${categories.find((c) => c.slug === selectedCategory)?.name}"`
+            : t("knowledgeBase.allDocuments")}
         </h2>
 
         {documents.length === 0 ? (
@@ -455,13 +456,13 @@ export default function KnowledgeBasePage() {
               </div>
               <h3 className="mb-2 text-xl font-semibold text-slate-900">
                 {selectedCategory
-                  ? "No hay documentos en esta categoría"
-                  : "No hay documentos aún"}
+                  ? t("knowledgeBase.noDocsInCategory")
+                  : t("knowledgeBase.noDocs")}
               </h3>
               <p className="mx-auto max-w-md text-slate-600">
                 {selectedCategory
-                  ? "Arrastra archivos arriba o haz clic en la zona de subida para añadir tu primer documento a esta categoría"
-                  : "Selecciona una categoría y sube tu primer documento para entrenar la IA con el conocimiento de tu empresa"}
+                  ? t("knowledgeBase.noDocsInCategoryDesc")
+                  : t("knowledgeBase.noDocsDesc")}
               </p>
             </CardContent>
           </Card>
@@ -516,7 +517,7 @@ export default function KnowledgeBasePage() {
           <Card className="max-w-md w-full mx-4">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Nueva Categoria</CardTitle>
+                <CardTitle>{t("knowledgeBase.newCategory")}</CardTitle>
                 <button
                   onClick={() => setShowNewCategoryModal(false)}
                   className="text-slate-400 hover:text-slate-600"
@@ -528,18 +529,18 @@ export default function KnowledgeBasePage() {
             <CardContent className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Nombre de la categoria
+                  {t("knowledgeBase.categoryName")}
                 </label>
                 <Input
                   type="text"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
-                  placeholder="Ej: Contratos, Reportes, Manuales..."
+                  placeholder={t("knowledgeBase.categoryPlaceholder")}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Icono</label>
+                <label className="block text-sm font-medium mb-2">{t("knowledgeBase.icon")}</label>
                 <div className="flex gap-2 flex-wrap">
                   {Object.entries(iconMap).map(([key, icon]) => (
                     <button
@@ -563,14 +564,14 @@ export default function KnowledgeBasePage() {
                   className="flex-1"
                   onClick={() => setShowNewCategoryModal(false)}
                 >
-                  Cancelar
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   className="flex-1"
                   onClick={createCategory}
                   disabled={!newCategoryName.trim()}
                 >
-                  Crear
+                  {t("knowledgeBase.create")}
                 </Button>
               </div>
             </CardContent>

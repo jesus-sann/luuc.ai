@@ -15,8 +15,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslations } from "@/hooks/use-translations";
 
 function LoginForm() {
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -89,9 +91,9 @@ function LoginForm() {
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
           <span className="text-2xl font-bold text-white">L</span>
         </div>
-        <CardTitle className="text-2xl">Bienvenido a Luuc.ai</CardTitle>
+        <CardTitle className="text-2xl">{t("auth.welcomeBack")}</CardTitle>
         <CardDescription>
-          Ingresa tus credenciales para continuar
+          {t("auth.welcomeBackDesc")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -110,7 +112,7 @@ function LoginForm() {
 
         <form onSubmit={handleEmailLogin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico</Label>
+            <Label htmlFor="email">{t("auth.email")}</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
@@ -128,12 +130,12 @@ function LoginForm() {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <Link
                 href="/forgot-password"
                 className="text-sm text-blue-600 hover:underline"
               >
-                ¿Olvidaste tu contraseña?
+                {t("auth.forgotPassword")}
               </Link>
             </div>
             <div className="relative">
@@ -166,10 +168,10 @@ function LoginForm() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Ingresando...
+                {t("common.loading")}
               </>
             ) : (
-              "Iniciar Sesión"
+              t("auth.loginButton")
             )}
           </Button>
         </form>
@@ -179,7 +181,7 @@ function LoginForm() {
             <div className="w-full border-t border-slate-200" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-slate-500 dark:bg-card dark:text-slate-400">O continúa con</span>
+            <span className="bg-white px-2 text-slate-500 dark:bg-card dark:text-slate-400">{t("auth.orContinueWith")}</span>
           </div>
         </div>
 
@@ -193,30 +195,30 @@ function LoginForm() {
           {isLoadingMagicLink ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Enviando enlace...
+              {t("common.loading")}
             </>
           ) : (
             <>
               <Mail className="mr-2 h-4 w-4" />
-              Enlace mágico por correo
+              {t("auth.magicLink")}
             </>
           )}
         </Button>
 
         <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
           <p className="mb-2 text-sm text-slate-600">
-            ¿No tienes cuenta?
+            {t("auth.noAccount")}
           </p>
           <Link href="/register">
             <Button variant="outline" className="w-full">
-              Crear Cuenta Gratis
+              {t("auth.createAccount")}
             </Button>
           </Link>
         </div>
 
         <div className="mt-4 text-center">
           <Link href="/" className="text-sm text-slate-500 hover:text-slate-700">
-            ← Volver al inicio
+            ← {t("common.back")}
           </Link>
         </div>
       </CardContent>
@@ -225,14 +227,15 @@ function LoginForm() {
 }
 
 function LoginFormFallback() {
+  const t = useTranslations();
   return (
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
           <span className="text-2xl font-bold text-white">L</span>
         </div>
-        <CardTitle className="text-2xl">Bienvenido a Luuc.ai</CardTitle>
-        <CardDescription>Cargando...</CardDescription>
+        <CardTitle className="text-2xl">{t("auth.welcomeBack")}</CardTitle>
+        <CardDescription>{t("common.loading")}</CardDescription>
       </CardHeader>
       <CardContent className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />

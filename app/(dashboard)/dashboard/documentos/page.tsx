@@ -4,13 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FileText, Search, Calendar, MoreVertical, Download, Trash2, Eye, Copy, FileDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Document, Analysis, AnalysisResponse } from "@/types";
 import { DocumentViewerModal } from "@/components/document-viewer-modal";
 import { AnalysisModal } from "@/components/analysis-modal";
+import { useTranslations } from "@/hooks/use-translations";
 
 export default function DocumentosPage() {
+  const t = useTranslations();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"generados" | "analizados">(
     "generados"
@@ -176,9 +178,9 @@ export default function DocumentosPage() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Mis Documentos</h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t("documentos.title")}</h1>
         <p className="mt-2 text-slate-600 dark:text-slate-400">
-          Accede a tus documentos generados y análisis realizados
+          {t("documentos.description")}
         </p>
       </div>
 
@@ -187,7 +189,7 @@ export default function DocumentosPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
-            placeholder="Buscar documentos..."
+            placeholder={t("documentos.searchPlaceholder")}
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -202,7 +204,7 @@ export default function DocumentosPage() {
                 : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
             } rounded-l-lg`}
           >
-            Generados
+            {t("documentos.tabGenerated")}
           </button>
           <button
             onClick={() => setActiveTab("analizados")}
@@ -212,7 +214,7 @@ export default function DocumentosPage() {
                 : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
             } rounded-r-lg`}
           >
-            Analizados
+            {t("documentos.tabAnalyzed")}
           </button>
         </div>
       </div>
@@ -223,7 +225,7 @@ export default function DocumentosPage() {
           {loading ? (
             <Card>
               <CardContent className="flex min-h-[400px] items-center justify-center p-12">
-                <p className="text-slate-600">Cargando documentos...</p>
+                <p className="text-slate-600">{t("documentos.loading")}</p>
               </CardContent>
             </Card>
           ) : error ? (
@@ -239,15 +241,15 @@ export default function DocumentosPage() {
                   <FileText className="h-12 w-12 text-blue-600" />
                 </div>
                 <h3 className="mb-2 text-xl font-semibold text-slate-900 dark:text-white">
-                  Aún no tienes documentos generados
+                  {t("documentos.emptyTitle")}
                 </h3>
                 <p className="mb-6 max-w-md text-center text-slate-600">
-                  Comienza a redactar tu primer documento legal en minutos con la ayuda de nuestra IA
+                  {t("documentos.emptyDescription")}
                 </p>
                 <Link href="/dashboard/redactar">
                   <Button size="lg">
                     <FileText className="mr-2 h-4 w-4" />
-                    Crear primer documento
+                    {t("documentos.createFirst")}
                   </Button>
                 </Link>
               </CardContent>
@@ -294,7 +296,7 @@ export default function DocumentosPage() {
                             }}
                           >
                             <Eye className="h-4 w-4" />
-                            Ver documento
+                            {t("documentos.viewDoc")}
                           </button>
                           <button
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
@@ -304,7 +306,7 @@ export default function DocumentosPage() {
                             }}
                           >
                             <FileDown className="h-4 w-4" />
-                            Descargar DOCX
+                            {t("documentos.downloadDocx")}
                           </button>
                           <button
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
@@ -314,14 +316,14 @@ export default function DocumentosPage() {
                             }}
                           >
                             <Download className="h-4 w-4" />
-                            Descargar PDF
+                            {t("documentos.downloadPdf")}
                           </button>
                           <button
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                             onClick={() => handleDuplicateDocument(doc.id)}
                           >
                             <Copy className="h-4 w-4" />
-                            Duplicar
+                            {t("documentos.duplicate")}
                           </button>
                           <hr className="my-1 border-slate-200" />
                           <button
@@ -329,7 +331,7 @@ export default function DocumentosPage() {
                             onClick={() => handleDeleteDocument(doc.id)}
                           >
                             <Trash2 className="h-4 w-4" />
-                            Eliminar
+                            {t("documentos.delete")}
                           </button>
                         </div>
                       </>
@@ -345,7 +347,7 @@ export default function DocumentosPage() {
           {loading ? (
             <Card>
               <CardContent className="flex min-h-[400px] items-center justify-center p-12">
-                <p className="text-slate-600">Cargando análisis...</p>
+                <p className="text-slate-600">{t("documentos.loadingAnalyses")}</p>
               </CardContent>
             </Card>
           ) : error ? (
@@ -361,15 +363,15 @@ export default function DocumentosPage() {
                   <Search className="h-12 w-12 text-green-600" />
                 </div>
                 <h3 className="mb-2 text-xl font-semibold text-slate-900 dark:text-white">
-                  No hay análisis realizados aún
+                  {t("documentos.emptyAnalysesTitle")}
                 </h3>
                 <p className="mb-6 max-w-md text-center text-slate-600">
-                  Sube un contrato o documento legal para obtener un análisis detallado de riesgos y recomendaciones
+                  {t("documentos.emptyAnalysesDescription")}
                 </p>
                 <Link href="/dashboard/revisar">
                   <Button size="lg">
                     <Search className="mr-2 h-4 w-4" />
-                    Analizar documento
+                    {t("documentos.analyzeDoc")}
                   </Button>
                 </Link>
               </CardContent>
@@ -401,7 +403,7 @@ export default function DocumentosPage() {
                         analysis.risk_score
                       )}`}
                     >
-                      Riesgo: {analysis.risk_score}/10
+                      {t("documentos.risk")}: {analysis.risk_score}/10
                     </span>
                     <div className="relative">
                       <Button
@@ -430,7 +432,7 @@ export default function DocumentosPage() {
                               onClick={() => handleViewAnalysis(analysis.id)}
                             >
                               <Eye className="h-4 w-4" />
-                              Ver análisis
+                              {t("documentos.viewAnalysis")}
                             </button>
                             <button
                               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
@@ -439,7 +441,7 @@ export default function DocumentosPage() {
                               }}
                             >
                               <Download className="h-4 w-4" />
-                              Descargar reporte
+                              {t("documentos.downloadReport")}
                             </button>
                             <hr className="my-1 border-slate-200" />
                             <button
@@ -447,7 +449,7 @@ export default function DocumentosPage() {
                               onClick={() => handleDeleteAnalysis(analysis.id)}
                             >
                               <Trash2 className="h-4 w-4" />
-                              Eliminar
+                              {t("documentos.delete")}
                             </button>
                           </div>
                         </>

@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useTranslations } from "@/hooks/use-translations";
 
 const DOC_LANGUAGES = [
   { value: "es", label: "Español" },
@@ -25,14 +26,9 @@ const DOC_LANGUAGES = [
   { value: "de", label: "Deutsch" },
 ];
 
-const FOCUS_EXAMPLES = [
-  "Identifica riesgos para la empresa en este contrato laboral",
-  "Analiza las cláusulas de confidencialidad",
-  "Revisa condiciones de terminación y penalidades",
-  "Evalúa obligaciones problemáticas para el arrendatario",
-];
 
 export default function RevisarPage() {
+  const t = useTranslations();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [focusContext, setFocusContext] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +61,7 @@ export default function RevisarPage() {
       const parseData = await parseRes.json();
 
       if (!parseData.success) {
-        setError(parseData.error || "Error leyendo el archivo");
+        setError(parseData.error || t("revisar.errorReading"));
         setIsLoading(false);
         return;
       }
@@ -87,10 +83,10 @@ export default function RevisarPage() {
         setAnalysisResult(data.data);
         setShowModal(true);
       } else {
-        setError(data.error || "Error analizando documento");
+        setError(data.error || t("revisar.errorAnalyzing"));
       }
     } catch {
-      setError("Error de conexión. Intenta de nuevo.");
+      setError(t("revisar.errorConnection"));
     } finally {
       setIsLoading(false);
     }
@@ -126,13 +122,13 @@ export default function RevisarPage() {
       {/* Header */}
       <div className="mb-8">
         <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-blue-600">
-          Revisión
+          {t("revisar.badge")}
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-          Analiza riesgos en tus documentos
+          {t("revisar.title")}
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Sube un documento legal y recibe un análisis detallado con recomendaciones
+          {t("revisar.description")}
         </p>
       </div>
 
@@ -142,10 +138,10 @@ export default function RevisarPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Upload className="h-5 w-5 text-slate-400" />
-              <CardTitle className="text-base">Subir Documento</CardTitle>
+              <CardTitle className="text-base">{t("revisar.uploadTitle")}</CardTitle>
             </div>
             <p className="text-xs text-slate-500">
-              Formatos soportados: PDF, DOCX, TXT
+              {t("revisar.uploadFormats")}
             </p>
           </CardHeader>
           <CardContent>
@@ -158,15 +154,15 @@ export default function RevisarPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-blue-600" />
-              <CardTitle className="text-base">Enfoque del Análisis</CardTitle>
+              <CardTitle className="text-base">{t("revisar.focusTitle")}</CardTitle>
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
-                Opcional
+                {t("revisar.focusOptional")}
               </span>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <Textarea
-              placeholder="Ej: Quiero que revises este contrato laboral e identifiques los riesgos para la empresa..."
+              placeholder={t("revisar.focusPlaceholder")}
               rows={3}
               value={focusContext}
               onChange={(e) => setFocusContext(e.target.value)}
@@ -176,10 +172,10 @@ export default function RevisarPage() {
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs text-slate-400">
                 <Lightbulb className="h-3.5 w-3.5" />
-                <span>Ejemplos:</span>
+                <span>{t("revisar.focusExamples")}</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {FOCUS_EXAMPLES.map((example, index) => (
+                {[t("revisar.example1"), t("revisar.example2"), t("revisar.example3"), t("revisar.example4")].map((example, index) => (
                   <button
                     key={index}
                     onClick={() => handleExampleClick(example)}
@@ -196,7 +192,7 @@ export default function RevisarPage() {
 
         {/* Analysis Language */}
         <div className="space-y-1.5">
-          <Label className="text-sm">Idioma del análisis</Label>
+          <Label className="text-sm">{t("revisar.analysisLanguage")}</Label>
           <Select value={analysisLanguage} onValueChange={setAnalysisLanguage}>
             <SelectTrigger>
               <SelectValue />
@@ -211,7 +207,7 @@ export default function RevisarPage() {
 
         {/* Disclaimer */}
         <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
-          El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico.
+          {t("disclaimer.ai")}
         </p>
 
         {/* Analyze Button */}
@@ -225,12 +221,12 @@ export default function RevisarPage() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analizando documento...
+                {t("revisar.analyzing")}
               </>
             ) : (
               <>
                 <Target className="mr-2 h-4 w-4" />
-                Analizar Documento
+                {t("revisar.analyzeButton")}
               </>
             )}
           </Button>
