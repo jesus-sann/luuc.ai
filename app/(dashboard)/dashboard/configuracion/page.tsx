@@ -11,6 +11,7 @@ import {
   CreditCard,
   ChevronRight,
   Loader2,
+  Users,
 } from "lucide-react";
 import {
   Card,
@@ -42,6 +43,13 @@ export default function ConfiguracionPage() {
       icon: Building2,
       href: "/dashboard/configuracion/empresa",
       color: "bg-blue-500",
+    },
+    {
+      title: t("configuracion.team"),
+      description: t("configuracion.teamDesc"),
+      icon: Users,
+      href: "/dashboard/configuracion/equipo",
+      color: "bg-cyan-500",
     },
     {
       title: t("configuracion.refDocs"),

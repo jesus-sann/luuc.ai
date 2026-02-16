@@ -109,6 +109,8 @@
     "description": "Manage your account, company, and preferences",
     "company": "My Company",
     "companyDesc": "Configure your firm or company details",
+    "team": "Team",
+    "teamDesc": "Invite members and manage your company's users",
     "refDocs": "Reference Documents",
     "refDocsDesc": "Upload approved documents so the AI learns your style",
     "profile": "My Profile",
@@ -347,6 +349,7 @@
       "contact": "Contact",
       "privacy": "Privacy",
       "terms": "Terms",
+      "security": "Security",
       "cookies": "Cookies",
       "copyright": "Luuc.ai. All rights reserved.",
       "madeIn": "Made in Colombia"
@@ -369,5 +372,79 @@
     "current": "Current plan",
     "upgrade": "Upgrade to {plan}",
     "included": "Included"
+  },
+  "suggestions": {
+    "title": "AI Suggestions",
+    "loading": "Generating suggestions...",
+    "empty": "No additional suggestions",
+    "createDocument": "Create document",
+    "viewMore": "View more",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "priority": {
+      "high": "High priority",
+      "medium": "Medium priority",
+      "low": "Suggestion"
+    },
+    "types": {
+      "improvement": "Improvement",
+      "missing_clause": "Missing clause",
+      "related_template": "Related document",
+      "follow_up_action": "Next step",
+      "risk_mitigation": "Risk mitigation"
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Luuc.ai",
+      "subtitle": "Your AI-powered legal assistant",
+      "description": "Let's set up your account in less than 2 minutes to personalize your experience.",
+      "button": "Get Started"
+    },
+    "companySetup": {
+      "title": "Set up your company",
+      "subtitle": "Personalize the documents you generate",
+      "nameLabel": "Company name",
+      "namePlaceholder": "E.g.: Smith & Associates",
+      "countryLabel": "Country",
+      "sectorLabel": "Industry",
+      "sectorPlaceholder": "Select your industry",
+      "button": "Continue",
+      "skip": "Set up later"
+    },
+    "tour": {
+      "start": {
+        "title": "Let's explore!",
+        "description": "I'll show you the main features of Luuc.ai in just 30 seconds."
+      },
+      "create": {
+        "title": "Create Documents",
+        "description": "Generate contracts, NDAs, employment agreements, and more with AI. Just describe what you need."
+      },
+      "review": {
+        "title": "Review Documents",
+        "description": "Analyze existing contracts to identify risks, problematic clauses, and improvement suggestions."
+      },
+      "knowledge": {
+        "title": "Knowledge Base",
+        "description": "Upload your reference documents so the AI learns your style and generates more personalized documents."
+      },
+      "next": "Next",
+      "skip": "Skip tour",
+      "finish": "Finish"
+    },
+    "firstAction": {
+      "title": "Almost done!",
+      "subtitle": "Generate your first NDA",
+      "description": "We suggest starting with a Non-Disclosure Agreement (NDA). It's quick and will show you how Luuc.ai works.",
+      "button": "Create my first NDA",
+      "later": "Explore first"
+    },
+    "completed": {
+      "title": "Congratulations!",
+      "subtitle": "Your account is ready",
+      "description": "Now you can explore all of Luuc.ai's features. Let the legal magic begin!",
+      "button": "Go to Dashboard"
+    }
   }
 }

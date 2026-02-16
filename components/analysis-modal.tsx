@@ -9,7 +9,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { SuggestionsPanel } from "@/components/suggestions-panel";
 import { AnalysisResponse } from "@/types";
+import type { AISuggestion } from "@/types/suggestions";
 import { cn, getRiskColor, getRiskBorderColor } from "@/lib/utils";
 
 interface AnalysisModalProps {
@@ -17,6 +19,14 @@ interface AnalysisModalProps {
   onOpenChange: (open: boolean) => void;
   result: AnalysisResponse;
   filename: string;
+  /** AI suggestions based on analysis */
+  suggestions?: AISuggestion[];
+  /** Whether suggestions are loading */
+  suggestionsLoading?: boolean;
+  /** Callback when a suggestion is clicked */
+  onSuggestionClick?: (suggestion: AISuggestion) => void;
+  /** Locale for translations */
+  locale?: "es" | "en";
 }
 
 const getRiskIcon = (nivel: string) => {
@@ -55,6 +65,10 @@ export function AnalysisModal({
   onOpenChange,
   result,
   filename,
+  suggestions = [],
+  suggestionsLoading = false,
+  onSuggestionClick,
+  locale = "es",
 }: AnalysisModalProps) {
   const { score, riesgos, clausulas_faltantes, resumen, observaciones_generales } = result;
 
@@ -193,6 +207,17 @@ export function AnalysisModal({
               <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-white">Observaciones</h3>
               <p className="text-[15px] leading-7 text-slate-600 dark:text-slate-300">{observaciones_generales}</p>
             </div>
+          )}
+
+          {/* AI Suggestions */}
+          {(suggestionsLoading || suggestions.length > 0) && (
+            <SuggestionsPanel
+              suggestions={suggestions}
+              isLoading={suggestionsLoading}
+              onSuggestionClick={onSuggestionClick}
+              locale={locale}
+              defaultExpanded={true}
+            />
           )}
         </div>
 

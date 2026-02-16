@@ -10,6 +10,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { SuggestionsPanel } from "@/components/suggestions-panel";
+import type { AISuggestion } from "@/types/suggestions";
 
 interface DocumentViewerModalProps {
   open: boolean;
@@ -19,6 +21,14 @@ interface DocumentViewerModalProps {
   documentId?: string | null;
   /** Called when user edits content in the modal */
   onContentChange?: (content: string) => void;
+  /** AI suggestions for the document */
+  suggestions?: AISuggestion[];
+  /** Whether suggestions are loading */
+  suggestionsLoading?: boolean;
+  /** Callback when a suggestion is clicked */
+  onSuggestionClick?: (suggestion: AISuggestion) => void;
+  /** Locale for translations */
+  locale?: "es" | "en";
 }
 
 export function DocumentViewerModal({
@@ -28,6 +38,10 @@ export function DocumentViewerModal({
   content,
   documentId,
   onContentChange,
+  suggestions = [],
+  suggestionsLoading = false,
+  onSuggestionClick,
+  locale = "es",
 }: DocumentViewerModalProps) {
   const [copied, setCopied] = useState(false);
   const [editableContent, setEditableContent] = useState(content);
@@ -138,6 +152,17 @@ export function DocumentViewerModal({
             <div className="min-h-[350px] whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-[15px] leading-7 text-slate-600 dark:bg-slate-800/50 dark:text-slate-300">
               {editableContent}
             </div>
+          )}
+
+          {/* AI Suggestions */}
+          {(suggestionsLoading || suggestions.length > 0) && (
+            <SuggestionsPanel
+              suggestions={suggestions}
+              isLoading={suggestionsLoading}
+              onSuggestionClick={onSuggestionClick}
+              locale={locale}
+              defaultExpanded={true}
+            />
           )}
         </div>
 

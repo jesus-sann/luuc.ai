@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, FileText } from "lucide-react";
 import Link from "next/link";
 import { getTemplateBySlug } from "@/lib/templates";
@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGenerationSuggestions } from "@/hooks/use-suggestions";
+import type { AISuggestion } from "@/types/suggestions";
 
 const DOC_LANGUAGES = [
   { value: "es", label: "Español" },
@@ -36,6 +38,7 @@ const AI_PROVIDERS = [
 
 export default function TemplateFormPage() {
   const params = useParams();
+  const router = useRouter();
   const templateSlug = params.template as string;
   const template = getTemplateBySlug(templateSlug);
 
@@ -47,6 +50,21 @@ export default function TemplateFormPage() {
   const [showModal, setShowModal] = useState(false);
   const [aiProvider, setAiProvider] = useState("auto");
   const [docLanguage, setDocLanguage] = useState("es");
+
+  // Fetch AI suggestions when document is generated
+  const { suggestions, isLoading: suggestionsLoading } = useGenerationSuggestions(
+    showModal ? templateSlug : null,
+    showModal ? generatedContent : null,
+    formData,
+    { language: docLanguage as "es" | "en" | "pt" | "fr" | "de" }
+  );
+
+  const handleSuggestionClick = (suggestion: AISuggestion) => {
+    if (suggestion.action?.type === "create_template" && suggestion.action.templateSlug) {
+      setShowModal(false);
+      router.push(`/dashboard/crear/${suggestion.action.templateSlug}`);
+    }
+  };
 
   if (!template) {
     return (
@@ -225,6 +243,10 @@ export default function TemplateFormPage() {
           title={generatedTitle}
           content={generatedContent}
           documentId={generatedDocId}
+          suggestions={suggestions}
+          suggestionsLoading={suggestionsLoading}
+          onSuggestionClick={handleSuggestionClick}
+          locale={docLanguage as "es" | "en"}
         />
       )}
     </div>

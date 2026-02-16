@@ -109,6 +109,8 @@
     "description": "Administra tu cuenta, empresa y preferencias",
     "company": "Mi Empresa",
     "companyDesc": "Configura los datos de tu firma o empresa",
+    "team": "Equipo",
+    "teamDesc": "Invita miembros y administra los usuarios de tu empresa",
     "refDocs": "Documentos de Referencia",
     "refDocsDesc": "Sube documentos aprobados para que la IA aprenda tu estilo",
     "profile": "Mi Perfil",
@@ -347,6 +349,7 @@
       "contact": "Contacto",
       "privacy": "Privacidad",
       "terms": "Términos",
+      "security": "Seguridad",
       "cookies": "Cookies",
       "copyright": "Luuc.ai. Todos los derechos reservados.",
       "madeIn": "Hecho en Colombia"
@@ -369,5 +372,79 @@
     "current": "Plan actual",
     "upgrade": "Actualizar a {plan}",
     "included": "Incluido"
+  },
+  "suggestions": {
+    "title": "Sugerencias de la IA",
+    "loading": "Generando sugerencias...",
+    "empty": "No hay sugerencias adicionales",
+    "createDocument": "Crear documento",
+    "viewMore": "Ver más",
+    "collapse": "Colapsar",
+    "expand": "Expandir",
+    "priority": {
+      "high": "Alta prioridad",
+      "medium": "Prioridad media",
+      "low": "Sugerencia"
+    },
+    "types": {
+      "improvement": "Mejora",
+      "missing_clause": "Cláusula faltante",
+      "related_template": "Documento relacionado",
+      "follow_up_action": "Siguiente paso",
+      "risk_mitigation": "Mitigación de riesgo"
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Bienvenido a Luuc.ai",
+      "subtitle": "Tu asistente legal con IA",
+      "description": "Vamos a configurar tu cuenta en menos de 2 minutos para personalizar tu experiencia.",
+      "button": "Comenzar"
+    },
+    "companySetup": {
+      "title": "Configura tu empresa",
+      "subtitle": "Personaliza los documentos que generes",
+      "nameLabel": "Nombre de la empresa",
+      "namePlaceholder": "Ej: García & Asociados",
+      "countryLabel": "País",
+      "sectorLabel": "Sector",
+      "sectorPlaceholder": "Selecciona tu sector",
+      "button": "Continuar",
+      "skip": "Configurar después"
+    },
+    "tour": {
+      "start": {
+        "title": "¡Vamos a explorar!",
+        "description": "Te mostraré las principales funciones de Luuc.ai en solo 30 segundos."
+      },
+      "create": {
+        "title": "Crear Documentos",
+        "description": "Genera contratos, NDAs, acuerdos laborales y más con IA. Solo describe lo que necesitas."
+      },
+      "review": {
+        "title": "Revisar Documentos",
+        "description": "Analiza contratos existentes para identificar riesgos, cláusulas problemáticas y sugerencias de mejora."
+      },
+      "knowledge": {
+        "title": "Base de Conocimiento",
+        "description": "Sube tus documentos de referencia para que la IA aprenda tu estilo y genere documentos más personalizados."
+      },
+      "next": "Siguiente",
+      "skip": "Omitir tour",
+      "finish": "Finalizar"
+    },
+    "firstAction": {
+      "title": "¡Ya casi terminas!",
+      "subtitle": "Genera tu primer NDA",
+      "description": "Te sugerimos comenzar con un Acuerdo de Confidencialidad (NDA). Es rápido y te mostrará cómo funciona Luuc.ai.",
+      "button": "Crear mi primer NDA",
+      "later": "Explorar primero"
+    },
+    "completed": {
+      "title": "¡Felicitaciones!",
+      "subtitle": "Tu cuenta está lista",
+      "description": "Ahora puedes explorar todas las funciones de Luuc.ai. ¡Que comience la magia legal!",
+      "button": "Ir al Dashboard"
+    }
   }
 }

@@ -90,11 +90,11 @@ export function Sidebar() {
   const t = useTranslations();
 
   const navigation = [
-    { name: t("sidebar.dashboard"), href: "/dashboard", icon: Home },
-    { name: t("sidebar.crear"), href: "/dashboard/crear", icon: FileText },
-    { name: t("sidebar.revisar"), href: "/dashboard/revisar", icon: Search },
-    { name: t("sidebar.knowledgeBase"), href: "/dashboard/knowledge-base", icon: BookOpen },
-    { name: t("sidebar.documentos"), href: "/dashboard/documentos", icon: FolderOpen },
+    { name: t("sidebar.dashboard"), href: "/dashboard", icon: Home, tourId: null },
+    { name: t("sidebar.crear"), href: "/dashboard/crear", icon: FileText, tourId: "create" },
+    { name: t("sidebar.revisar"), href: "/dashboard/revisar", icon: Search, tourId: "review" },
+    { name: t("sidebar.knowledgeBase"), href: "/dashboard/knowledge-base", icon: BookOpen, tourId: "knowledge" },
+    { name: t("sidebar.documentos"), href: "/dashboard/documentos", icon: FolderOpen, tourId: null },
   ];
 
   const handleSignOut = async () => {
@@ -121,6 +121,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              data-tour={item.tourId || undefined}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive

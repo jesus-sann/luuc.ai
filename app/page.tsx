@@ -393,6 +393,7 @@ export default function LandingPage() {
               <div className="flex flex-col gap-2">
                 <Link href="/terminos" className="text-sm text-slate-500 hover:text-slate-300">{t("landing.footer.terms")}</Link>
                 <Link href="/privacidad" className="text-sm text-slate-500 hover:text-slate-300">{t("landing.footer.privacy")}</Link>
+                <Link href="/seguridad" className="text-sm text-slate-500 hover:text-slate-300">{t("landing.footer.security")}</Link>
               </div>
             </div>
             <div>

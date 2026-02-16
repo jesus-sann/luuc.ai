@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, Target, Lightbulb, Upload } from "lucide-react";
 import { FileUpload } from "@/components/file-upload";
 import { AnalysisModal } from "@/components/analysis-modal";
@@ -17,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "@/hooks/use-translations";
+import { useAnalysisSuggestions } from "@/hooks/use-suggestions";
+import type { AISuggestion } from "@/types/suggestions";
 
 const DOC_LANGUAGES = [
   { value: "es", label: "Español" },
@@ -29,6 +32,7 @@ const DOC_LANGUAGES = [
 
 export default function RevisarPage() {
   const t = useTranslations();
+  const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [focusContext, setFocusContext] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +40,20 @@ export default function RevisarPage() {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [analysisLanguage, setAnalysisLanguage] = useState("es");
+
+  // Fetch AI suggestions when analysis is complete
+  const { suggestions, isLoading: suggestionsLoading } = useAnalysisSuggestions(
+    showModal ? selectedFile?.name || null : null,
+    showModal ? analysisResult : null,
+    { language: analysisLanguage as "es" | "en" | "pt" | "fr" | "de" }
+  );
+
+  const handleSuggestionClick = (suggestion: AISuggestion) => {
+    if (suggestion.action?.type === "create_template" && suggestion.action.templateSlug) {
+      setShowModal(false);
+      router.push(`/dashboard/crear/${suggestion.action.templateSlug}`);
+    }
+  };
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
@@ -115,6 +133,10 @@ export default function RevisarPage() {
         }}
         result={analysisResult}
         filename={selectedFile?.name || "Documento"}
+        suggestions={suggestions}
+        suggestionsLoading={suggestionsLoading}
+        onSuggestionClick={handleSuggestionClick}
+        locale={analysisLanguage as "es" | "en"}
       />
     )}
 
