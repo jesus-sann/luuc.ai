@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, Download, FileDown, FileText, Pencil, Eye } from "lucide-react";
+import { Copy, Check, Download, FileDown, FileText, Pencil, Eye, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,6 +21,8 @@ interface DocumentViewerModalProps {
   documentId?: string | null;
   /** Called when user edits content in the modal */
   onContentChange?: (content: string) => void;
+  /** Called after successful save */
+  onSaveSuccess?: (newContent: string) => void;
   /** AI suggestions for the document */
   suggestions?: AISuggestion[];
   /** Whether suggestions are loading */
@@ -38,6 +40,7 @@ export function DocumentViewerModal({
   content,
   documentId,
   onContentChange,
+  onSaveSuccess,
   suggestions = [],
   suggestionsLoading = false,
   onSuggestionClick,
@@ -46,13 +49,51 @@ export function DocumentViewerModal({
   const [copied, setCopied] = useState(false);
   const [editableContent, setEditableContent] = useState(content);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "error">("idle");
+
+  // Track if content has been modified
+  const hasChanges = editableContent !== content;
 
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen) {
       setEditableContent(content);
       setIsEditing(false);
+      setSaveStatus("idle");
     }
     onOpenChange(isOpen);
+  };
+
+  const handleSave = async () => {
+    if (!documentId || !hasChanges) return;
+
+    setIsSaving(true);
+    setSaveStatus("idle");
+
+    try {
+      const response = await fetch(`/api/documents/${documentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editableContent }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSaveStatus("saved");
+        onSaveSuccess?.(editableContent);
+        // Reset status after 2 seconds
+        setTimeout(() => setSaveStatus("idle"), 2000);
+      } else {
+        setSaveStatus("error");
+        console.error("Save failed:", data.error);
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      setSaveStatus("error");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCopy = async () => {
@@ -198,12 +239,49 @@ export function DocumentViewerModal({
             </>
           )}
           <div className="flex-1" />
+          {/* Save button - shows when editing and has changes */}
+          {documentId && hasChanges && (
+            <Button
+              onClick={handleSave}
+              disabled={isSaving}
+              size="sm"
+              className={`rounded-xl ${
+                saveStatus === "saved"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : saveStatus === "error"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-emerald-600 hover:bg-emerald-700"
+              } text-white`}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  {locale === "es" ? "Guardando..." : "Saving..."}
+                </>
+              ) : saveStatus === "saved" ? (
+                <>
+                  <Check className="mr-1.5 h-3.5 w-3.5" />
+                  {locale === "es" ? "Guardado" : "Saved"}
+                </>
+              ) : saveStatus === "error" ? (
+                <>
+                  {locale === "es" ? "Error al guardar" : "Save failed"}
+                </>
+              ) : (
+                <>
+                  <Save className="mr-1.5 h-3.5 w-3.5" />
+                  {locale === "es" ? "Guardar cambios" : "Save changes"}
+                </>
+              )}
+            </Button>
+          )}
           <Button
             onClick={() => handleOpenChange(false)}
-            className="rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+            variant={hasChanges ? "outline" : "default"}
+            className={hasChanges ? "rounded-xl" : "rounded-xl bg-blue-600 text-white hover:bg-blue-700"}
             size="sm"
           >
-            Cerrar
+            {locale === "es" ? "Cerrar" : "Close"}
           </Button>
         </div>
       </DialogContent>

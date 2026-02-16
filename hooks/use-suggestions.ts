@@ -39,18 +39,27 @@ interface UseSuggestionsReturn {
 // FETCH FUNCTION
 // ===========================================
 
+const SUGGESTIONS_FETCH_TIMEOUT_MS = 20000; // 20 second timeout
+
 async function fetchSuggestions(
   context: SuggestionContext,
   language: string
 ): Promise<AISuggestion[]> {
   try {
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), SUGGESTIONS_FETCH_TIMEOUT_MS);
+
     const response = await fetch("/api/suggestions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ context, language }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       console.warn("[useSuggestions] API returned non-OK status:", response.status);
@@ -65,7 +74,11 @@ async function fetchSuggestions(
 
     return [];
   } catch (error) {
-    console.warn("[useSuggestions] Fetch failed:", error);
+    if (error instanceof Error && error.name === "AbortError") {
+      console.warn("[useSuggestions] Request timed out after", SUGGESTIONS_FETCH_TIMEOUT_MS, "ms");
+    } else {
+      console.warn("[useSuggestions] Fetch failed:", error);
+    }
     return [];
   }
 }
