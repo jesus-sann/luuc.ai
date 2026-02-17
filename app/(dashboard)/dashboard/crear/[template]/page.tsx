@@ -50,6 +50,7 @@ export default function TemplateFormPage() {
   const [showModal, setShowModal] = useState(false);
   const [aiProvider, setAiProvider] = useState("auto");
   const [docLanguage, setDocLanguage] = useState("es");
+  const [userInstructions, setUserInstructions] = useState("");
 
   // Fetch AI suggestions when document is generated
   const { suggestions, isLoading: suggestionsLoading } = useGenerationSuggestions(
@@ -95,6 +96,7 @@ export default function TemplateFormPage() {
           title: `${template.name} - ${new Date().toLocaleDateString("es-CO")}`,
           ...(aiProvider !== "auto" && { provider: aiProvider }),
           language: docLanguage,
+          ...(userInstructions.trim() && { userInstructions: userInstructions.trim() }),
         }),
       });
 
@@ -122,6 +124,7 @@ export default function TemplateFormPage() {
     setFormData({});
     setAiProvider("auto");
     setDocLanguage("es");
+    setUserInstructions("");
   };
 
   return (
@@ -214,6 +217,24 @@ export default function TemplateFormPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="userInstructions" className="text-sm">
+                  Instrucciones específicas <span className="text-slate-400 font-normal">(opcional)</span>
+                </Label>
+                <Textarea
+                  id="userInstructions"
+                  placeholder="Ej: Incluir cláusula de confidencialidad estricta, usar lenguaje formal corporativo, enfatizar penalidades por incumplimiento..."
+                  value={userInstructions}
+                  onChange={(e) => setUserInstructions(e.target.value)}
+                  rows={3}
+                  maxLength={2000}
+                  className="text-sm resize-none"
+                />
+                <p className="text-xs text-slate-400">
+                  Guía a la IA con instrucciones adicionales para personalizar el documento según tus necesidades.
+                </p>
               </div>
 
               <p className="text-xs text-slate-400 dark:text-slate-500 text-center">

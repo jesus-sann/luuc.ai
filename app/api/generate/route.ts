@@ -58,6 +58,9 @@ async function handler(request: NextRequest) {
     const { template, variables, title, companyId } = validation.sanitized!;
     const provider = body.provider; // optional AI provider override
     const language = body.language; // optional output language
+    const userInstructions = typeof body.userInstructions === "string"
+      ? body.userInstructions.slice(0, 2000) // Limit to 2000 chars for safety
+      : undefined;
 
     // Determinar companyId (del request o del usuario)
     let effectiveCompanyId: string | undefined = companyId;
@@ -115,7 +118,8 @@ ${knowledgeContext}
       fullContext,
       companyInstructions,
       provider,
-      language
+      language,
+      userInstructions
     );
 
     // Generate AI title from content

@@ -48,7 +48,8 @@ export async function generateDocumentWithContext(
   companyContext: string,
   companyInstructions: string,
   provider?: AIProvider,
-  language?: string
+  language?: string,
+  userInstructions?: string
 ): Promise<string> {
   const lang = language || "es";
   const langInstructions: Record<string, { locale: string; region: string }> = {
@@ -102,12 +103,26 @@ en los documentos de referencia. Adapta el contenido a las variables proporciona
 pero mantén la esencia y calidad de los documentos aprobados.`;
   }
 
-  const userPrompt = `TIPO DE DOCUMENTO: ${templateName}
+  let userPrompt = `TIPO DE DOCUMENTO: ${templateName}
 
 INFORMACIÓN PROPORCIONADA:
 ${Object.entries(variables)
   .map(([k, v]) => `- ${k}: ${v}`)
-  .join("\n")}
+  .join("\n")}`;
+
+  // Add user-specific instructions if provided
+  if (userInstructions && userInstructions.trim()) {
+    userPrompt += `
+
+INSTRUCCIONES ESPECÍFICAS DEL USUARIO:
+"""
+${userInstructions.trim()}
+"""
+
+IMPORTANTE: Presta especial atención a las instrucciones del usuario. Adapta el documento para cumplir con sus requisitos específicos.`;
+  }
+
+  userPrompt += `
 
 Genera el documento legal completo${companyContext ? " respetando el estilo de los documentos de referencia" : ""}:`;
 
