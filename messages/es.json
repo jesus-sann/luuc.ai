@@ -3,7 +3,7 @@
     "dashboard": "Dashboard",
     "crear": "Crear",
     "revisar": "Revisar",
-    "knowledgeBase": "Base de Conocimiento",
+    "knowledgeBase": "Información Empresarial",
     "documentos": "Documentos",
     "configuracion": "Configuración",
     "cerrarSesion": "Cerrar Sesión",
@@ -111,8 +111,10 @@
     "companyDesc": "Configura los datos de tu firma o empresa",
     "team": "Equipo",
     "teamDesc": "Invita miembros y administra los usuarios de tu empresa",
-    "refDocs": "Documentos de Referencia",
-    "refDocsDesc": "Sube documentos aprobados para que la IA aprenda tu estilo",
+    "refDocs": "Documentos Modelo",
+    "refDocsDesc": "Sube documentos aprobados para que la IA imite tu estilo y formato",
+    "refDocsSubtitle": "La IA escribirá COMO estos",
+    "refDocsExamples": "Contratos finalizados, NDAs firmados, acuerdos aprobados por el equipo legal",
     "profile": "Mi Perfil",
     "profileDesc": "Actualiza tu información personal",
     "notifications": "Notificaciones",
@@ -164,8 +166,11 @@
     "privacyPolicy": "Política de Privacidad"
   },
   "knowledgeBase": {
-    "title": "Base de Conocimiento",
-    "description": "Alimenta a Luuc con la documentación de tu empresa para generar documentos coherentes con tus estándares",
+    "title": "Información Empresarial",
+    "subtitle": "La IA sabrá SOBRE esto",
+    "description": "Sube políticas, procedimientos y datos de tu empresa para que la IA tenga contexto al generar documentos.",
+    "whatToUpload": "¿Qué subir aquí?",
+    "examples": "Políticas internas, manuales de empleados, procedimientos, datos de la empresa, información organizacional.",
     "totalFiles": "Total Archivos",
     "totalSize": "Tamaño Total",
     "categories": "Categorías",
@@ -231,9 +236,14 @@
       "badge": "PDF, DOCX, TXT"
     },
     "knowledgeBase": {
-      "title": "Base de Conocimiento",
-      "description": "Sube los documentos de tu empresa para que la IA aprenda tu estilo y genere documentos personalizados.",
-      "badge": "Próximamente"
+      "title": "Información Empresarial",
+      "description": "Sube políticas y datos de tu empresa para que la IA tenga contexto al generar documentos.",
+      "badge": "Disponible"
+    },
+    "modelDocs": {
+      "title": "Documentos Modelo",
+      "description": "Sube contratos aprobados para que la IA imite tu estilo de redacción.",
+      "badge": "Disponible"
     }
   },
   "disclaimer": {
@@ -299,8 +309,8 @@
         "description": "Sube cualquier documento legal y recibe un análisis detallado de riesgos, cláusulas faltantes y recomendaciones de mejora."
       },
       "knowledge": {
-        "title": "Base de Conocimiento",
-        "description": "Sube los documentos de tu empresa para que la IA aprenda tu estilo, terminología y cláusulas preferidas. Resultados cada vez más precisos."
+        "title": "Personalización Empresarial",
+        "description": "Dos formas de personalizar: sube información de tu empresa (políticas, datos) y documentos modelo (contratos aprobados) para que la IA genere documentos perfectamente adaptados."
       }
     },
     "howItWorks": {
@@ -426,8 +436,12 @@
         "description": "Analiza contratos existentes para identificar riesgos, cláusulas problemáticas y sugerencias de mejora."
       },
       "knowledge": {
-        "title": "Base de Conocimiento",
-        "description": "Sube tus documentos de referencia para que la IA aprenda tu estilo y genere documentos más personalizados."
+        "title": "Información Empresarial",
+        "description": "Sube políticas, procedimientos y datos de tu empresa. La IA usará esta información como contexto al generar documentos."
+      },
+      "modelDocs": {
+        "title": "Documentos Modelo",
+        "description": "En Configuración > Documentos Modelo puedes subir contratos aprobados para que la IA imite tu estilo de redacción."
       },
       "next": "Siguiente",
       "skip": "Omitir tour",

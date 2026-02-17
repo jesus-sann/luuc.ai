@@ -3,7 +3,7 @@
     "dashboard": "Dashboard",
     "crear": "Create",
     "revisar": "Review",
-    "knowledgeBase": "Knowledge Base",
+    "knowledgeBase": "Company Info",
     "documentos": "Documents",
     "configuracion": "Settings",
     "cerrarSesion": "Sign Out",
@@ -111,8 +111,10 @@
     "companyDesc": "Configure your firm or company details",
     "team": "Team",
     "teamDesc": "Invite members and manage your company's users",
-    "refDocs": "Reference Documents",
-    "refDocsDesc": "Upload approved documents so the AI learns your style",
+    "refDocs": "Model Documents",
+    "refDocsDesc": "Upload approved documents so the AI mimics your style and format",
+    "refDocsSubtitle": "The AI will write LIKE these",
+    "refDocsExamples": "Finalized contracts, signed NDAs, agreements approved by legal team",
     "profile": "My Profile",
     "profileDesc": "Update your personal information",
     "notifications": "Notifications",
@@ -164,8 +166,11 @@
     "privacyPolicy": "Privacy Policy"
   },
   "knowledgeBase": {
-    "title": "Knowledge Base",
-    "description": "Feed Luuc with your company's documentation to generate documents consistent with your standards",
+    "title": "Company Information",
+    "subtitle": "The AI will know ABOUT this",
+    "description": "Upload policies, procedures, and company data so the AI has context when generating documents.",
+    "whatToUpload": "What to upload here?",
+    "examples": "Internal policies, employee manuals, procedures, company data, organizational information.",
     "totalFiles": "Total Files",
     "totalSize": "Total Size",
     "categories": "Categories",
@@ -231,9 +236,14 @@
       "badge": "PDF, DOCX, TXT"
     },
     "knowledgeBase": {
-      "title": "Knowledge Base",
-      "description": "Upload your company's documents so the AI learns your style and generates personalized documents.",
-      "badge": "Coming soon"
+      "title": "Company Information",
+      "description": "Upload policies and company data so the AI has context when generating documents.",
+      "badge": "Available"
+    },
+    "modelDocs": {
+      "title": "Model Documents",
+      "description": "Upload approved contracts so the AI mimics your writing style.",
+      "badge": "Available"
     }
   },
   "disclaimer": {
@@ -299,8 +309,8 @@
         "description": "Upload any legal document and receive a detailed analysis of risks, missing clauses and improvement recommendations."
       },
       "knowledge": {
-        "title": "Knowledge Base",
-        "description": "Upload your company's documents so the AI learns your style, terminology and preferred clauses. Increasingly accurate results."
+        "title": "Company Personalization",
+        "description": "Two ways to personalize: upload company info (policies, data) and model documents (approved contracts) so the AI generates perfectly tailored documents."
       }
     },
     "howItWorks": {
@@ -426,8 +436,12 @@
         "description": "Analyze existing contracts to identify risks, problematic clauses, and improvement suggestions."
       },
       "knowledge": {
-        "title": "Knowledge Base",
-        "description": "Upload your reference documents so the AI learns your style and generates more personalized documents."
+        "title": "Company Information",
+        "description": "Upload policies, procedures, and company data. The AI will use this information as context when generating documents."
+      },
+      "modelDocs": {
+        "title": "Model Documents",
+        "description": "In Settings > Model Documents you can upload approved contracts so the AI mimics your writing style."
       },
       "next": "Next",
       "skip": "Skip tour",

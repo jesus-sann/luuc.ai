@@ -205,11 +205,11 @@ export default function DocumentosReferenciaPage() {
             <ArrowLeft className="h-5 w-5 text-slate-600" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Documentos de Referencia
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              Documentos Modelo
             </h1>
-            <p className="text-slate-500">
-              Sube documentos aprobados para que la IA aprenda tu estilo
+            <p className="text-slate-500 dark:text-slate-400">
+              Sube contratos aprobados para que la IA imite tu estilo y formato
             </p>
           </div>
         </div>
@@ -360,17 +360,22 @@ export default function DocumentosReferenciaPage() {
         </Card>
       )}
 
-      {/* Info sobre documentos de referencia */}
-      <Card className="border-blue-200 bg-blue-50">
+      {/* Info sobre documentos modelo */}
+      <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20">
         <CardContent className="py-4">
           <div className="flex items-start gap-3">
-            <FileText className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div className="text-sm text-blue-800">
-              <p className="font-medium">¿Para qué sirven los documentos de referencia?</p>
-              <p className="mt-1 text-blue-700">
-                La IA analiza estos documentos para aprender el estilo, formato
-                y terminología que usa tu firma. Entre más documentos subas,
-                mejor será la calidad de los documentos generados.
+            <FileText className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-green-800 dark:text-green-300">
+                📋 La IA escribirá COMO estos documentos
+              </p>
+              <p className="mt-1 text-green-700 dark:text-green-400">
+                Sube contratos finalizados, NDAs firmados y acuerdos aprobados.
+                La IA imitará el <strong>estilo, formato y terminología</strong> de estos documentos.
+              </p>
+              <p className="mt-2 text-xs text-green-600 dark:text-green-500">
+                ¿Quieres que la IA tenga <strong>contexto</strong> sobre tu empresa? → Usa{" "}
+                <a href="/dashboard/knowledge-base" className="underline font-medium">Información Empresarial</a>.
               </p>
             </div>
           </div>
@@ -382,11 +387,11 @@ export default function DocumentosReferenciaPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <File className="h-12 w-12 text-slate-300" />
-            <h3 className="mt-4 font-medium text-slate-900">
-              No hay documentos de referencia
+            <h3 className="mt-4 font-medium text-slate-900 dark:text-white">
+              No hay documentos modelo
             </h3>
-            <p className="mt-1 text-sm text-slate-500">
-              Sube tu primer documento para comenzar
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Sube tu primer contrato aprobado para que la IA aprenda tu estilo
             </p>
             <Button className="mt-4" onClick={() => setShowForm(true)}>
               <Plus className="mr-2 h-4 w-4" />
