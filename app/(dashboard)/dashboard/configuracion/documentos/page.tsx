@@ -34,6 +34,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useTranslations } from "@/hooks/use-translations";
 
 interface CompanyDocument {
   id: string;
@@ -63,6 +64,7 @@ const categories = [
 ];
 
 export default function DocumentosReferenciaPage() {
+  const t = useTranslations();
   const [documents, setDocuments] = useState<CompanyDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -367,15 +369,14 @@ export default function DocumentosReferenciaPage() {
             <FileText className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
             <div className="text-sm">
               <p className="font-medium text-green-800 dark:text-green-300">
-                📋 La IA escribirá COMO estos documentos
+                {t("configuracion.modelDocsInfoTitle")}
               </p>
               <p className="mt-1 text-green-700 dark:text-green-400">
-                Sube contratos finalizados, NDAs firmados y acuerdos aprobados.
-                La IA imitará el <strong>estilo, formato y terminología</strong> de estos documentos.
+                {t("configuracion.modelDocsInfoDescription")}
               </p>
               <p className="mt-2 text-xs text-green-600 dark:text-green-500">
-                ¿Quieres que la IA tenga <strong>contexto</strong> sobre tu empresa? → Usa{" "}
-                <a href="/dashboard/knowledge-base" className="underline font-medium">Información Empresarial</a>.
+                {t("configuracion.modelDocsInfoLink")}{" "}
+                <a href="/dashboard/knowledge-base" className="underline font-medium">{t("configuracion.modelDocsInfoLinkAction")}</a>.
               </p>
             </div>
           </div>

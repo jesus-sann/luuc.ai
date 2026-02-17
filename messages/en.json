@@ -131,7 +131,11 @@
     "companyNotConfigured": "You don't have a company configured",
     "configureCompany": "Configure company",
     "viewCompany": "View company",
-    "companyNeeded": "Configure your company to personalize documents"
+    "companyNeeded": "Configure your company to personalize documents",
+    "modelDocsInfoTitle": "📋 The AI will write LIKE these documents",
+    "modelDocsInfoDescription": "Upload finalized contracts, signed NDAs, and team-approved agreements. The AI will mimic the style, format, and terminology of these documents.",
+    "modelDocsInfoLink": "Want the AI to have context about your company?",
+    "modelDocsInfoLinkAction": "Company Info"
   },
   "auth": {
     "login": "Sign In",
@@ -171,6 +175,11 @@
     "description": "Upload policies, procedures, and company data so the AI has context when generating documents.",
     "whatToUpload": "What to upload here?",
     "examples": "Internal policies, employee manuals, procedures, company data, organizational information.",
+    "infoCardTitle": "💡 The AI will know ABOUT this",
+    "infoCardDescription": "Upload here: internal policies, employee manuals, procedures, organizational data. The AI will use this information as context when generating documents.",
+    "infoCardLink": "Want the AI to mimic your contract style?",
+    "infoCardLinkAction": "Model Documents",
+    "infoCardLinkSuffix": "in Settings.",
     "totalFiles": "Total Files",
     "totalSize": "Total Size",
     "categories": "Categories",

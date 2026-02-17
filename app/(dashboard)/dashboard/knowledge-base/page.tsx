@@ -262,15 +262,14 @@ export default function KnowledgeBasePage() {
         {/* Explanation Card */}
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
           <p className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-1">
-            💡 La IA sabrá SOBRE esto
+            {t("knowledgeBase.infoCardTitle")}
           </p>
           <p className="text-sm text-blue-700 dark:text-blue-400">
-            Sube aquí: políticas internas, manuales de empleados, procedimientos, datos organizacionales.
-            La IA usará esta información como <strong>contexto</strong> al generar documentos.
+            {t("knowledgeBase.infoCardDescription")}
           </p>
           <p className="text-xs text-blue-600 dark:text-blue-500 mt-2">
-            ¿Quieres que la IA imite el <strong>estilo</strong> de tus contratos? → Usa{" "}
-            <a href="/dashboard/configuracion/documentos" className="underline font-medium">Documentos Modelo</a> en Configuración.
+            {t("knowledgeBase.infoCardLink")}{" "}
+            <a href="/dashboard/configuracion/documentos" className="underline font-medium">{t("knowledgeBase.infoCardLinkAction")}</a> {t("knowledgeBase.infoCardLinkSuffix")}
           </p>
         </div>
       </div>

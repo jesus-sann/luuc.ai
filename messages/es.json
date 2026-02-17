@@ -131,7 +131,11 @@
     "companyNotConfigured": "No tienes una empresa configurada",
     "configureCompany": "Configurar empresa",
     "viewCompany": "Ver empresa",
-    "companyNeeded": "Configura tu empresa para personalizar los documentos"
+    "companyNeeded": "Configura tu empresa para personalizar los documentos",
+    "modelDocsInfoTitle": "📋 La IA escribirá COMO estos documentos",
+    "modelDocsInfoDescription": "Sube contratos finalizados, NDAs firmados y acuerdos aprobados por el equipo legal. La IA imitará el estilo, formato y terminología de estos documentos.",
+    "modelDocsInfoLink": "¿Quieres que la IA tenga contexto sobre tu empresa?",
+    "modelDocsInfoLinkAction": "Información Empresarial"
   },
   "auth": {
     "login": "Iniciar Sesión",
@@ -171,6 +175,11 @@
     "description": "Sube políticas, procedimientos y datos de tu empresa para que la IA tenga contexto al generar documentos.",
     "whatToUpload": "¿Qué subir aquí?",
     "examples": "Políticas internas, manuales de empleados, procedimientos, datos de la empresa, información organizacional.",
+    "infoCardTitle": "💡 La IA sabrá SOBRE esto",
+    "infoCardDescription": "Sube aquí: políticas internas, manuales de empleados, procedimientos, datos organizacionales. La IA usará esta información como contexto al generar documentos.",
+    "infoCardLink": "¿Quieres que la IA imite el estilo de tus contratos?",
+    "infoCardLinkAction": "Documentos Modelo",
+    "infoCardLinkSuffix": "en Configuración.",
     "totalFiles": "Total Archivos",
     "totalSize": "Tamaño Total",
     "categories": "Categorías",
