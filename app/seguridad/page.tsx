@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Shield, Lock, Server, Eye, Trash2, FileSignature, CheckCircle2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Shield, Lock, Server, Eye, FileSignature, CheckCircle2, ExternalLink, Building2, Globe, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const securityFeatures = [
@@ -47,17 +47,43 @@ const faqs = [
     answer: "Sí. Para empresas que lo requieran, ofrecemos un Acuerdo de Confidencialidad (NDA) estándar. Descarga la plantilla y envíala firmada a legal@luuc.ai para que procedamos con la firma bilateral.",
   },
   {
-    question: "¿Qué certificaciones tienen?",
-    answer: "Nuestra infraestructura en AWS y Supabase cumple con SOC 2 Type II, ISO 27001 y GDPR. Realizamos auditorías de seguridad regulares y pentesting.",
+    question: "¿Qué estándares de seguridad siguen?",
+    answer: "Seguimos las mejores prácticas de seguridad alineadas con SOC 2 e ISO 27001. Nuestra infraestructura (AWS/Supabase) cuenta con estas certificaciones, y aplicamos los mismos controles en nuestra capa de aplicación.",
   },
 ];
 
-const certifications = [
-  { name: "SOC 2 Type II", status: "Infraestructura" },
-  { name: "ISO 27001", status: "Infraestructura" },
-  { name: "GDPR Compliant", status: "Cumplimiento" },
-  { name: "TLS 1.3", status: "Cifrado" },
-  { name: "AES-256", status: "Cifrado" },
+const complianceStandards = [
+  {
+    name: "SOC 2 Type II",
+    description: "Controles de seguridad auditados",
+    icon: BadgeCheck,
+    status: "Alineado"
+  },
+  {
+    name: "ISO 27001",
+    description: "Gestión de seguridad de información",
+    icon: Globe,
+    status: "Alineado"
+  },
+  {
+    name: "GDPR",
+    description: "Protección de datos personales",
+    icon: Shield,
+    status: "Cumplimiento"
+  },
+  {
+    name: "Ley 1581 de 2012",
+    description: "Habeas Data Colombia",
+    icon: Building2,
+    status: "Cumplimiento"
+  },
+];
+
+const encryptionStandards = [
+  { name: "TLS 1.3", description: "Cifrado en tránsito" },
+  { name: "AES-256", description: "Cifrado en reposo" },
+  { name: "JWT", description: "Tokens seguros" },
+  { name: "RLS", description: "Aislamiento de datos" },
 ];
 
 export default function SeguridadPage() {
@@ -109,23 +135,70 @@ export default function SeguridadPage() {
           })}
         </div>
 
-        {/* Certifications */}
+        {/* Compliance Standards */}
+        <div className="mb-16">
+          <h2 className="mb-2 text-center text-2xl font-bold text-slate-900 dark:text-white">
+            Cumplimiento Normativo
+          </h2>
+          <p className="mb-8 text-center text-slate-600 dark:text-slate-400">
+            Seguimos las mejores prácticas de seguridad y cumplimos con los estándares de la industria
+          </p>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {complianceStandards.map((standard) => {
+              const Icon = standard.icon;
+              return (
+                <div
+                  key={standard.name}
+                  className="flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
+                    <Icon className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-slate-900 dark:text-white">
+                        {standard.name}
+                      </h3>
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                        {standard.status}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                      {standard.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
+              <strong>Nota:</strong> Nuestra infraestructura (AWS, Supabase, Anthropic) cuenta con certificaciones
+              SOC 2 Type II e ISO 27001. Aplicamos los mismos controles de seguridad en nuestra capa de aplicación
+              y estamos trabajando en obtener nuestras propias certificaciones.
+            </p>
+          </div>
+        </div>
+
+        {/* Encryption Standards */}
         <div className="mb-16">
           <h2 className="mb-6 text-center text-2xl font-bold text-slate-900 dark:text-white">
-            Cumplimiento y Certificaciones
+            Estándares de Cifrado
           </h2>
           <div className="flex flex-wrap justify-center gap-4">
-            {certifications.map((cert) => (
+            {encryptionStandards.map((standard) => (
               <div
-                key={cert.name}
+                key={standard.name}
                 className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 dark:border-slate-700 dark:bg-slate-800"
               >
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span className="text-sm font-medium text-slate-900 dark:text-white">
-                  {cert.name}
+                  {standard.name}
                 </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400">
-                  ({cert.status})
+                  ({standard.description})
                 </span>
               </div>
             ))}
@@ -183,8 +256,25 @@ export default function SeguridadPage() {
           </p>
         </div>
 
+        {/* Related Pages */}
+        <div className="mt-12 flex flex-wrap justify-center gap-4">
+          <Link
+            href="/terminos"
+            className="text-sm text-slate-500 hover:text-blue-600 hover:underline dark:text-slate-400"
+          >
+            Términos de Servicio
+          </Link>
+          <span className="text-slate-300 dark:text-slate-600">•</span>
+          <Link
+            href="/privacidad"
+            className="text-sm text-slate-500 hover:text-blue-600 hover:underline dark:text-slate-400"
+          >
+            Política de Privacidad
+          </Link>
+        </div>
+
         {/* Contact */}
-        <div className="mt-12 text-center">
+        <div className="mt-8 text-center">
           <p className="text-slate-600 dark:text-slate-400">
             ¿Tienes más preguntas sobre seguridad?{" "}
             <a
