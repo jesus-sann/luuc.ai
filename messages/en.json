@@ -102,7 +102,13 @@
     "analyzeButton": "Analyze Document",
     "errorReading": "Error reading the file",
     "errorAnalyzing": "Error analyzing document",
-    "errorConnection": "Connection error. Please try again."
+    "errorConnection": "Connection error. Please try again.",
+    "multipleFiles": "You can upload up to 5 documents",
+    "focusPlaceholderMultiple": "Ex: Compare these contracts and identify differences in confidentiality clauses...",
+    "multiExample1": "Compare the clauses in these contracts",
+    "multiExample2": "Identify inconsistencies between documents",
+    "multiExample3": "Analyze differences in payment terms",
+    "documents": "documents"
   },
   "configuracion": {
     "title": "Settings",

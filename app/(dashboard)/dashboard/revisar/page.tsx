@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Target, Lightbulb, Upload } from "lucide-react";
+import { Loader2, Target, Lightbulb, Files } from "lucide-react";
 import { FileUpload } from "@/components/file-upload";
 import { AnalysisModal } from "@/components/analysis-modal";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ const DOC_LANGUAGES = [
 export default function RevisarPage() {
   const t = useTranslations();
   const router = useRouter();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [focusContext, setFocusContext] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
@@ -41,9 +41,14 @@ export default function RevisarPage() {
   const [error, setError] = useState<string | null>(null);
   const [analysisLanguage, setAnalysisLanguage] = useState("es");
 
+  // Combined filename for display
+  const combinedFilename = selectedFiles.length > 1
+    ? `${selectedFiles.length} documentos`
+    : selectedFiles[0]?.name || "Documento";
+
   // Fetch AI suggestions when analysis is complete
   const { suggestions, isLoading: suggestionsLoading } = useAnalysisSuggestions(
-    showModal ? selectedFile?.name || null : null,
+    showModal ? combinedFilename : null,
     showModal ? analysisResult : null,
     { language: analysisLanguage as "es" | "en" | "pt" | "fr" | "de" }
   );
@@ -55,43 +60,79 @@ export default function RevisarPage() {
     }
   };
 
+  // Single file select (for backwards compatibility)
   const handleFileSelect = (file: File) => {
-    setSelectedFile(file);
+    setSelectedFiles([file]);
+    setAnalysisResult(null);
+    setError(null);
+  };
+
+  // Multiple files select
+  const handleFilesSelect = (files: File[]) => {
+    setSelectedFiles(files);
     setAnalysisResult(null);
     setError(null);
   };
 
   const handleAnalyze = async () => {
-    if (!selectedFile) return;
+    if (selectedFiles.length === 0) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // Parse file server-side (supports PDF, DOCX, TXT)
-      const formData = new FormData();
-      formData.append("file", selectedFile);
+      // Parse all files and combine content
+      const parsedContents: { filename: string; content: string }[] = [];
 
-      const parseRes = await fetch("/api/parse-file", {
-        method: "POST",
-        body: formData,
-      });
-      const parseData = await parseRes.json();
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
 
-      if (!parseData.success) {
-        setError(parseData.error || t("revisar.errorReading"));
-        setIsLoading(false);
-        return;
+        const parseRes = await fetch("/api/parse-file", {
+          method: "POST",
+          body: formData,
+        });
+        const parseData = await parseRes.json();
+
+        if (!parseData.success) {
+          setError(`${t("revisar.errorReading")}: ${file.name}`);
+          setIsLoading(false);
+          return;
+        }
+
+        parsedContents.push({
+          filename: file.name,
+          content: parseData.data.text,
+        });
+      }
+
+      // Prepare content for analysis
+      let combinedContent: string;
+      let filenamesForApi: string;
+
+      if (parsedContents.length === 1) {
+        // Single document
+        combinedContent = parsedContents[0].content;
+        filenamesForApi = parsedContents[0].filename;
+      } else {
+        // Multiple documents - format them clearly
+        combinedContent = parsedContents
+          .map((doc, index) => {
+            return `\n${"=".repeat(60)}\nDOCUMENTO ${index + 1}: ${doc.filename}\n${"=".repeat(60)}\n\n${doc.content}`;
+          })
+          .join("\n\n");
+        filenamesForApi = parsedContents.map((d) => d.filename).join(", ");
       }
 
       const response = await fetch("/api/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          content: parseData.data.text,
-          filename: selectedFile.name,
+          content: combinedContent,
+          filename: filenamesForApi,
           focusContext: focusContext.trim() || undefined,
           language: analysisLanguage,
+          documentCount: parsedContents.length,
         }),
       });
 
@@ -115,7 +156,7 @@ export default function RevisarPage() {
   };
 
   const handleNewAnalysis = () => {
-    setSelectedFile(null);
+    setSelectedFiles([]);
     setFocusContext("");
     setAnalysisResult(null);
     setError(null);
@@ -132,7 +173,7 @@ export default function RevisarPage() {
           if (!open) handleNewAnalysis();
         }}
         result={analysisResult}
-        filename={selectedFile?.name || "Documento"}
+        filename={combinedFilename}
         suggestions={suggestions}
         suggestionsLoading={suggestionsLoading}
         onSuggestionClick={handleSuggestionClick}
@@ -159,15 +200,21 @@ export default function RevisarPage() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Upload className="h-5 w-5 text-slate-400" />
+              <Files className="h-5 w-5 text-slate-400" />
               <CardTitle className="text-base">{t("revisar.uploadTitle")}</CardTitle>
             </div>
             <p className="text-xs text-slate-500">
-              {t("revisar.uploadFormats")}
+              {t("revisar.uploadFormats")} • {t("revisar.multipleFiles")}
             </p>
           </CardHeader>
           <CardContent>
-            <FileUpload onFileSelect={handleFileSelect} isLoading={isLoading} />
+            <FileUpload
+              onFileSelect={handleFileSelect}
+              onFilesSelect={handleFilesSelect}
+              isLoading={isLoading}
+              multiple={true}
+              maxFiles={5}
+            />
           </CardContent>
         </Card>
 
@@ -184,7 +231,11 @@ export default function RevisarPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <Textarea
-              placeholder={t("revisar.focusPlaceholder")}
+              placeholder={
+                selectedFiles.length > 1
+                  ? t("revisar.focusPlaceholderMultiple")
+                  : t("revisar.focusPlaceholder")
+              }
               rows={3}
               value={focusContext}
               onChange={(e) => setFocusContext(e.target.value)}
@@ -197,16 +248,44 @@ export default function RevisarPage() {
                 <span>{t("revisar.focusExamples")}</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {[t("revisar.example1"), t("revisar.example2"), t("revisar.example3"), t("revisar.example4")].map((example, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleExampleClick(example)}
-                    className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-blue-700 dark:hover:bg-blue-950/30 dark:hover:text-blue-400"
-                    disabled={isLoading}
-                  >
-                    {example}
-                  </button>
-                ))}
+                {selectedFiles.length > 1 ? (
+                  // Examples for multiple documents
+                  <>
+                    <button
+                      onClick={() => handleExampleClick(t("revisar.multiExample1"))}
+                      className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-blue-700 dark:hover:bg-blue-950/30 dark:hover:text-blue-400"
+                      disabled={isLoading}
+                    >
+                      {t("revisar.multiExample1")}
+                    </button>
+                    <button
+                      onClick={() => handleExampleClick(t("revisar.multiExample2"))}
+                      className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-blue-700 dark:hover:bg-blue-950/30 dark:hover:text-blue-400"
+                      disabled={isLoading}
+                    >
+                      {t("revisar.multiExample2")}
+                    </button>
+                    <button
+                      onClick={() => handleExampleClick(t("revisar.multiExample3"))}
+                      className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-blue-700 dark:hover:bg-blue-950/30 dark:hover:text-blue-400"
+                      disabled={isLoading}
+                    >
+                      {t("revisar.multiExample3")}
+                    </button>
+                  </>
+                ) : (
+                  // Examples for single document
+                  [t("revisar.example1"), t("revisar.example2"), t("revisar.example3"), t("revisar.example4")].map((example, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleExampleClick(example)}
+                      className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-blue-700 dark:hover:bg-blue-950/30 dark:hover:text-blue-400"
+                      disabled={isLoading}
+                    >
+                      {example}
+                    </button>
+                  ))
+                )}
               </div>
             </div>
           </CardContent>
@@ -233,7 +312,7 @@ export default function RevisarPage() {
         </p>
 
         {/* Analyze Button */}
-        {selectedFile && (
+        {selectedFiles.length > 0 && (
           <Button
             onClick={handleAnalyze}
             className="w-full"
@@ -248,7 +327,9 @@ export default function RevisarPage() {
             ) : (
               <>
                 <Target className="mr-2 h-4 w-4" />
-                {t("revisar.analyzeButton")}
+                {selectedFiles.length > 1
+                  ? `${t("revisar.analyzeButton")} (${selectedFiles.length} ${t("revisar.documents")})`
+                  : t("revisar.analyzeButton")}
               </>
             )}
           </Button>
