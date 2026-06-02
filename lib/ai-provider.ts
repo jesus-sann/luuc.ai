@@ -158,7 +158,10 @@ export async function generateText(
 ): Promise<AIResponse> {
   const provider = providerOverride || getProvider();
 
-  console.log(`[AI Provider] Using: ${provider}`);
+  // Log the resolved provider only — do not log user-supplied prompts or content
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[AI Provider] Using: ${provider}`);
+  }
 
   const startTime = Date.now();
 
@@ -179,7 +182,10 @@ export async function generateText(
   }
 
   const elapsed = Date.now() - startTime;
-  console.log(`[AI Provider] ${provider}/${response.model} responded in ${elapsed}ms (${response.tokensUsed || "?"} tokens)`);
+  // Only log timing in non-production to avoid unnecessary log volume
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[AI Provider] ${provider}/${response.model} responded in ${elapsed}ms (${response.tokensUsed || "?"} tokens)`);
+  }
 
   return response;
 }

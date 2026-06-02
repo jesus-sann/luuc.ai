@@ -10,6 +10,7 @@ export const revalidate = 0;
 
 import { NextRequest, NextResponse } from "next/server";
 import { getInvitationByToken } from "@/lib/invitations";
+import { withRateLimit } from "@/lib/api-middleware";
 import type { ApiResponse } from "@/types";
 
 async function handler(request: NextRequest) {
@@ -58,4 +59,6 @@ async function handler(request: NextRequest) {
   }
 }
 
-export const GET = handler;
+// Apply rate limiting — this endpoint is public (no auth required) so it is
+// particularly susceptible to token enumeration attacks.
+export const GET = withRateLimit(handler, "auth");

@@ -46,13 +46,18 @@ export const ALLOWED_FILE_TYPES = ['pdf', 'docx', 'doc', 'txt', 'md'] as const;
 export type AllowedFileType = typeof ALLOWED_FILE_TYPES[number];
 
 // Patrones sospechosos que pueden indicar ataques
+// NOTA: Estos patrones se aplican ÚNICAMENTE a `validateDocumentContent` (variables de plantillas),
+// NO al contenido de análisis ni al cuerpo de documentos legales completos, ya que el lenguaje
+// legal contiene legítimamente términos como "execute", "alter", paréntesis, etc.
 const SUSPICIOUS_PATTERNS = [
-  // SQL Injection patterns
-  /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b)/gi,
-  /(--|\bOR\b.*=.*|;\s*DROP|UNION\s+SELECT)/gi,
+  // SQL Injection patterns — only the dangerous structural forms, not bare keywords.
+  // We do NOT match standalone SQL keywords (SELECT, ALTER, EXECUTE…) because these
+  // are common English/Spanish legal words ("execute this contract", "alter the terms").
+  // We DO match the dangerous injection sequences that never appear in legitimate text.
+  /(--|\bOR\b\s+['"]?\d+['"]?\s*=\s*['"]?\d+['"]?|;\s*DROP\s+TABLE|UNION\s+ALL\s+SELECT|UNION\s+SELECT)/gi,
 
-  // XSS patterns
-  /<script[^>]*>.*?<\/script>/gi,
+  // XSS patterns — unchanged, these never appear in legal documents
+  /<script[^>]*>[\s\S]*?<\/script>/gi,
   /<iframe[^>]*>/gi,
   /javascript:/gi,
   /on\w+\s*=/gi, // onclick=, onerror=, etc.
@@ -60,10 +65,14 @@ const SUSPICIOUS_PATTERNS = [
   // Path traversal
   /\.\.[\/\\]/g,
 
-  // Command injection
-  /[;&|`$()]/g,
+  // Command injection — REMOVED the overly broad [;&|`$()] character class because:
+  //   - Parentheses () are ubiquitous in legal text: "(en adelante, el Contratante)"
+  //   - Semicolons ; appear in lists and Spanish sentences
+  // Instead, only match the shell-specific dangerous sequences:
+  /`[^`]*`/g,           // backtick command substitution: `rm -rf`
+  /\$\([^)]*\)/g,       // $() command substitution: $(cat /etc/passwd)
 
-  // Null bytes
+  // Null bytes — always malicious
   /\0/g,
 ];
 

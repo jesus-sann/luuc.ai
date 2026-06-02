@@ -78,6 +78,14 @@ async function handlePost(
       );
     }
 
+    // SECURITY: Only admins/owners can resend invitations
+    if (user.role !== "admin" && user.role !== "owner") {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "No tienes permisos de administrador" },
+        { status: 403 }
+      );
+    }
+
     const invitationId = params.id;
     if (!invitationId) {
       return NextResponse.json<ApiResponse<null>>(

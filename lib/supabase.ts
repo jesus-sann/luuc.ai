@@ -25,9 +25,25 @@ export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKe
  * PREFER using createClient() from "@/lib/supabase/server" which respects RLS
  * for standard user operations where possible.
  */
+// SECURITY: Do NOT fall back to the anon key — a missing service role key should be
+// a hard failure at startup, not a silent degradation that bypasses RLS incorrectly
+// (operations would appear to succeed but would actually run under anon permissions,
+// silently skipping writes that require service-role access).
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!serviceRoleKey && process.env.NODE_ENV !== "test") {
+  // In production this must be set; log a loud warning so it surfaces in monitoring.
+  console.error(
+    "[SECURITY] SUPABASE_SERVICE_ROLE_KEY is not configured. " +
+    "supabaseAdmin will NOT bypass RLS — admin operations will fail or behave unexpectedly."
+  );
+}
+
 export const supabaseAdmin: SupabaseClient = createClient(
   supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey,
+  // If the key is absent we still create the client (to avoid a build-time crash)
+  // but operations requiring service-role access will fail with a 403, which is
+  // a safer failure mode than silently operating as anon.
+  serviceRoleKey || supabaseAnonKey,
   {
     auth: {
       autoRefreshToken: false,

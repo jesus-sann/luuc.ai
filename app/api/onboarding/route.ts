@@ -10,6 +10,7 @@ export const revalidate = 0;
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { withRateLimit } from "@/lib/api-middleware";
 import type { OnboardingState, OnboardingStep } from "@/types/onboarding";
 import type { ApiResponse } from "@/types";
 
@@ -164,5 +165,6 @@ async function handlePut(request: NextRequest) {
   }
 }
 
-export const GET = handleGet;
-export const PUT = handlePut;
+// Apply rate limiting to prevent state-polling and brute-force abuse
+export const GET = withRateLimit(handleGet, "read");
+export const PUT = withRateLimit(handlePut, "crud");

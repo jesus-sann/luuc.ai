@@ -77,14 +77,43 @@ async function postHandler(request: NextRequest) {
     const body = await request.json();
     const { name, industry, description } = body;
 
-    if (!name || !industry) {
+    if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: "Nombre e industria son requeridos" },
+        { success: false, error: "Nombre es requerido" },
         { status: 400 }
       );
     }
 
-    const company = await createCompany(user.id, name, industry, description);
+    if (!industry || typeof industry !== "string" || industry.trim().length === 0) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Industria es requerida" },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Enforce length limits matching the DB column definitions
+    if (name.trim().length > 255) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Nombre demasiado largo (máximo 255 caracteres)" },
+        { status: 400 }
+      );
+    }
+
+    if (industry.trim().length > 100) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Industria demasiado larga (máximo 100 caracteres)" },
+        { status: 400 }
+      );
+    }
+
+    if (description && (typeof description !== "string" || description.length > 2000)) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Descripción demasiado larga (máximo 2000 caracteres)" },
+        { status: 400 }
+      );
+    }
+
+    const company = await createCompany(user.id, name.trim(), industry.trim(), description?.trim());
 
     if (!company) {
       return NextResponse.json<ApiResponse<null>>(

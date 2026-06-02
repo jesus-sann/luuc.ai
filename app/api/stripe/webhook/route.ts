@@ -12,15 +12,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing signature" }, { status: 400 });
   }
 
+  // SECURITY: Fail fast if the webhook secret is not configured.
+  // An empty string would make constructEvent throw anyway, but an explicit
+  // guard here ensures a clear startup-time error and prevents any future
+  // accidental bypass if the library behaviour changes.
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error("[Stripe Webhook] STRIPE_WEBHOOK_SECRET is not configured");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
+
   let event: Stripe.Event;
   try {
     event = getStripe().webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET || ""
+      webhookSecret
     );
   } catch (err) {
-    console.error("Webhook signature verification failed:", err);
+    // Do not log `err` here — it may contain the raw body or sensitive payload data
+    console.error("[Stripe Webhook] Signature verification failed");
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 

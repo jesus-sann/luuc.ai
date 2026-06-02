@@ -40,8 +40,13 @@ async function getHandler(request: NextRequest) {
     }
 
     const category = request.nextUrl.searchParams.get("category");
-    const search = request.nextUrl.searchParams.get("search");
-    const limit = parseInt(request.nextUrl.searchParams.get("limit") || "50");
+    const rawSearch = request.nextUrl.searchParams.get("search");
+    // SECURITY: Clamp pagination limit and search-query length
+    const rawLimit = parseInt(request.nextUrl.searchParams.get("limit") || "50");
+    const limit = Number.isNaN(rawLimit) ? 50 : Math.min(Math.max(rawLimit, 1), 100);
+
+    // Trim the search query and enforce a sensible max length
+    const search = rawSearch ? rawSearch.trim().substring(0, 200) : null;
 
     let documents: KnowledgeBaseDocument[];
 

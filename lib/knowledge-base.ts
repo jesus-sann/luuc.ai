@@ -346,12 +346,21 @@ export async function searchKnowledgeBase(
   category?: string
 ): Promise<KnowledgeBaseDocument[]> {
   try {
+    // SECURITY: Sanitize the search query before embedding it in a LIKE pattern.
+    // Raw user input with LIKE wildcards (%, _) can be used for:
+    //   1. Wildcard injection — "%" matches everything, forcing a full-table scan (DoS)
+    //   2. Excessive result sets that reveal data across documents
+    const MAX_SEARCH_LENGTH = 200;
+    const sanitizedQuery = searchQuery
+      .substring(0, MAX_SEARCH_LENGTH) // cap length
+      .replace(/[%_\\]/g, "\\$&");     // escape LIKE special characters
+
     // Usar busqueda simple por ilike si textSearch falla
     let query = supabaseAdmin
       .from("knowledge_base")
       .select("*")
       .eq("company_id", companyId)
-      .or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+      .or(`title.ilike.%${sanitizedQuery}%,content.ilike.%${sanitizedQuery}%`);
 
     if (category) {
       query = query.eq("category", category);

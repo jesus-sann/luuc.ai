@@ -22,8 +22,11 @@ async function handler(request: NextRequest) {
       );
     }
 
-    const limit = parseInt(request.nextUrl.searchParams.get("limit") || "50");
-    const offset = parseInt(request.nextUrl.searchParams.get("offset") || "0");
+    // SECURITY: Clamp pagination parameters to prevent DoS via large range queries
+    const rawLimit = parseInt(request.nextUrl.searchParams.get("limit") || "50");
+    const rawOffset = parseInt(request.nextUrl.searchParams.get("offset") || "0");
+    const limit = Number.isNaN(rawLimit) ? 50 : Math.min(Math.max(rawLimit, 1), 100);
+    const offset = Number.isNaN(rawOffset) ? 0 : Math.max(rawOffset, 0);
 
     const { data, error } = await supabaseAdmin
       .from("analyses")

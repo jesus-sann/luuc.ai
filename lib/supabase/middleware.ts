@@ -38,12 +38,14 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Rutas públicas que no requieren autenticación
-  const publicRoutes = ["/", "/login", "/register", "/auth/callback"];
-  const isPublicRoute = publicRoutes.some(
-    (route) =>
-      request.nextUrl.pathname === route ||
-      request.nextUrl.pathname.startsWith("/auth/")
-  );
+  const publicRoutes = ["/", "/login", "/register", "/auth/callback", "/precios", "/terminos", "/privacidad", "/seguridad"];
+  const isPublicRoute =
+    publicRoutes.includes(request.nextUrl.pathname) ||
+    request.nextUrl.pathname.startsWith("/auth/") ||
+    request.nextUrl.pathname.startsWith("/invite/") ||
+    // Forgot-password / reset-password flows are unauthenticated
+    request.nextUrl.pathname === "/forgot-password" ||
+    request.nextUrl.pathname === "/reset-password";
 
   // Si no hay usuario y la ruta requiere autenticación, redirigir a login
   if (!user && !isPublicRoute && request.nextUrl.pathname.startsWith("/dashboard")) {

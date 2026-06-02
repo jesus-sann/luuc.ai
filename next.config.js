@@ -115,6 +115,22 @@ const nextConfig = {
               'magnetometer=()',
             ].join(', '),
           },
+          {
+            // Previene ataques de Spectre mediante isolación de contexto de navegación
+            // Necesario para usar SharedArrayBuffer y para aislamiento cross-origin
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            // Previene que los recursos de esta página sean embebidos en otros orígenes
+            key: 'Cross-Origin-Resource-Policy',
+            value: 'same-origin',
+          },
+          {
+            // Deshabilita DNS prefetching para prevenir fugas de información
+            key: 'X-DNS-Prefetch-Control',
+            value: 'off',
+          },
         ],
       },
     ];

@@ -1,10 +1,29 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+/**
+ * Sanitize the `next` redirect parameter to prevent open-redirect attacks.
+ *
+ * Only relative paths that start with "/" and do not contain protocol separators
+ * ("//", "://") are accepted.  Everything else falls back to "/dashboard".
+ *
+ * Attack prevented:
+ *   ?next=//evil.com      → redirects to evil.com (host-relative URL)
+ *   ?next=https://evil.com → same issue
+ */
+function sanitizeNextParam(next: string | null): string {
+  if (!next) return "/dashboard";
+  // Must start with "/" and must NOT contain a protocol or double-slash
+  if (next.startsWith("/") && !next.startsWith("//") && !next.includes("://")) {
+    return next;
+  }
+  return "/dashboard";
+}
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  const next = sanitizeNextParam(searchParams.get("next"));
   const type = searchParams.get("type");
 
   if (code) {

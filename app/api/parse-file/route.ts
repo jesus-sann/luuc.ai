@@ -33,7 +33,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // SECURITY: Validate by both file extension AND MIME type.
+    // Extension-only validation is bypassable (e.g. rename malware.exe → contract.pdf).
+    const ALLOWED_TYPES: Record<string, string[]> = {
+      ".pdf":  ["application/pdf"],
+      ".docx": [
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/octet-stream", // some browsers send this for .docx
+      ],
+      ".doc":  ["application/msword", "application/octet-stream"],
+      ".txt":  ["text/plain", "application/octet-stream"],
+      ".md":   ["text/markdown", "text/plain", "application/octet-stream"],
+    };
+
     const filename = file.name.toLowerCase();
+    const ext = Object.keys(ALLOWED_TYPES).find((e) => filename.endsWith(e));
+    const mimeType = file.type || "application/octet-stream";
+
+    if (!ext) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Formato no soportado. Usa PDF, DOCX o TXT." },
+        { status: 400 }
+      );
+    }
+
+    // Allow if MIME matches or is the generic octet-stream (browser quirk)
+    const allowedMimes = ALLOWED_TYPES[ext];
+    if (!allowedMimes.includes(mimeType)) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "El tipo MIME del archivo no coincide con su extensión." },
+        { status: 400 }
+      );
+    }
+
     let text = "";
 
     if (filename.endsWith(".txt") || filename.endsWith(".md")) {
