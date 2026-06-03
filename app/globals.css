@@ -57,3 +57,44 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+/* Legal document paper typography */
+.document-body {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: #1a1a1a;
+}
+.document-body .doc-h1 {
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 1.5em 0 0.75em;
+}
+.document-body .doc-h2 {
+  font-size: 13.5px;
+  font-weight: 700;
+  margin: 1.25em 0 0.5em;
+  text-decoration: underline;
+}
+.document-body .doc-p {
+  margin: 0.5em 0;
+  text-align: justify;
+  text-indent: 2em;
+}
+.document-body .doc-ul,
+.document-body .doc-ol {
+  margin: 0.5em 0 0.5em 2em;
+  padding: 0;
+}
+.document-body .doc-li {
+  margin: 0.25em 0;
+  text-align: justify;
+}
+.document-body .doc-hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 1.5em 0;
+}

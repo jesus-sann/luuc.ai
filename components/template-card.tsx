@@ -7,6 +7,12 @@ import {
   FileX,
   Users,
   BookOpen,
+  Globe,
+  FileCheck,
+  Scale,
+  UserCheck,
+  ClipboardList,
+  Briefcase,
   LucideIcon,
 } from "lucide-react";
 import { Template } from "@/types";
@@ -17,6 +23,12 @@ const iconMap: Record<string, LucideIcon> = {
   FileX,
   Users,
   BookOpen,
+  Globe,
+  FileCheck,
+  Scale,
+  UserCheck,
+  ClipboardList,
+  Briefcase,
 };
 
 interface TemplateCardProps {

@@ -448,7 +448,7 @@ const immigrationTemplates: Template[] = [
       },
     ],
     system_prompt:
-      "You are an expert immigration attorney. Generate a professional consular cover letter in the format standard for US visa applications. Use formal legal language. Structure: opening identifying the applicant, visa category and petition basis, summary of supporting evidence, closing request.",
+      "You are an expert US immigration attorney. Generate the document in English. Generate a professional consular cover letter in the format standard for US visa applications. Use formal legal language. Structure: opening identifying the applicant, visa category and petition basis, summary of supporting evidence, closing request.",
     steps: [
       {
         title: "Client Info",
@@ -536,7 +536,7 @@ const immigrationTemplates: Template[] = [
       },
     ],
     system_prompt:
-      "Generate a professional USCIS cover letter for a petition or application filing. Include reference to the form type and receipt number if provided. Summarize the filing basis and enumerate the supporting documents.",
+      "You are an expert US immigration attorney. Generate the document in English. Generate a professional USCIS cover letter for a petition or application filing. Include reference to the form type and receipt number if provided. Summarize the filing basis and enumerate the supporting documents.",
     steps: [
       {
         title: "Client Info",
@@ -618,7 +618,7 @@ const immigrationTemplates: Template[] = [
       },
     ],
     system_prompt:
-      "Generate a first-person sworn personal declaration for immigration proceedings. Use \"I\" throughout. Include a formal declaration header (\"I, [name], declare under penalty of perjury...\"). Tell the story chronologically. End with a formal signature block.",
+      "You are an expert US immigration attorney. Generate the document in English. Generate a first-person sworn personal declaration for immigration proceedings. Use \"I\" throughout. Include a formal declaration header (\"I, [name], declare under penalty of perjury under the laws of the United States of America that the following is true and correct:\"). Tell the story chronologically. End with a formal signature block.",
     steps: [
       {
         title: "Identity",
@@ -706,7 +706,7 @@ const immigrationTemplates: Template[] = [
       },
     ],
     system_prompt:
-      "Generate a formal legal argument brief section for an immigration case. Structure: Issue Presented, Legal Standard (cite the statute), Statement of Facts, Argument (applying law to facts), Conclusion. Use formal legal citation style.",
+      "You are an expert US immigration attorney. Generate the document in English. Generate a formal legal argument brief section for an immigration case. Structure: Issue Presented, Legal Standard (cite the statute), Statement of Facts, Argument (applying law to facts), Conclusion. Use formal legal citation style.",
     steps: [
       {
         title: "Case",
@@ -779,7 +779,7 @@ const immigrationTemplates: Template[] = [
       },
     ],
     system_prompt:
-      "Generate a professional evidence summary / exhibit index for an immigration filing. List each piece of evidence with its exhibit label, document description, and relevance to the petition. Format as a structured table or numbered list.",
+      "You are an expert US immigration attorney. Generate the document in English. Generate a professional evidence summary / exhibit index for an immigration filing. List each piece of evidence with its exhibit label, document description, and relevance to the petition. Format as a structured table or numbered list.",
     steps: [
       {
         title: "Case Info",
@@ -876,7 +876,7 @@ const immigrationTemplates: Template[] = [
       },
     ],
     system_prompt:
-      "Generate a concise professional case summary memo for an immigration matter. Include client identification, case type, current status, key dates, and recommended next steps. This is an internal firm document.",
+      "You are an expert US immigration attorney. Generate the document in English. Generate a concise professional case summary memo for an immigration matter. Include client identification, case type, current status, key dates, and recommended next steps. This is an internal firm document.",
     steps: [
       {
         title: "Client",

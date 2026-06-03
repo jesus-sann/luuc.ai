@@ -6,14 +6,21 @@ import { templates } from "@/lib/templates";
 import { TemplateCard } from "@/components/template-card";
 import { useTranslations } from "@/hooks/use-translations";
 
-// Group templates by category
-const groupedTemplates = templates.reduce((acc, template) => {
-  if (!acc[template.category]) {
-    acc[template.category] = [];
-  }
+// Immigration first, then other categories alphabetically
+const CATEGORY_ORDER = ["Inmigración"];
+
+const rawGrouped = templates.reduce((acc, template) => {
+  if (!acc[template.category]) acc[template.category] = [];
   acc[template.category].push(template);
   return acc;
 }, {} as Record<string, typeof templates>);
+
+const groupedTemplates = Object.fromEntries(
+  [
+    ...CATEGORY_ORDER.filter((c) => rawGrouped[c]).map((c) => [c, rawGrouped[c]]),
+    ...Object.entries(rawGrouped).filter(([c]) => !CATEGORY_ORDER.includes(c)),
+  ]
+);
 
 export default function CrearPage() {
   const t = useTranslations();
@@ -55,17 +62,31 @@ export default function CrearPage() {
       </Link>
 
       {/* Grouped Templates */}
-      <div className="space-y-8">
-        {Object.entries(groupedTemplates).map(([category, categoryTemplates]) => (
-          <div key={category}>
-            <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">{category}</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {categoryTemplates.map((template) => (
-                <TemplateCard key={template.id} template={template} />
-              ))}
+      <div className="space-y-10">
+        {Object.entries(groupedTemplates).map(([category, categoryTemplates]) => {
+          const isImmigration = category === "Inmigración";
+          const displayName = isImmigration ? "Immigration Documents" : category;
+          return (
+            <div key={category}>
+              <div className="mb-4 flex items-center gap-3">
+                {isImmigration && (
+                  <span className="inline-flex items-center rounded-full bg-blue-900 px-2.5 py-0.5 text-xs font-semibold text-blue-200">
+                    AGC Firm
+                  </span>
+                )}
+                <h2 className={`text-sm font-semibold uppercase tracking-wider ${isImmigration ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400"}`}>
+                  {displayName}
+                </h2>
+                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {(categoryTemplates as typeof templates).map((template) => (
+                  <TemplateCard key={template.id} template={template} />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

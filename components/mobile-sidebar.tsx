@@ -14,6 +14,7 @@ import {
   BookOpen,
   Menu,
   Zap,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -75,6 +76,7 @@ export function MobileSidebar() {
     { name: t("sidebar.revisar"), href: "/dashboard/revisar", icon: Search, tourId: "review" },
     { name: t("sidebar.knowledgeBase"), href: "/dashboard/knowledge-base", icon: BookOpen, tourId: "knowledge" },
     { name: t("sidebar.documentos"), href: "/dashboard/documentos", icon: FolderOpen, tourId: null },
+    { name: "USCIS Updates", href: "/dashboard/uscis-updates", icon: Globe, tourId: null },
   ];
 
   const handleSignOut = async () => {

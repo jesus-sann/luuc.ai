@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, Download, FileDown, FileText, Pencil, Eye, Save, Loader2 } from "lucide-react";
+import { Copy, Check, Download, FileDown, Pencil, Eye, Save, Loader2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,18 +19,75 @@ interface DocumentViewerModalProps {
   title: string;
   content: string;
   documentId?: string | null;
-  /** Called when user edits content in the modal */
   onContentChange?: (content: string) => void;
-  /** Called after successful save */
   onSaveSuccess?: (newContent: string) => void;
-  /** AI suggestions for the document */
   suggestions?: AISuggestion[];
-  /** Whether suggestions are loading */
   suggestionsLoading?: boolean;
-  /** Callback when a suggestion is clicked */
   onSuggestionClick?: (suggestion: AISuggestion) => void;
-  /** Locale for translations */
   locale?: "es" | "en";
+}
+
+// Converts plain text with basic markdown to styled HTML for the paper view
+function renderDocumentContent(text: string): string {
+  const lines = text.split("\n");
+  const result: string[] = [];
+  let inList = false;
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+
+    // Heading 1 — lines starting with # or ALL CAPS short lines
+    if (/^#{1}\s+/.test(line)) {
+      if (inList) { result.push("</ul>"); inList = false; }
+      result.push(`<h1 class="doc-h1">${line.replace(/^#+\s+/, "")}</h1>`);
+      continue;
+    }
+    // Heading 2
+    if (/^#{2,3}\s+/.test(line)) {
+      if (inList) { result.push("</ul>"); inList = false; }
+      result.push(`<h2 class="doc-h2">${line.replace(/^#+\s+/, "")}</h2>`);
+      continue;
+    }
+    // Horizontal rule
+    if (/^[-_*]{3,}$/.test(line.trim())) {
+      if (inList) { result.push("</ul>"); inList = false; }
+      result.push(`<hr class="doc-hr" />`);
+      continue;
+    }
+    // Bullet list
+    if (/^[\-\*]\s+/.test(line)) {
+      if (!inList) { result.push("<ul class=\"doc-ul\">"); inList = true; }
+      const content = inlineFormat(line.replace(/^[\-\*]\s+/, ""));
+      result.push(`<li class="doc-li">${content}</li>`);
+      continue;
+    }
+    // Numbered list
+    if (/^\d+\.\s+/.test(line)) {
+      if (!inList) { result.push("<ol class=\"doc-ol\">"); inList = true; }
+      const content = inlineFormat(line.replace(/^\d+\.\s+/, ""));
+      result.push(`<li class="doc-li">${content}</li>`);
+      continue;
+    }
+    // Empty line
+    if (line === "") {
+      if (inList) { result.push("</ul>"); inList = false; }
+      result.push(`<br />`);
+      continue;
+    }
+    // Normal paragraph
+    if (inList) { result.push("</ul>"); inList = false; }
+    result.push(`<p class="doc-p">${inlineFormat(line)}</p>`);
+  }
+  if (inList) result.push("</ul>");
+  return result.join("");
+}
+
+function inlineFormat(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/__(.+?)__/g, "<strong>$1</strong>")
+    .replace(/_(.+?)_/g, "<em>$1</em>");
 }
 
 export function DocumentViewerModal({
@@ -52,7 +109,6 @@ export function DocumentViewerModal({
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "error">("idle");
 
-  // Track if content has been modified
   const hasChanges = editableContent !== content;
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -66,30 +122,23 @@ export function DocumentViewerModal({
 
   const handleSave = async () => {
     if (!documentId || !hasChanges) return;
-
     setIsSaving(true);
     setSaveStatus("idle");
-
     try {
       const response = await fetch(`/api/documents/${documentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: editableContent }),
       });
-
       const data = await response.json();
-
       if (data.success) {
         setSaveStatus("saved");
         onSaveSuccess?.(editableContent);
-        // Reset status after 2 seconds
         setTimeout(() => setSaveStatus("idle"), 2000);
       } else {
         setSaveStatus("error");
-        console.error("Save failed:", data.error);
       }
-    } catch (error) {
-      console.error("Save error:", error);
+    } catch {
       setSaveStatus("error");
     } finally {
       setIsSaving(false);
@@ -116,136 +165,154 @@ export function DocumentViewerModal({
   };
 
   const wordCount = editableContent.split(/\s+/).filter(Boolean).length;
+  const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="flex max-h-[90vh] w-full max-w-3xl flex-col gap-0 overflow-hidden rounded-2xl p-0">
-        {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600">
-              <FileText className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
-                {title}
-              </DialogTitle>
-              <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
-                {wordCount} palabras
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
+      <DialogContent className="flex max-h-[92vh] w-full max-w-4xl flex-col gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl">
 
-        {/* Divider */}
-        <div className="mx-6 border-t border-slate-200 dark:border-slate-700" />
+        {/* Top chrome: dark navy toolbar */}
+        <div className="flex-shrink-0 bg-[#0f2044] px-5 py-3">
+          <DialogHeader className="m-0 p-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+                  <FileText className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <DialogTitle className="text-base font-semibold text-white">
+                    {title}
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-blue-200/70">
+                    {wordCount} words · {today}
+                  </DialogDescription>
+                </div>
+              </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-auto px-6 py-5 space-y-4">
-          {/* Toolbar Banner */}
-          <div className="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50/50 p-3 dark:border-blue-800 dark:bg-blue-950/20">
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setIsEditing(false)}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                  !isEditing
-                    ? "bg-white text-blue-700 shadow-sm dark:bg-slate-800 dark:text-blue-400"
-                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400"
-                }`}
-              >
-                <Eye className="h-3.5 w-3.5" />
-                Vista
-              </button>
-              <button
-                onClick={() => setIsEditing(true)}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                  isEditing
-                    ? "bg-white text-blue-700 shadow-sm dark:bg-slate-800 dark:text-blue-400"
-                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400"
-                }`}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-                Editar
-              </button>
+              {/* Mode toggle */}
+              <div className="flex items-center gap-1 rounded-lg bg-white/10 p-1">
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                    !isEditing ? "bg-white text-[#0f2044]" : "text-white/70 hover:text-white"
+                  }`}
+                >
+                  <Eye className="h-3 w-3" />
+                  View
+                </button>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                    isEditing ? "bg-white text-[#0f2044]" : "text-white/70 hover:text-white"
+                  }`}
+                >
+                  <Pencil className="h-3 w-3" />
+                  Edit
+                </button>
+              </div>
             </div>
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400"
-            >
-              {copied ? (
-                <Check className="h-3.5 w-3.5 text-green-600" />
-              ) : (
-                <Copy className="h-3.5 w-3.5" />
-              )}
-              {copied ? "Copiado" : "Copiar"}
-            </button>
-          </div>
+          </DialogHeader>
+        </div>
 
-          {/* Document Content */}
+        {/* Paper document area */}
+        <div className="flex-1 overflow-auto bg-[#f0f0f0] dark:bg-slate-800 px-6 py-6">
           {isEditing ? (
             <textarea
               value={editableContent}
               onChange={(e) => handleContentEdit(e.target.value)}
-              className="min-h-[350px] w-full resize-none rounded-xl border border-slate-200 bg-white p-4 text-[15px] leading-7 text-slate-600 focus:border-blue-300 focus:outline-none focus:ring-1 focus:ring-blue-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:focus:border-blue-600"
+              className="min-h-[600px] w-full resize-none rounded-none border-0 bg-white p-10 font-mono text-[13.5px] leading-6 text-slate-700 shadow-[0_2px_16px_rgba(0,0,0,0.15)] focus:outline-none dark:bg-slate-900 dark:text-slate-300"
               spellCheck={false}
             />
           ) : (
-            <div className="min-h-[350px] whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-[15px] leading-7 text-slate-600 dark:bg-slate-800/50 dark:text-slate-300">
-              {editableContent}
+            <div className="mx-auto max-w-[680px] rounded-sm bg-white shadow-[0_4px_24px_rgba(0,0,0,0.18)] dark:bg-slate-900">
+              {/* Letterhead */}
+              <div className="border-b-4 border-[#0f2044] px-12 py-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#0f2044]">
+                      AGC Firm
+                    </p>
+                    <p className="text-[9px] uppercase tracking-widest text-slate-400">
+                      Aaron G. Christensen, Attorney at Law PLLC
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[9px] text-slate-400">1811 North Freeway, Suite 200</p>
+                    <p className="text-[9px] text-slate-400">Houston, Texas 77060</p>
+                    <p className="text-[9px] text-slate-400">346-423-2375</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Document body */}
+              <div
+                className="document-body px-12 py-10"
+                dangerouslySetInnerHTML={{ __html: renderDocumentContent(editableContent) }}
+              />
+
+              {/* Footer */}
+              <div className="border-t border-slate-200 px-12 py-4">
+                <p className="text-center text-[8.5px] text-slate-400">
+                  DRAFT — This document was generated with AI assistance and must be reviewed by a licensed attorney before use.
+                </p>
+              </div>
             </div>
           )}
 
           {/* AI Suggestions */}
           {(suggestionsLoading || suggestions.length > 0) && (
-            <SuggestionsPanel
-              suggestions={suggestions}
-              isLoading={suggestionsLoading}
-              onSuggestionClick={onSuggestionClick}
-              locale={locale}
-              defaultExpanded={true}
-            />
+            <div className="mx-auto mt-4 max-w-[680px]">
+              <SuggestionsPanel
+                suggestions={suggestions}
+                isLoading={suggestionsLoading}
+                onSuggestionClick={onSuggestionClick}
+                locale={locale}
+                defaultExpanded={true}
+              />
+            </div>
           )}
         </div>
 
-        {/* Divider */}
-        <div className="mx-6 border-t border-slate-200 dark:border-slate-700" />
-
-        {/* Footer */}
-        <div className="flex-shrink-0 px-6 pt-3">
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 text-center">
-            El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico.
-          </p>
-        </div>
-        <div className="flex flex-shrink-0 items-center gap-3 px-6 py-4">
+        {/* Footer toolbar */}
+        <div className="flex flex-shrink-0 items-center gap-2 border-t border-slate-200 bg-white px-5 py-3 dark:border-slate-700 dark:bg-slate-900">
           {documentId && (
             <>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleDownload("docx")}
-                className="rounded-xl"
+                className="gap-1.5 text-xs"
               >
-                <FileDown className="mr-1.5 h-3.5 w-3.5" />
+                <FileDown className="h-3.5 w-3.5" />
                 DOCX
               </Button>
               <Button
                 size="sm"
                 onClick={() => handleDownload("pdf")}
-                className="rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+                className="gap-1.5 bg-[#0f2044] text-xs text-white hover:bg-[#1a3566]"
               >
-                <Download className="mr-1.5 h-3.5 w-3.5" />
+                <Download className="h-3.5 w-3.5" />
                 PDF
               </Button>
             </>
           )}
+
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+          >
+            {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? "Copied" : "Copy"}
+          </button>
+
           <div className="flex-1" />
-          {/* Save button - shows when editing and has changes */}
+
           {documentId && hasChanges && (
             <Button
               onClick={handleSave}
               disabled={isSaving}
               size="sm"
-              className={`rounded-xl ${
+              className={`gap-1.5 text-xs ${
                 saveStatus === "saved"
                   ? "bg-green-600 hover:bg-green-700"
                   : saveStatus === "error"
@@ -254,34 +321,24 @@ export function DocumentViewerModal({
               } text-white`}
             >
               {isSaving ? (
-                <>
-                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                  {locale === "es" ? "Guardando..." : "Saving..."}
-                </>
+                <><Loader2 className="h-3.5 w-3.5 animate-spin" />Saving…</>
               ) : saveStatus === "saved" ? (
-                <>
-                  <Check className="mr-1.5 h-3.5 w-3.5" />
-                  {locale === "es" ? "Guardado" : "Saved"}
-                </>
+                <><Check className="h-3.5 w-3.5" />Saved</>
               ) : saveStatus === "error" ? (
-                <>
-                  {locale === "es" ? "Error al guardar" : "Save failed"}
-                </>
+                <>Save failed</>
               ) : (
-                <>
-                  <Save className="mr-1.5 h-3.5 w-3.5" />
-                  {locale === "es" ? "Guardar cambios" : "Save changes"}
-                </>
+                <><Save className="h-3.5 w-3.5" />Save changes</>
               )}
             </Button>
           )}
+
           <Button
             onClick={() => handleOpenChange(false)}
-            variant={hasChanges ? "outline" : "default"}
-            className={hasChanges ? "rounded-xl" : "rounded-xl bg-blue-600 text-white hover:bg-blue-700"}
+            variant="outline"
             size="sm"
+            className="text-xs"
           >
-            {locale === "es" ? "Cerrar" : "Close"}
+            Close
           </Button>
         </div>
       </DialogContent>
