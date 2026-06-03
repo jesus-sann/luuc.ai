@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/card";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { useAuth } from "@/hooks/use-auth";
-import { redirect } from "next/navigation";
 
 interface AuditLogUser {
   name: string | null;
@@ -94,6 +93,7 @@ export default function ActividadPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   // Filters
@@ -116,6 +116,10 @@ export default function ActividadPage() {
         if (userFilter && userFilter !== "all") params.set("userId", userFilter);
 
         const res = await fetch(`/api/audit-logs?${params.toString()}`);
+        if (res.status === 403) {
+          setAccessDenied(true);
+          return;
+        }
         const data = await res.json();
 
         if (data.success) {
@@ -186,12 +190,20 @@ export default function ActividadPage() {
     return ACTION_LABELS[action] ?? action;
   };
 
-  // Redirect non-admin users after auth is resolved
-  if (!authLoading && user) {
-    const role = user.user_metadata?.role as string | undefined;
-    if (role !== "admin" && role !== "owner") {
-      redirect("/dashboard");
-    }
+  if (accessDenied) {
+    return (
+      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 text-center">
+        <p className="text-lg font-medium text-slate-900 dark:text-white">
+          Acceso restringido
+        </p>
+        <p className="text-sm text-slate-500">
+          Solo administradores y propietarios pueden ver el registro de actividad.
+        </p>
+        <Link href="/dashboard">
+          <Button variant="outline" size="sm">Volver al inicio</Button>
+        </Link>
+      </div>
+    );
   }
 
   const startRecord = total === 0 ? 0 : (page - 1) * LIMIT + 1;
