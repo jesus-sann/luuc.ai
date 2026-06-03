@@ -179,6 +179,8 @@ export default function EquipoPage() {
     switch (role) {
       case "admin":
         return <Crown className="h-4 w-4 text-yellow-600" />;
+      case "attorney":
+        return <Shield className="h-4 w-4 text-indigo-600" />;
       case "member":
         return <User className="h-4 w-4 text-blue-600" />;
       case "viewer":
@@ -192,6 +194,8 @@ export default function EquipoPage() {
     switch (role) {
       case "admin":
         return "Administrador";
+      case "attorney":
+        return "Abogado";
       case "member":
         return "Miembro";
       case "viewer":
@@ -282,6 +286,9 @@ export default function EquipoPage() {
                   <SelectContent>
                     <SelectItem value="admin">
                       Administrador - Puede invitar y gestionar usuarios
+                    </SelectItem>
+                    <SelectItem value="attorney">
+                      Abogado - Puede crear y editar documentos
                     </SelectItem>
                     <SelectItem value="member">
                       Miembro - Puede crear y editar documentos

@@ -10,7 +10,10 @@
 -- ===========================================
 CREATE TABLE IF NOT EXISTS public.audit_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE SET NULL,
+    -- SECURITY: user_id is nullable so audit records survive user deletion
+    -- (compliance requires retaining audit trails even after account removal).
+    -- ON DELETE SET NULL preserves the log row with the user_id nullified.
+    user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
     company_id UUID REFERENCES public.companies(id) ON DELETE SET NULL,
     action VARCHAR(100) NOT NULL,
     resource_type VARCHAR(100) NOT NULL,

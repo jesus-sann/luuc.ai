@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Loader2,
   Users,
+  Activity,
 } from "lucide-react";
 import {
   Card,
@@ -72,6 +73,13 @@ export default function ConfiguracionPage() {
       href: "/dashboard/configuracion/notificaciones",
       color: "bg-orange-500",
       comingSoon: true,
+    },
+    {
+      title: "Registro de Actividad",
+      description: "Historial de acciones y auditoría del equipo",
+      icon: Activity,
+      href: "/dashboard/configuracion/actividad",
+      color: "bg-slate-500",
     },
     {
       title: t("configuracion.security"),

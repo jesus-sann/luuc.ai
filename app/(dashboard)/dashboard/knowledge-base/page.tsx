@@ -16,7 +16,9 @@ import {
   CheckCircle,
   Loader2,
   AlertCircle,
+  Activity,
 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -252,10 +254,19 @@ export default function KnowledgeBasePage() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-          <BookOpen className="h-8 w-8 text-blue-600" />
-          {t("knowledgeBase.title")}
-        </h1>
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <BookOpen className="h-8 w-8 text-blue-600" />
+            {t("knowledgeBase.title")}
+          </h1>
+          <Link
+            href="/dashboard/knowledge-base/estado"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+          >
+            <Activity className="h-4 w-4" />
+            Estado del conocimiento
+          </Link>
+        </div>
         <p className="text-slate-600 mb-4">
           {t("knowledgeBase.description")}
         </p>

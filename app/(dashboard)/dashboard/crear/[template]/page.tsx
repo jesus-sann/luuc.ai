@@ -20,6 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGenerationSuggestions } from "@/hooks/use-suggestions";
 import type { AISuggestion } from "@/types/suggestions";
+import { DocumentFormWizard } from "@/components/document-form-wizard";
 
 const DOC_LANGUAGES = [
   { value: "es", label: "Español" },
@@ -82,8 +83,7 @@ export default function TemplateFormPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const generateDocument = async (variables: Record<string, string>) => {
     setIsLoading(true);
 
     try {
@@ -92,7 +92,7 @@ export default function TemplateFormPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           template: template.slug,
-          variables: formData,
+          variables,
           title: `${template.name} - ${new Date().toLocaleDateString("es-CO")}`,
           ...(aiProvider !== "auto" && { provider: aiProvider }),
           language: docLanguage,
@@ -115,6 +115,15 @@ export default function TemplateFormPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await generateDocument(formData);
+  };
+
+  const handleWizardSubmit = async (values: Record<string, string>) => {
+    await generateDocument(values);
   };
 
   const handleNewDocument = () => {
@@ -148,110 +157,134 @@ export default function TemplateFormPage() {
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{template.description}</p>
       </div>
 
-      <div className="mx-auto max-w-2xl">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Información del Documento</CardTitle>
-            <p className="text-xs text-slate-500">{template.variables.length} campos requeridos</p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {template.variables.map((variable) => (
-                <div key={variable.name} className="space-y-1.5">
-                  <Label htmlFor={variable.name} className="text-sm">
-                    {variable.label}
-                    {variable.required && <span className="ml-1 text-red-500">*</span>}
-                  </Label>
+      {/* Extra controls: language, AI model, custom instructions — shared by both wizard and flat form */}
+      {(() => {
+        const extraControls = (
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-sm">Idioma del documento</Label>
+              <Select value={docLanguage} onValueChange={setDocLanguage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DOC_LANGUAGES.map((l) => (
+                    <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-                  {variable.type === "text" && (
-                    <Input id={variable.name} placeholder={variable.placeholder} required={variable.required} value={formData[variable.name] || ""} onChange={(e) => handleInputChange(variable.name, e.target.value)} className="text-sm" />
-                  )}
+            <div className="space-y-1.5">
+              <Label className="text-sm">Modelo de IA</Label>
+              <Select value={aiProvider} onValueChange={setAiProvider}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Auto (predeterminado)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AI_PROVIDERS.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>
+                      <span className="font-medium">{p.label}</span>
+                      <span className="ml-2 text-xs text-slate-500">— {p.description}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-                  {variable.type === "textarea" && (
-                    <Textarea id={variable.name} placeholder={variable.placeholder} required={variable.required} rows={3} value={formData[variable.name] || ""} onChange={(e) => handleInputChange(variable.name, e.target.value)} className="text-sm" />
-                  )}
-
-                  {variable.type === "date" && (
-                    <Input id={variable.name} type="date" required={variable.required} value={formData[variable.name] || ""} onChange={(e) => handleInputChange(variable.name, e.target.value)} className="text-sm" />
-                  )}
-
-                  {variable.type === "select" && variable.options && (
-                    <Select value={formData[variable.name] || ""} onValueChange={(value) => handleInputChange(variable.name, value)}>
-                      <SelectTrigger><SelectValue placeholder="Selecciona una opción" /></SelectTrigger>
-                      <SelectContent>
-                        {variable.options.map((option) => (
-                          <SelectItem key={option} value={option}>{option}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              ))}
-
-              <div className="space-y-1.5">
-                <Label className="text-sm">Idioma del documento</Label>
-                <Select value={docLanguage} onValueChange={setDocLanguage}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DOC_LANGUAGES.map((l) => (
-                      <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-sm">Modelo de IA</Label>
-                <Select value={aiProvider} onValueChange={setAiProvider}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Auto (predeterminado)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {AI_PROVIDERS.map((p) => (
-                      <SelectItem key={p.value} value={p.value}>
-                        <span className="font-medium">{p.label}</span>
-                        <span className="ml-2 text-xs text-slate-500">— {p.description}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="userInstructions" className="text-sm">
-                  Instrucciones específicas <span className="text-slate-400 font-normal">(opcional)</span>
-                </Label>
-                <Textarea
-                  id="userInstructions"
-                  placeholder="Ej: Incluir cláusula de confidencialidad estricta, usar lenguaje formal corporativo, enfatizar penalidades por incumplimiento..."
-                  value={userInstructions}
-                  onChange={(e) => setUserInstructions(e.target.value)}
-                  rows={3}
-                  maxLength={2000}
-                  className="text-sm resize-none"
-                />
-                <p className="text-xs text-slate-400">
-                  Guía a la IA con instrucciones adicionales para personalizar el documento según tus necesidades.
-                </p>
-              </div>
-
-              <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
-                El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico.
+            <div className="space-y-1.5">
+              <Label htmlFor="userInstructions" className="text-sm">
+                Instrucciones específicas <span className="text-slate-400 font-normal">(opcional)</span>
+              </Label>
+              <Textarea
+                id="userInstructions"
+                placeholder="Ej: Incluir cláusula de confidencialidad estricta, usar lenguaje formal corporativo, enfatizar penalidades por incumplimiento..."
+                value={userInstructions}
+                onChange={(e) => setUserInstructions(e.target.value)}
+                rows={3}
+                maxLength={2000}
+                className="text-sm resize-none"
+              />
+              <p className="text-xs text-slate-400">
+                Guía a la IA con instrucciones adicionales para personalizar el documento según tus necesidades.
               </p>
+            </div>
+          </div>
+        );
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                {isLoading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generando documento...</>
-                ) : (
-                  "Generar Documento"
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+        // Wizard mode: template has steps defined
+        if (template.steps && template.steps.length > 0) {
+          return (
+            <DocumentFormWizard
+              template={template}
+              onSubmit={handleWizardSubmit}
+              isLoading={isLoading}
+              extraControls={extraControls}
+            />
+          );
+        }
+
+        // Flat form mode: legacy templates without steps
+        return (
+          <div className="mx-auto max-w-2xl">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Información del Documento</CardTitle>
+                <p className="text-xs text-slate-500">{template.variables.length} campos requeridos</p>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {template.variables.map((variable) => (
+                    <div key={variable.name} className="space-y-1.5">
+                      <Label htmlFor={variable.name} className="text-sm">
+                        {variable.label}
+                        {variable.required && <span className="ml-1 text-red-500">*</span>}
+                      </Label>
+
+                      {variable.type === "text" && (
+                        <Input id={variable.name} placeholder={variable.placeholder} required={variable.required} value={formData[variable.name] || ""} onChange={(e) => handleInputChange(variable.name, e.target.value)} className="text-sm" />
+                      )}
+
+                      {variable.type === "textarea" && (
+                        <Textarea id={variable.name} placeholder={variable.placeholder} required={variable.required} rows={3} value={formData[variable.name] || ""} onChange={(e) => handleInputChange(variable.name, e.target.value)} className="text-sm" />
+                      )}
+
+                      {variable.type === "date" && (
+                        <Input id={variable.name} type="date" required={variable.required} value={formData[variable.name] || ""} onChange={(e) => handleInputChange(variable.name, e.target.value)} className="text-sm" />
+                      )}
+
+                      {variable.type === "select" && variable.options && (
+                        <Select value={formData[variable.name] || ""} onValueChange={(value) => handleInputChange(variable.name, value)}>
+                          <SelectTrigger><SelectValue placeholder="Selecciona una opción" /></SelectTrigger>
+                          <SelectContent>
+                            {variable.options.map((option) => (
+                              <SelectItem key={option} value={option}>{option}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  ))}
+
+                  {extraControls}
+
+                  <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
+                    El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico.
+                  </p>
+
+                  <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                    {isLoading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generando documento...</>
+                    ) : (
+                      "Generar Documento"
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      })()}
 
       {/* Document Viewer Modal */}
       {generatedContent && (

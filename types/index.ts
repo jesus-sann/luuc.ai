@@ -9,7 +9,7 @@ export interface User {
   name: string | null;
   company: string | null;
   company_id: string | null;
-  role: "owner" | "admin" | "member" | null;
+  role: "owner" | "admin" | "member" | "attorney" | null;
   usage_count: number;
   plan: "free" | "plus" | "pro" | "enterprise";
   created_at: string;
@@ -35,7 +35,19 @@ export type DocumentType =
   | "carta_terminacion"
   | "acta_reunion"
   | "politica_interna"
-  | "performance_report";
+  | "performance_report"
+  | "cover-letter-consular"
+  | "cover-letter-uscis"
+  | "personal-declaration"
+  | "legal-argument"
+  | "evidence-summary"
+  | "case-summary";
+
+// Paso de wizard de template
+export interface TemplateStep {
+  title: string;
+  fields: string[]; // variable names for this step
+}
 
 // Template de documento
 export interface Template {
@@ -48,6 +60,7 @@ export interface Template {
   outputType: string;
   variables: TemplateVariable[];
   system_prompt: string;
+  steps?: TemplateStep[]; // optional wizard steps
 }
 
 // Variable de template

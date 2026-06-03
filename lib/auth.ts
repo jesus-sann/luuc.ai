@@ -6,7 +6,7 @@ interface DbUser {
   name: string | null;
   company: string | null;
   company_id: string | null;
-  role: "owner" | "admin" | "member" | null;
+  role: "owner" | "admin" | "member" | "attorney" | null;
   avatar_url: string | null;
   plan: "free" | "pro" | "enterprise";
   usage_documents: number;
@@ -22,7 +22,7 @@ export interface AuthUser {
   name: string | null;
   company: string | null;
   company_id: string | null;
-  role: "owner" | "admin" | "member" | null;
+  role: "owner" | "admin" | "member" | "attorney" | null;
   usage_count: number;
   plan: "free" | "pro" | "enterprise";
   created_at: string;

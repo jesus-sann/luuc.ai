@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS public.company_documents (
 -- ===========================================
 ALTER TABLE public.users
 ADD COLUMN IF NOT EXISTS company_id UUID REFERENCES public.companies(id),
-ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'member' CHECK (role IN ('admin', 'member', 'viewer'));
+ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'member' CHECK (role IN ('admin', 'member', 'viewer', 'attorney'));
 
 -- ===========================================
 -- 4. AGREGAR company_id A DOCUMENTS Y ANALYSES

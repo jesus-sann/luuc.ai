@@ -1,6 +1,6 @@
 import { Template } from "@/types";
 
-export const templates: Template[] = [
+const baseTemplates: Template[] = [
   {
     id: "1",
     name: "Acuerdo de Confidencialidad (NDA)",
@@ -360,6 +360,545 @@ export const templates: Template[] = [
       "Genera un reporte de desempeño profesional y estructurado según el tipo seleccionado. Usa un tono objetivo, constructivo y orientado al desarrollo. Incluye secciones claras, métricas cuando sea posible y recomendaciones accionables.",
   },
 ];
+
+// ===========================================
+// Immigration Templates
+// ===========================================
+
+const immigrationTemplates: Template[] = [
+  {
+    id: "7",
+    name: "Cover Letter Consular",
+    slug: "cover-letter-consular",
+    description:
+      "Professional consular cover letter for US visa applications and embassy submissions",
+    icon: "Globe",
+    category: "Inmigración",
+    outputType: "Carta",
+    variables: [
+      {
+        name: "applicant_name",
+        label: "Applicant Full Name",
+        type: "text",
+        required: true,
+        placeholder: "Full legal name of the applicant",
+      },
+      {
+        name: "visa_category",
+        label: "Visa Category",
+        type: "text",
+        required: true,
+        placeholder: "E.g. H-1B, L-1A, O-1, EB-2 NIW",
+      },
+      {
+        name: "consulate_city",
+        label: "Consulate City",
+        type: "text",
+        required: true,
+        placeholder: "E.g. Bogotá, Mexico City, São Paulo",
+      },
+      {
+        name: "consulate_country",
+        label: "Consulate Country",
+        type: "text",
+        required: true,
+        placeholder: "E.g. Colombia, Mexico, Brazil",
+      },
+      {
+        name: "officer_title",
+        label: "Consular Officer Title",
+        type: "text",
+        required: false,
+        placeholder: "E.g. Consular Officer, Visa Section Chief",
+      },
+      {
+        name: "petition_basis",
+        label: "Petition Basis",
+        type: "textarea",
+        required: true,
+        placeholder: "Describe the legal basis for this visa petition...",
+      },
+      {
+        name: "key_facts",
+        label: "Key Facts",
+        type: "textarea",
+        required: true,
+        placeholder: "Key facts about the applicant relevant to the petition...",
+      },
+      {
+        name: "supporting_evidence",
+        label: "Supporting Evidence Summary",
+        type: "textarea",
+        required: true,
+        placeholder: "List the supporting documents and their significance...",
+      },
+      {
+        name: "attorney_name",
+        label: "Attorney Name",
+        type: "text",
+        required: true,
+        placeholder: "Full name of the filing attorney",
+      },
+      {
+        name: "law_firm_name",
+        label: "Law Firm Name",
+        type: "text",
+        required: true,
+        placeholder: "Name of the law firm",
+      },
+    ],
+    system_prompt:
+      "You are an expert immigration attorney. Generate a professional consular cover letter in the format standard for US visa applications. Use formal legal language. Structure: opening identifying the applicant, visa category and petition basis, summary of supporting evidence, closing request.",
+    steps: [
+      {
+        title: "Client Info",
+        fields: ["applicant_name", "visa_category"],
+      },
+      {
+        title: "Consulate Details",
+        fields: ["consulate_city", "consulate_country", "officer_title"],
+      },
+      {
+        title: "Petition Basis",
+        fields: ["petition_basis", "key_facts", "supporting_evidence"],
+      },
+      {
+        title: "Firm Info",
+        fields: ["attorney_name", "law_firm_name"],
+      },
+    ],
+  },
+  {
+    id: "8",
+    name: "Cover Letter USCIS",
+    slug: "cover-letter-uscis",
+    description:
+      "Professional USCIS cover letter for petition and application filings",
+    icon: "FileCheck",
+    category: "Inmigración",
+    outputType: "Carta",
+    variables: [
+      {
+        name: "applicant_name",
+        label: "Applicant Full Name",
+        type: "text",
+        required: true,
+        placeholder: "Full legal name of the applicant",
+      },
+      {
+        name: "a_number",
+        label: "A-Number (Alien Registration Number)",
+        type: "text",
+        required: false,
+        placeholder: "E.g. A-123 456 789",
+      },
+      {
+        name: "form_type",
+        label: "Form Type",
+        type: "text",
+        required: true,
+        placeholder: "E.g. I-130, I-485, I-765, I-140",
+      },
+      {
+        name: "receipt_number",
+        label: "Receipt Number",
+        type: "text",
+        required: false,
+        placeholder: "E.g. EAC-24-123-45678",
+      },
+      {
+        name: "filing_basis",
+        label: "Filing Basis",
+        type: "textarea",
+        required: true,
+        placeholder: "Describe the legal basis for this filing...",
+      },
+      {
+        name: "key_facts",
+        label: "Key Facts",
+        type: "textarea",
+        required: true,
+        placeholder: "Key facts supporting this filing...",
+      },
+      {
+        name: "supporting_documents",
+        label: "Supporting Documents",
+        type: "textarea",
+        required: true,
+        placeholder: "List all supporting documents included in this submission...",
+      },
+      {
+        name: "attorney_name",
+        label: "Attorney Name",
+        type: "text",
+        required: true,
+        placeholder: "Full name of the filing attorney",
+      },
+    ],
+    system_prompt:
+      "Generate a professional USCIS cover letter for a petition or application filing. Include reference to the form type and receipt number if provided. Summarize the filing basis and enumerate the supporting documents.",
+    steps: [
+      {
+        title: "Client Info",
+        fields: ["applicant_name", "a_number"],
+      },
+      {
+        title: "Filing Details",
+        fields: ["form_type", "receipt_number", "filing_basis"],
+      },
+      {
+        title: "Supporting Documents",
+        fields: ["key_facts", "supporting_documents", "attorney_name"],
+      },
+    ],
+  },
+  {
+    id: "9",
+    name: "Personal Declaration",
+    slug: "personal-declaration",
+    description:
+      "First-person sworn personal declaration for immigration proceedings",
+    icon: "UserCheck",
+    category: "Inmigración",
+    outputType: "Declaración",
+    variables: [
+      {
+        name: "declarant_name",
+        label: "Declarant Full Name",
+        type: "text",
+        required: true,
+        placeholder: "Full legal name of the person making the declaration",
+      },
+      {
+        name: "country_of_birth",
+        label: "Country of Birth",
+        type: "text",
+        required: true,
+        placeholder: "E.g. Mexico, Colombia, Brazil",
+      },
+      {
+        name: "date_of_entry",
+        label: "Date of Entry to the US",
+        type: "date",
+        required: true,
+      },
+      {
+        name: "port_of_entry",
+        label: "Port of Entry",
+        type: "text",
+        required: true,
+        placeholder: "E.g. JFK Airport, New York; Laredo, Texas",
+      },
+      {
+        name: "current_immigration_status",
+        label: "Current Immigration Status",
+        type: "text",
+        required: true,
+        placeholder: "E.g. Pending asylum, DACA recipient, H-1B holder",
+      },
+      {
+        name: "chronological_facts",
+        label: "Chronological Facts",
+        type: "textarea",
+        required: true,
+        placeholder: "Tell the story chronologically — entry, key events, current situation...",
+      },
+      {
+        name: "relief_sought",
+        label: "Relief Sought",
+        type: "textarea",
+        required: true,
+        placeholder: "What relief or benefit is the declarant seeking and why...",
+      },
+      {
+        name: "declaration_date",
+        label: "Declaration Date",
+        type: "date",
+        required: true,
+      },
+    ],
+    system_prompt:
+      "Generate a first-person sworn personal declaration for immigration proceedings. Use \"I\" throughout. Include a formal declaration header (\"I, [name], declare under penalty of perjury...\"). Tell the story chronologically. End with a formal signature block.",
+    steps: [
+      {
+        title: "Identity",
+        fields: ["declarant_name", "country_of_birth"],
+      },
+      {
+        title: "Entry & Status",
+        fields: ["date_of_entry", "port_of_entry", "current_immigration_status"],
+      },
+      {
+        title: "Facts & Relief",
+        fields: ["chronological_facts", "relief_sought"],
+      },
+      {
+        title: "Finalize",
+        fields: ["declaration_date"],
+      },
+    ],
+  },
+  {
+    id: "10",
+    name: "Legal Argument Brief",
+    slug: "legal-argument",
+    description:
+      "Formal legal argument brief section for immigration cases",
+    icon: "Scale",
+    category: "Inmigración",
+    outputType: "Brief",
+    variables: [
+      {
+        name: "case_name",
+        label: "Case Name",
+        type: "text",
+        required: true,
+        placeholder: "E.g. Matter of Rodriguez, File No. A-123456789",
+      },
+      {
+        name: "issue_presented",
+        label: "Issue Presented",
+        type: "textarea",
+        required: true,
+        placeholder: "State the precise legal question to be resolved...",
+      },
+      {
+        name: "applicable_statute",
+        label: "Applicable Statute / Regulation",
+        type: "text",
+        required: true,
+        placeholder: "E.g. INA § 101(a)(15)(H)(i)(b), 8 C.F.R. § 214.2(h)",
+      },
+      {
+        name: "legal_standard",
+        label: "Legal Standard",
+        type: "textarea",
+        required: true,
+        placeholder: "State the applicable legal standard and cite relevant case law...",
+      },
+      {
+        name: "facts",
+        label: "Statement of Facts",
+        type: "textarea",
+        required: true,
+        placeholder: "Summarize the relevant facts of the case...",
+      },
+      {
+        name: "argument",
+        label: "Argument",
+        type: "textarea",
+        required: true,
+        placeholder: "Apply law to facts — make the argument...",
+      },
+      {
+        name: "conclusion",
+        label: "Conclusion",
+        type: "textarea",
+        required: true,
+        placeholder: "State the relief requested and why it should be granted...",
+      },
+      {
+        name: "attorney_name",
+        label: "Attorney Name",
+        type: "text",
+        required: true,
+        placeholder: "Full name of the filing attorney",
+      },
+    ],
+    system_prompt:
+      "Generate a formal legal argument brief section for an immigration case. Structure: Issue Presented, Legal Standard (cite the statute), Statement of Facts, Argument (applying law to facts), Conclusion. Use formal legal citation style.",
+    steps: [
+      {
+        title: "Case",
+        fields: ["case_name", "issue_presented"],
+      },
+      {
+        title: "Legal Basis",
+        fields: ["applicable_statute", "legal_standard"],
+      },
+      {
+        title: "Argument",
+        fields: ["facts", "argument"],
+      },
+      {
+        title: "Conclusion",
+        fields: ["conclusion", "attorney_name"],
+      },
+    ],
+  },
+  {
+    id: "11",
+    name: "Evidence Summary",
+    slug: "evidence-summary",
+    description:
+      "Professional evidence summary and exhibit index for immigration filings",
+    icon: "ClipboardList",
+    category: "Inmigración",
+    outputType: "Resumen",
+    variables: [
+      {
+        name: "case_name",
+        label: "Case Name",
+        type: "text",
+        required: true,
+        placeholder: "E.g. Matter of Rodriguez, File No. A-123456789",
+      },
+      {
+        name: "applicant_name",
+        label: "Applicant Full Name",
+        type: "text",
+        required: true,
+        placeholder: "Full legal name of the applicant",
+      },
+      {
+        name: "submission_date",
+        label: "Submission Date",
+        type: "date",
+        required: true,
+      },
+      {
+        name: "exhibit_list",
+        label: "Exhibit List",
+        type: "textarea",
+        required: true,
+        placeholder: "List each exhibit — label, document name, brief description. One per line.\nE.g.\nExhibit A — Passport copy — Identity document\nExhibit B — Employment letter — Establishes qualifying employment",
+      },
+      {
+        name: "relevance_statement",
+        label: "Overall Relevance Statement",
+        type: "textarea",
+        required: true,
+        placeholder: "Explain how the body of evidence supports the petition as a whole...",
+      },
+      {
+        name: "attorney_name",
+        label: "Attorney Name",
+        type: "text",
+        required: true,
+        placeholder: "Full name of the filing attorney",
+      },
+    ],
+    system_prompt:
+      "Generate a professional evidence summary / exhibit index for an immigration filing. List each piece of evidence with its exhibit label, document description, and relevance to the petition. Format as a structured table or numbered list.",
+    steps: [
+      {
+        title: "Case Info",
+        fields: ["case_name", "applicant_name", "submission_date"],
+      },
+      {
+        title: "Evidence",
+        fields: ["exhibit_list"],
+      },
+      {
+        title: "Finalize",
+        fields: ["relevance_statement", "attorney_name"],
+      },
+    ],
+  },
+  {
+    id: "12",
+    name: "Case Summary",
+    slug: "case-summary",
+    description:
+      "Concise internal case summary memo for immigration matters",
+    icon: "FolderOpen",
+    category: "Inmigración",
+    outputType: "Memo",
+    variables: [
+      {
+        name: "client_name",
+        label: "Client Full Name",
+        type: "text",
+        required: true,
+        placeholder: "Full legal name of the client",
+      },
+      {
+        name: "a_number",
+        label: "A-Number",
+        type: "text",
+        required: false,
+        placeholder: "E.g. A-123 456 789",
+      },
+      {
+        name: "visa_type",
+        label: "Visa / Case Type",
+        type: "text",
+        required: true,
+        placeholder: "E.g. H-1B, Marriage-Based Green Card, Asylum",
+      },
+      {
+        name: "case_stage",
+        label: "Current Case Stage",
+        type: "text",
+        required: true,
+        placeholder: "E.g. Petition filed, RFE received, Interview scheduled",
+      },
+      {
+        name: "priority_date",
+        label: "Priority Date",
+        type: "text",
+        required: false,
+        placeholder: "E.g. January 1, 2022 (leave blank if N/A)",
+      },
+      {
+        name: "filing_date",
+        label: "Filing Date",
+        type: "date",
+        required: false,
+      },
+      {
+        name: "key_dates",
+        label: "Key Dates / Deadlines",
+        type: "textarea",
+        required: true,
+        placeholder: "List important dates and deadlines, one per line...",
+      },
+      {
+        name: "current_status",
+        label: "Current Status",
+        type: "textarea",
+        required: true,
+        placeholder: "Describe the current status of the case in detail...",
+      },
+      {
+        name: "next_steps",
+        label: "Recommended Next Steps",
+        type: "textarea",
+        required: true,
+        placeholder: "List the recommended next actions and who is responsible...",
+      },
+      {
+        name: "assigned_attorney",
+        label: "Assigned Attorney",
+        type: "text",
+        required: true,
+        placeholder: "Name of the attorney handling this case",
+      },
+    ],
+    system_prompt:
+      "Generate a concise professional case summary memo for an immigration matter. Include client identification, case type, current status, key dates, and recommended next steps. This is an internal firm document.",
+    steps: [
+      {
+        title: "Client",
+        fields: ["client_name", "a_number", "visa_type"],
+      },
+      {
+        title: "Case Status",
+        fields: ["case_stage", "priority_date", "filing_date"],
+      },
+      {
+        title: "Key Info",
+        fields: ["key_dates", "current_status"],
+      },
+      {
+        title: "Next Steps",
+        fields: ["next_steps", "assigned_attorney"],
+      },
+    ],
+  },
+];
+
+export const templates: Template[] = [...baseTemplates, ...immigrationTemplates];
 
 export function getTemplateBySlug(slug: string): Template | undefined {
   return templates.find((t) => t.slug === slug);

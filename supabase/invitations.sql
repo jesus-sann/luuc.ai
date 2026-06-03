@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS public.invitations (
     email VARCHAR(255) NOT NULL,
     company_id UUID NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,
     invited_by UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-    role VARCHAR(50) DEFAULT 'member' CHECK (role IN ('admin', 'member', 'viewer')),
+    role VARCHAR(50) DEFAULT 'member' CHECK (role IN ('admin', 'member', 'viewer', 'attorney')),
     status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'expired', 'cancelled')),
     token VARCHAR(64) UNIQUE NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),
