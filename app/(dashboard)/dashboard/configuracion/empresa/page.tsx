@@ -17,6 +17,7 @@ import {
   Scale,
   FileText,
   Sparkles,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,6 +115,7 @@ export default function EmpresaPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isNewCompany, setIsNewCompany] = useState(false);
+  const [uploading, setUploading] = useState<"logo" | "letterhead" | null>(null);
 
   const [form, setForm] = useState({
     // Basic
@@ -185,6 +187,26 @@ export default function EmpresaPage() {
         ? prev.practice_areas.filter((a) => a !== area)
         : [...prev.practice_areas, area],
     }));
+  };
+
+  const handleFileUpload = async (file: File, type: "logo" | "letterhead") => {
+    setUploading(type);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("type", type);
+    try {
+      const res = await fetch("/api/company/upload-asset", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.success) {
+        setForm((prev) => ({ ...prev, [`${type}_url`]: data.url }));
+      } else {
+        setError(data.error || "Upload failed");
+      }
+    } catch {
+      setError("Upload failed — check your connection");
+    } finally {
+      setUploading(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -440,22 +462,71 @@ export default function EmpresaPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Logo */}
             <div className="space-y-2">
-              <Label htmlFor="logo_url">Logo URL (optional)</Label>
-              <Input id="logo_url" placeholder="https://yourfirm.com/logo.png" type="url" {...field("logo_url")} />
+              <Label htmlFor="logo_url">Logo (optional)</Label>
+              <div className="flex gap-2">
+                <Input id="logo_url" placeholder="https://yourfirm.com/logo.png" type="url" className="flex-1" {...field("logo_url")} />
+                <label className="flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+                  {uploading === "logo" ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Upload className="h-3.5 w-3.5" />
+                  )}
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    disabled={!!uploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(file, "logo");
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
               <p className="text-xs text-slate-500">Shown in the sidebar and document letterheads instead of firm name text</p>
+              {form.logo_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={form.logo_url} alt="Logo preview" className="h-10 object-contain rounded border border-slate-200 bg-white p-1" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              )}
             </div>
 
+            {/* Letterhead */}
             <div className="space-y-2">
               <Label htmlFor="letterhead_url">Document Letterhead Image (optional)</Label>
-              <Input
-                id="letterhead_url"
-                placeholder="https://yourfirm.com/letterhead.png"
-                type="url"
-                {...field("letterhead_url")}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="letterhead_url"
+                  placeholder="https://yourfirm.com/letterhead.png"
+                  type="url"
+                  className="flex-1"
+                  {...field("letterhead_url")}
+                />
+                <label className="flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+                  {uploading === "letterhead" ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Upload className="h-3.5 w-3.5" />
+                  )}
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    disabled={!!uploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(file, "letterhead");
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
               <p className="text-xs text-slate-500">
-                Upload your firm's official letterhead as an image. When set, it replaces the auto-generated header on every document — ideal for firms with pre-designed letterhead stationery.
+                When set, replaces the auto-generated header on every document — ideal for firms with pre-designed letterhead stationery.
               </p>
               {form.letterhead_url && (
                 <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">

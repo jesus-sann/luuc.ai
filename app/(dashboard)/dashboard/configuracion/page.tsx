@@ -124,45 +124,10 @@ export default function ConfiguracionPage() {
         </p>
       </div>
 
-      {/* Status de empresa */}
-      {!loading && (
-        <Card className={company ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30" : "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/30"}>
-          <CardContent className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-3">
-              <div className={`rounded-full p-2 ${company ? "bg-green-100" : "bg-yellow-100"}`}>
-                <Building2 className={`h-5 w-5 ${company ? "text-green-600" : "text-yellow-600"}`} />
-              </div>
-              <div>
-                <p className={`font-medium ${company ? "text-green-800" : "text-yellow-800"}`}>
-                  {company ? `${t("configuracion.company")}: ${company.name}` : t("configuracion.companyNotConfigured")}
-                </p>
-                <p className={`text-sm ${company ? "text-green-600" : "text-yellow-600"}`}>
-                  {company
-                    ? t("configuracion.companyConfigured")
-                    : t("configuracion.companyNeeded")}
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/dashboard/configuracion/empresa"
-              className={`rounded-lg px-4 py-2 text-sm font-medium ${
-                company
-                  ? "bg-green-600 text-white hover:bg-green-700"
-                  : "bg-yellow-600 text-white hover:bg-yellow-700"
-              }`}
-            >
-              {company ? t("configuracion.viewCompany") : t("configuracion.configureCompany")}
-            </Link>
-          </CardContent>
-        </Card>
-      )}
-
       {loading && (
-        <Card>
-          <CardContent className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-          </CardContent>
-        </Card>
+        <div className="flex items-center justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+        </div>
       )}
 
       {/* Secciones de configuración */}
