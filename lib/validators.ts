@@ -51,10 +51,14 @@ export type AllowedFileType = typeof ALLOWED_FILE_TYPES[number];
 // legal contiene legítimamente términos como "execute", "alter", paréntesis, etc.
 const SUSPICIOUS_PATTERNS = [
   // SQL Injection patterns — only the dangerous structural forms, not bare keywords.
-  // We do NOT match standalone SQL keywords (SELECT, ALTER, EXECUTE…) because these
+  // We do NOT match standalone SQL keywords (ALTER, EXECUTE…) because these
   // are common English/Spanish legal words ("execute this contract", "alter the terms").
   // We DO match the dangerous injection sequences that never appear in legitimate text.
   /(--|\bOR\b\s+['"]?\d+['"]?\s*=\s*['"]?\d+['"]?|;\s*DROP\s+TABLE|UNION\s+ALL\s+SELECT|UNION\s+SELECT)/gi,
+  // SELECT * FROM / SELECT col FROM table — the asterisk and table-reference structure
+  // are unambiguous SQL and never appear in legitimate legal document content.
+  /\bSELECT\s+\*\s+FROM\b/gi,
+  /\bSELECT\b\s+\w+(?:\s*,\s*\w+)*\s+\bFROM\b\s+\w+/gi,
 
   // XSS patterns — unchanged, these never appear in legal documents
   /<script[^>]*>[\s\S]*?<\/script>/gi,
