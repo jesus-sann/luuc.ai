@@ -1,12 +1,13 @@
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 export const revalidate = 0;
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getStripe } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase";
+import { withRateLimit } from "@/lib/api-middleware";
 
-export async function POST() {
+async function handler(_request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -14,7 +15,7 @@ export async function POST() {
     }
 
     const { data: profile } = await supabaseAdmin
-      .from("profiles")
+      .from("users")
       .select("stripe_customer_id")
       .eq("id", user.id)
       .single();
@@ -42,3 +43,5 @@ export async function POST() {
     );
   }
 }
+
+export const POST = withRateLimit(handler, "crud");

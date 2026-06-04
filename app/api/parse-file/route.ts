@@ -4,8 +4,9 @@ export const revalidate = 0;
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
+import { withRateLimit } from "@/lib/api-middleware";
 
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -106,3 +107,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const POST = withRateLimit(handler, "crud");

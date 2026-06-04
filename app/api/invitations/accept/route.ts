@@ -86,4 +86,4 @@ async function handler(request: NextRequest) {
   }
 }
 
-export const POST = withRateLimit(handler, "generate");
+export const POST = withRateLimit(handler, "crud");

@@ -6,10 +6,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { generateText } from "@/lib/ai-provider";
+import { withRateLimit } from "@/lib/api-middleware";
 
 const RATE_LIMIT_HOURS = 1;
 
-export async function GET() {
+async function getHandler() {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -42,7 +43,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -151,3 +152,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");
+export const POST = withRateLimit(postHandler, "generate");

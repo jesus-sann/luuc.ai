@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
         if (userId && plan) {
           await supabaseAdmin
-            .from("profiles")
+            .from("users")
             .update({
               plan,
               stripe_customer_id: session.customer as string,
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
         // Find user by stripe_customer_id
         const { data: profile } = await supabaseAdmin
-          .from("profiles")
+          .from("users")
           .select("id")
           .eq("stripe_customer_id", customerId)
           .single();
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
             // Plan is active, keep current plan
           } else if (status === "canceled" || status === "unpaid") {
             await supabaseAdmin
-              .from("profiles")
+              .from("users")
               .update({ plan: "free" })
               .eq("id", profile.id);
           }
@@ -85,14 +85,14 @@ export async function POST(request: NextRequest) {
         const customerId = subscription.customer as string;
 
         const { data: profile } = await supabaseAdmin
-          .from("profiles")
+          .from("users")
           .select("id")
           .eq("stripe_customer_id", customerId)
           .single();
 
         if (profile) {
           await supabaseAdmin
-            .from("profiles")
+            .from("users")
             .update({ plan: "free" })
             .eq("id", profile.id);
         }

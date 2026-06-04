@@ -5,8 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getStripe, PLANS, PlanKey } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase";
+import { withRateLimit } from "@/lib/api-middleware";
 
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user already has a Stripe customer ID
     const { data: profile } = await supabaseAdmin
-      .from("profiles")
+      .from("users")
       .select("stripe_customer_id")
       .eq("id", user.id)
       .single();
@@ -43,15 +44,10 @@ export async function POST(request: NextRequest) {
       });
       stripeCustomerId = customer.id;
 
-      // Save to profiles (ignore error if column doesn't exist yet)
-      try {
-        await supabaseAdmin
-          .from("profiles")
-          .update({ stripe_customer_id: stripeCustomerId })
-          .eq("id", user.id);
-      } catch {
-        // Column may not exist yet
-      }
+      await supabaseAdmin
+        .from("users")
+        .update({ stripe_customer_id: stripeCustomerId })
+        .eq("id", user.id);
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -75,3 +71,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const POST = withRateLimit(handler, "crud");

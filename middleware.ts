@@ -24,11 +24,13 @@ function getClientIp(request: NextRequest): string {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Apply rate limiting to auth routes
-  if (pathname === "/login" || pathname === "/register") {
+  // Apply rate limiting to auth routes — POST only to avoid locking out users
+  // who refresh or navigate back to the login/register page
+  if (request.method === "POST" && (pathname === "/login" || pathname === "/register")) {
     try {
       const ip = getClientIp(request);
-      await authLimiter.check(5, ip);
+      const key = ip !== "unknown" ? ip : `deploy-${process.env.VERCEL_DEPLOYMENT_ID ?? "local"}`;
+      await authLimiter.check(5, key);
     } catch (error) {
       if (error instanceof RateLimitError) {
         return new NextResponse(

@@ -24,6 +24,7 @@ export interface AuthUser {
   company_id: string | null;
   role: "owner" | "admin" | "member" | "attorney" | null;
   usage_count: number;
+  usage_analyses: number;
   plan: "free" | "pro" | "enterprise";
   created_at: string;
 }
@@ -61,6 +62,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       company_id: user.company_id,
       role: user.role,
       usage_count: user.usage_documents || 0,
+      usage_analyses: user.usage_analyses || 0,
       plan: user.plan || "free",
       created_at: user.created_at,
     };
@@ -75,6 +77,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     company_id: null,
     role: null,
     usage_count: 0,
+    usage_analyses: 0,
     plan: "free",
     created_at: authUser.created_at || new Date().toISOString(),
   };

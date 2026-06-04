@@ -5,6 +5,7 @@ export const revalidate = 0;
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { withRateLimit } from "@/lib/api-middleware";
 
 /**
  * GET /api/audit-logs
@@ -18,7 +19,7 @@ import { supabaseAdmin } from "@/lib/supabase";
  *   from    - ISO date string (optional)
  *   to      - ISO date string (optional)
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -115,3 +116,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(getHandler, "read");

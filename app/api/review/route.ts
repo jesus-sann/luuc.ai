@@ -37,7 +37,7 @@ async function handler(request: NextRequest) {
 
     // Verificar límites del plan
     const FREE_LIMIT = parseInt(process.env.FREE_TIER_ANALYSIS_LIMIT || "5");
-    if (user.plan === "free" && user.usage_count >= FREE_LIMIT) {
+    if (user.plan === "free" && user.usage_analyses >= FREE_LIMIT) {
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
