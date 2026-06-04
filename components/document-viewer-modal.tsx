@@ -31,54 +31,59 @@ interface DocumentViewerModalProps {
 function renderDocumentContent(text: string): string {
   const lines = text.split("\n");
   const result: string[] = [];
-  let inList = false;
+  let listType: "ul" | "ol" | null = null;
+
+  const closeList = () => {
+    if (listType) {
+      result.push(listType === "ul" ? "</ul>" : "</ol>");
+      listType = null;
+    }
+  };
 
   for (const raw of lines) {
-    const line = raw.trimEnd();
+    const line = raw.trim(); // trim both ends so AI-indented lines don't break layout
 
-    // Heading 1 — lines starting with # or ALL CAPS short lines
+    // Heading 1
     if (/^#{1}\s+/.test(line)) {
-      if (inList) { result.push("</ul>"); inList = false; }
+      closeList();
       result.push(`<h1 class="doc-h1">${line.replace(/^#+\s+/, "")}</h1>`);
       continue;
     }
     // Heading 2
     if (/^#{2,3}\s+/.test(line)) {
-      if (inList) { result.push("</ul>"); inList = false; }
+      closeList();
       result.push(`<h2 class="doc-h2">${line.replace(/^#+\s+/, "")}</h2>`);
       continue;
     }
     // Horizontal rule
-    if (/^[-_*]{3,}$/.test(line.trim())) {
-      if (inList) { result.push("</ul>"); inList = false; }
+    if (/^[-_*]{3,}$/.test(line)) {
+      closeList();
       result.push(`<hr class="doc-hr" />`);
       continue;
     }
-    // Bullet list
-    if (/^[\-\*]\s+/.test(line)) {
-      if (!inList) { result.push("<ul class=\"doc-ul\">"); inList = true; }
-      const content = inlineFormat(line.replace(/^[\-\*]\s+/, ""));
-      result.push(`<li class="doc-li">${content}</li>`);
+    // Bullet list — switch from ol→ul if needed
+    if (/^[-*]\s+/.test(line)) {
+      if (listType !== "ul") { closeList(); result.push('<ul class="doc-ul">'); listType = "ul"; }
+      result.push(`<li class="doc-li">${inlineFormat(line.replace(/^[-*]\s+/, ""))}</li>`);
       continue;
     }
-    // Numbered list
+    // Numbered list — switch from ul→ol if needed
     if (/^\d+\.\s+/.test(line)) {
-      if (!inList) { result.push("<ol class=\"doc-ol\">"); inList = true; }
-      const content = inlineFormat(line.replace(/^\d+\.\s+/, ""));
-      result.push(`<li class="doc-li">${content}</li>`);
+      if (listType !== "ol") { closeList(); result.push('<ol class="doc-ol">'); listType = "ol"; }
+      result.push(`<li class="doc-li">${inlineFormat(line.replace(/^\d+\.\s+/, ""))}</li>`);
       continue;
     }
     // Empty line
     if (line === "") {
-      if (inList) { result.push("</ul>"); inList = false; }
+      closeList();
       result.push(`<br />`);
       continue;
     }
     // Normal paragraph
-    if (inList) { result.push("</ul>"); inList = false; }
+    closeList();
     result.push(`<p class="doc-p">${inlineFormat(line)}</p>`);
   }
-  if (inList) result.push("</ul>");
+  closeList();
   return result.join("");
 }
 
