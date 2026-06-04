@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslations } from "@/hooks/use-translations";
+import { useState, useEffect } from "react";
 import type { User } from "@supabase/supabase-js";
 
 function TrialSection({ user }: { user: User }) {
@@ -85,10 +86,26 @@ function TrialSection({ user }: { user: User }) {
   );
 }
 
+function useFirmBranding() {
+  const [firm, setFirm] = useState<{ name: string; logo_url: string | null; primary_color: string } | null>(null);
+  useEffect(() => {
+    fetch("/api/company/setup")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.data) {
+          setFirm({ name: d.data.name, logo_url: d.data.logo_url || null, primary_color: d.data.primary_color || "#0f2044" });
+        }
+      })
+      .catch(() => {});
+  }, []);
+  return firm;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const { user, signOut, loading } = useAuth();
   const t = useTranslations();
+  const firm = useFirmBranding();
 
   const navigation = [
     { name: t("sidebar.dashboard"), href: "/dashboard", icon: Home, tourId: null },
@@ -105,14 +122,31 @@ export function Sidebar() {
 
   return (
     <div className="flex h-full w-64 flex-col bg-slate-900 dark:bg-slate-950 dark:border-r dark:border-slate-800">
-      {/* Logo */}
-      <div className="flex h-16 items-center px-6">
+      {/* Logo / Firm branding */}
+      <div className="flex h-16 flex-col justify-center px-4">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-            <span className="text-lg font-bold text-white">L</span>
-          </div>
-          <span className="text-xl font-bold text-white">Luuc.ai</span>
+          {firm?.logo_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={firm.logo_url} alt={firm.name} className="h-7 max-w-[140px] object-contain" />
+          ) : (
+            <>
+              <div
+                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md"
+                style={{ backgroundColor: firm?.primary_color || "#2563eb" }}
+              >
+                <span className="text-sm font-bold text-white">
+                  {firm?.name ? firm.name[0].toUpperCase() : "L"}
+                </span>
+              </div>
+              <span className="truncate text-[15px] font-bold text-white">
+                {firm?.name || "Luuc.ai"}
+              </span>
+            </>
+          )}
         </Link>
+        <p className="mt-0.5 pl-9 text-[9px] font-medium uppercase tracking-widest text-slate-500">
+          Powered by Luuc.ai
+        </p>
       </div>
 
       {/* Navigation */}

@@ -71,16 +71,26 @@ export async function POST(request: NextRequest) {
 
     const systemPrompt =
       "You are an immigration law research assistant specializing in USCIS policy. " +
-      "Return ONLY valid JSON — no markdown, no code fences, no commentary.";
+      "Return ONLY valid JSON — no markdown, no code fences, no commentary. " +
+      "For source_url, use ONLY these verified uscis.gov base URLs (pick the most relevant): " +
+      "https://www.uscis.gov/news/news-releases | " +
+      "https://www.uscis.gov/policy-manual | " +
+      "https://www.uscis.gov/forms/filing-fees | " +
+      "https://www.uscis.gov/forms | " +
+      "https://egov.uscis.gov/processing-times/ | " +
+      "https://www.uscis.gov/working-in-the-united-states | " +
+      "https://www.uscis.gov/green-card | " +
+      "https://www.uscis.gov/humanitarian. " +
+      "Do NOT invent specific news article URLs — use only these stable section URLs.";
 
     const userPrompt =
-      `Today is ${today}. List 8 important and recent USCIS updates, policy changes, fee changes, ` +
-      `form revisions, or processing time alerts that US immigration attorneys should know about ` +
-      `from the past 90 days. For each update provide: ` +
-      `title (concise, under 80 chars), summary (2-3 sentences of practical information), ` +
+      `Today is ${today}. List 8 important and real USCIS updates, policy changes, fee changes, ` +
+      `form revisions, or processing time alerts from the past 90 days that US immigration attorneys ` +
+      `need to know. These must be real, verifiable updates — not hypothetical. ` +
+      `For each update: title (concise, under 80 chars), summary (2-3 sentences of practical info), ` +
       `category (exactly one of: Policy Change / Fee Update / Form Revision / Processing Time / Alert), ` +
       `effective_date (ISO date YYYY-MM-DD if known, null if not), ` +
-      `source_url (uscis.gov URL if applicable, null if not). ` +
+      `source_url (choose from the verified URLs in the system prompt — pick the most relevant section, never null). ` +
       `Respond with a JSON array of 8 objects only.`;
 
     const aiResponse = await generateText(systemPrompt, userPrompt, 2048);
@@ -106,6 +116,17 @@ export async function POST(request: NextRequest) {
     }
 
     const VALID_CATEGORIES = ["Policy Change", "Fee Update", "Form Revision", "Processing Time", "Alert"];
+    const VALID_URL_PREFIXES = [
+      "https://www.uscis.gov/",
+      "https://egov.uscis.gov/",
+      "https://myaccount.uscis.gov/",
+    ];
+    const validateUSCISUrl = (url: string | null): string | null => {
+      if (!url) return "https://www.uscis.gov/news/news-releases";
+      const valid = VALID_URL_PREFIXES.some((p) => url.startsWith(p));
+      return valid ? url : "https://www.uscis.gov/news/news-releases";
+    };
+
     const rows = updates
       .filter((u) => u.title && u.summary)
       .map((u) => ({
@@ -114,7 +135,7 @@ export async function POST(request: NextRequest) {
         summary: String(u.summary).slice(0, 1000),
         category: VALID_CATEGORIES.includes(u.category) ? u.category : "Alert",
         effective_date: u.effective_date || null,
-        source_url: u.source_url || null,
+        source_url: validateUSCISUrl(u.source_url),
         is_pinned: false,
       }));
 

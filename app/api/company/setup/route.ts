@@ -160,13 +160,30 @@ async function putHandler(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, industry, description, document_rules } = body;
+    const {
+      name, industry, description, document_rules,
+      address_line1, address_line2, city, state, zip,
+      phone, website, logo_url, primary_color, tagline,
+      bar_number, practice_areas,
+    } = body;
 
     const updatedCompany = await updateCompany(company.id, {
       name: name || company.name,
       industry: industry || company.industry,
       description: description !== undefined ? description : company.description,
       document_rules: document_rules || company.document_rules,
+      ...(address_line1 !== undefined && { address_line1 }),
+      ...(address_line2 !== undefined && { address_line2 }),
+      ...(city !== undefined && { city }),
+      ...(state !== undefined && { state }),
+      ...(zip !== undefined && { zip }),
+      ...(phone !== undefined && { phone }),
+      ...(website !== undefined && { website }),
+      ...(logo_url !== undefined && { logo_url }),
+      ...(primary_color !== undefined && { primary_color }),
+      ...(tagline !== undefined && { tagline }),
+      ...(bar_number !== undefined && { bar_number }),
+      ...(practice_areas !== undefined && { practice_areas }),
     });
 
     if (!updatedCompany) {

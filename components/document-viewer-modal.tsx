@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, Check, Download, FileDown, Pencil, Eye, Save, Loader2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -90,6 +90,51 @@ function inlineFormat(text: string): string {
     .replace(/_(.+?)_/g, "<em>$1</em>");
 }
 
+interface FirmProfile {
+  name: string;
+  address: string;
+  phone: string;
+  website: string;
+  logo_url: string | null;
+  primary_color: string;
+  tagline: string;
+}
+
+const DEFAULT_PROFILE: FirmProfile = {
+  name: "Your Firm",
+  address: "",
+  phone: "",
+  website: "",
+  logo_url: null,
+  primary_color: "#0f2044",
+  tagline: "",
+};
+
+function useFirmProfile() {
+  const [profile, setProfile] = useState<FirmProfile>(DEFAULT_PROFILE);
+  useEffect(() => {
+    fetch("/api/company/setup")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          const c = data.data;
+          const addressParts = [c.address_line1, c.address_line2, c.city && c.state ? `${c.city}, ${c.state} ${c.zip || ""}`.trim() : (c.city || c.state || "")].filter(Boolean);
+          setProfile({
+            name: c.name || "Your Firm",
+            address: addressParts.join(" · "),
+            phone: c.phone || "",
+            website: c.website || "",
+            logo_url: c.logo_url || null,
+            primary_color: c.primary_color || "#0f2044",
+            tagline: c.tagline || "",
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+  return profile;
+}
+
 export function DocumentViewerModal({
   open,
   onOpenChange,
@@ -108,6 +153,7 @@ export function DocumentViewerModal({
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "error">("idle");
+  const firm = useFirmProfile();
 
   const hasChanges = editableContent !== content;
 
@@ -166,13 +212,14 @@ export function DocumentViewerModal({
 
   const wordCount = editableContent.split(/\s+/).filter(Boolean).length;
   const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  const navColor = firm.primary_color || "#0f2044";
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="flex max-h-[92vh] w-full max-w-4xl flex-col gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl">
 
-        {/* Top chrome: dark navy toolbar */}
-        <div className="flex-shrink-0 bg-[#0f2044] px-5 py-3">
+        {/* Top chrome: firm-colored toolbar */}
+        <div className="flex-shrink-0 px-5 py-3" style={{ backgroundColor: navColor }}>
           <DialogHeader className="m-0 p-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -215,31 +262,38 @@ export function DocumentViewerModal({
         </div>
 
         {/* Paper document area */}
-        <div className="flex-1 overflow-auto bg-[#f0f0f0] dark:bg-slate-800 px-6 py-6">
+        <div className="flex-1 overflow-auto bg-[#e8e8e8] px-6 py-6">
           {isEditing ? (
             <textarea
               value={editableContent}
               onChange={(e) => handleContentEdit(e.target.value)}
-              className="min-h-[600px] w-full resize-none rounded-none border-0 bg-white p-10 font-mono text-[13.5px] leading-6 text-slate-700 shadow-[0_2px_16px_rgba(0,0,0,0.15)] focus:outline-none dark:bg-slate-900 dark:text-slate-300"
+              className="min-h-[600px] w-full resize-none rounded-none border-0 bg-white p-10 font-mono text-[13.5px] leading-6 text-slate-700 shadow-[0_2px_16px_rgba(0,0,0,0.15)] focus:outline-none"
               spellCheck={false}
             />
           ) : (
-            <div className="mx-auto max-w-[680px] rounded-sm bg-white shadow-[0_4px_24px_rgba(0,0,0,0.18)] dark:bg-slate-900">
-              {/* Letterhead */}
-              <div className="border-b-4 border-[#0f2044] px-12 py-6">
-                <div className="flex items-center justify-between">
+            <div className="mx-auto max-w-[680px] rounded-sm bg-white shadow-[0_4px_24px_rgba(0,0,0,0.18)]">
+              {/* Letterhead — dynamic from firm profile */}
+              <div className="px-12 py-6" style={{ borderBottom: `4px solid ${navColor}` }}>
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#0f2044]">
-                      AGC Firm
-                    </p>
-                    <p className="text-[9px] uppercase tracking-widest text-slate-400">
-                      Aaron G. Christensen, Attorney at Law PLLC
-                    </p>
+                    {firm.logo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={firm.logo_url} alt={firm.name} className="mb-1 h-8 object-contain" />
+                    ) : (
+                      <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: navColor }}>
+                        {firm.name}
+                      </p>
+                    )}
+                    {firm.tagline && (
+                      <p className="text-[9px] uppercase tracking-widest text-slate-400">{firm.tagline}</p>
+                    )}
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] text-slate-400">1811 North Freeway, Suite 200</p>
-                    <p className="text-[9px] text-slate-400">Houston, Texas 77060</p>
-                    <p className="text-[9px] text-slate-400">346-423-2375</p>
+                    {firm.address && <p className="text-[9px] text-slate-400">{firm.address}</p>}
+                    {firm.phone && <p className="text-[9px] text-slate-400">{firm.phone}</p>}
+                    {firm.website && (
+                      <p className="text-[9px] text-slate-400">{firm.website.replace(/^https?:\/\//, "")}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -289,7 +343,8 @@ export function DocumentViewerModal({
               <Button
                 size="sm"
                 onClick={() => handleDownload("pdf")}
-                className="gap-1.5 bg-[#0f2044] text-xs text-white hover:bg-[#1a3566]"
+                className="gap-1.5 text-xs text-white"
+                style={{ backgroundColor: navColor }}
               >
                 <Download className="h-3.5 w-3.5" />
                 PDF
