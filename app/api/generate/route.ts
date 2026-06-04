@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 export const revalidate = 0;
+export const maxDuration = 60; // AI generation can take 30-45s; default 10s causes silent 504s
 import { NextRequest, NextResponse } from "next/server";
 import { generateDocumentWithContext, generateDocumentTitle } from "@/lib/claude";
 import { saveDocument, logUsage } from "@/lib/supabase";

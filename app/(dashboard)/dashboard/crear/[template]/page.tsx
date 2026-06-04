@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, FileText } from "lucide-react";
+import { ArrowLeft, Loader2, FileText, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { getTemplateBySlug } from "@/lib/templates";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ export default function TemplateFormPage() {
 
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [generatedDocId, setGeneratedDocId] = useState<string | null>(null);
   const [generatedTitle, setGeneratedTitle] = useState<string>("");
@@ -85,11 +86,16 @@ export default function TemplateFormPage() {
 
   const generateDocument = async (variables: Record<string, string>) => {
     setIsLoading(true);
+    setGenerateError(null);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 55_000);
 
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           template: template.slug,
           variables,
@@ -108,11 +114,16 @@ export default function TemplateFormPage() {
         setGeneratedTitle(data.data.title || template.name);
         setShowModal(true);
       } else {
-        alert("Error generando documento: " + data.error);
+        setGenerateError(data.error || "Error al generar el documento. Intenta de nuevo.");
       }
-    } catch {
-      alert("Error de conexión");
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        setGenerateError("La generación tardó demasiado. Intenta de nuevo o usa un documento más corto.");
+      } else {
+        setGenerateError("Error de conexión. Verifica tu internet e intenta de nuevo.");
+      }
     } finally {
+      clearTimeout(timeout);
       setIsLoading(false);
     }
   };
@@ -156,6 +167,16 @@ export default function TemplateFormPage() {
         </div>
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{template.description}</p>
       </div>
+
+      {generateError && (
+        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Error al generar el documento</p>
+            <p className="mt-0.5 text-red-600 dark:text-red-400">{generateError}</p>
+          </div>
+        </div>
+      )}
 
       {/* Extra controls: language, AI model, custom instructions — shared by both wizard and flat form */}
       {(() => {
