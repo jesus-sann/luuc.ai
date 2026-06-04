@@ -164,7 +164,7 @@ async function putHandler(request: NextRequest) {
       name, industry, description, document_rules,
       address_line1, address_line2, city, state, zip,
       phone, website, logo_url, primary_color, tagline,
-      bar_number, practice_areas,
+      bar_number, practice_areas, letterhead_url,
     } = body;
 
     const updatedCompany = await updateCompany(company.id, {
@@ -184,6 +184,7 @@ async function putHandler(request: NextRequest) {
       ...(tagline !== undefined && { tagline }),
       ...(bar_number !== undefined && { bar_number }),
       ...(practice_areas !== undefined && { practice_areas }),
+      ...(letterhead_url !== undefined && { letterhead_url }),
     });
 
     if (!updatedCompany) {

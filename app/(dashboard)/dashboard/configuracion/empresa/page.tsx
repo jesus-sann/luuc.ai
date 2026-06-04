@@ -61,6 +61,7 @@ interface Company {
   logo_url: string | null;
   primary_color: string | null;
   tagline: string | null;
+  letterhead_url: string | null;
   // Legal
   bar_number: string | null;
   practice_areas: string[] | null;
@@ -131,6 +132,7 @@ export default function EmpresaPage() {
     logo_url: "",
     primary_color: "#0f2044",
     tagline: "",
+    letterhead_url: "",
     // Legal
     bar_number: "",
     practice_areas: [] as string[],
@@ -160,6 +162,7 @@ export default function EmpresaPage() {
             logo_url: c.logo_url || "",
             primary_color: c.primary_color || "#0f2044",
             tagline: c.tagline || "",
+            letterhead_url: c.letterhead_url || "",
             bar_number: c.bar_number || "",
             practice_areas: c.practice_areas || [],
             style: c.document_rules?.style || "formal",
@@ -206,6 +209,7 @@ export default function EmpresaPage() {
         logo_url: form.logo_url || null,
         primary_color: form.primary_color || "#0f2044",
         tagline: form.tagline || null,
+        letterhead_url: form.letterhead_url || null,
         bar_number: form.bar_number || null,
         practice_areas: form.practice_areas.length > 0 ? form.practice_areas : null,
         document_rules: {
@@ -439,8 +443,36 @@ export default function EmpresaPage() {
             <div className="space-y-2">
               <Label htmlFor="logo_url">Logo URL (optional)</Label>
               <Input id="logo_url" placeholder="https://yourfirm.com/logo.png" type="url" {...field("logo_url")} />
-              <p className="text-xs text-slate-500">Hosted image URL — shown in document letterheads instead of firm name text</p>
+              <p className="text-xs text-slate-500">Shown in the sidebar and document letterheads instead of firm name text</p>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="letterhead_url">Document Letterhead Image (optional)</Label>
+              <Input
+                id="letterhead_url"
+                placeholder="https://yourfirm.com/letterhead.png"
+                type="url"
+                {...field("letterhead_url")}
+              />
+              <p className="text-xs text-slate-500">
+                Upload your firm's official letterhead as an image. When set, it replaces the auto-generated header on every document — ideal for firms with pre-designed letterhead stationery.
+              </p>
+              {form.letterhead_url && (
+                <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div className="bg-slate-50 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:bg-slate-800">
+                    Letterhead Preview
+                  </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={form.letterhead_url}
+                    alt="Letterhead preview"
+                    className="max-h-32 w-full object-contain bg-white p-2"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label>Primary Color</Label>
               <div className="flex flex-wrap items-center gap-2">

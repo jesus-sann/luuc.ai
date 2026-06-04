@@ -96,6 +96,7 @@ interface FirmProfile {
   phone: string;
   website: string;
   logo_url: string | null;
+  letterhead_url: string | null;
   primary_color: string;
   tagline: string;
 }
@@ -106,6 +107,7 @@ const DEFAULT_PROFILE: FirmProfile = {
   phone: "",
   website: "",
   logo_url: null,
+  letterhead_url: null,
   primary_color: "#0f2044",
   tagline: "",
 };
@@ -125,6 +127,7 @@ function useFirmProfile() {
             phone: c.phone || "",
             website: c.website || "",
             logo_url: c.logo_url || null,
+            letterhead_url: c.letterhead_url || null,
             primary_color: c.primary_color || "#0f2044",
             tagline: c.tagline || "",
           });
@@ -272,31 +275,43 @@ export function DocumentViewerModal({
             />
           ) : (
             <div className="mx-auto max-w-[680px] rounded-sm bg-white shadow-[0_4px_24px_rgba(0,0,0,0.18)]">
-              {/* Letterhead — dynamic from firm profile */}
-              <div className="px-12 py-6" style={{ borderBottom: `4px solid ${navColor}` }}>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    {firm.logo_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={firm.logo_url} alt={firm.name} className="mb-1 h-8 object-contain" />
-                    ) : (
-                      <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: navColor }}>
-                        {firm.name}
-                      </p>
-                    )}
-                    {firm.tagline && (
-                      <p className="text-[9px] uppercase tracking-widest text-slate-400">{firm.tagline}</p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    {firm.address && <p className="text-[9px] text-slate-400">{firm.address}</p>}
-                    {firm.phone && <p className="text-[9px] text-slate-400">{firm.phone}</p>}
-                    {firm.website && (
-                      <p className="text-[9px] text-slate-400">{firm.website.replace(/^https?:\/\//, "")}</p>
-                    )}
+              {/* Letterhead — custom image if set, otherwise auto-generated from firm profile */}
+              {firm.letterhead_url ? (
+                <div style={{ borderBottom: `4px solid ${navColor}` }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={firm.letterhead_url}
+                    alt={`${firm.name} letterhead`}
+                    className="w-full object-contain"
+                    style={{ maxHeight: "160px" }}
+                  />
+                </div>
+              ) : (
+                <div className="px-12 py-6" style={{ borderBottom: `4px solid ${navColor}` }}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      {firm.logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={firm.logo_url} alt={firm.name} className="mb-1 h-8 object-contain" />
+                      ) : (
+                        <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: navColor }}>
+                          {firm.name}
+                        </p>
+                      )}
+                      {firm.tagline && (
+                        <p className="text-[9px] uppercase tracking-widest text-slate-400">{firm.tagline}</p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      {firm.address && <p className="text-[9px] text-slate-400">{firm.address}</p>}
+                      {firm.phone && <p className="text-[9px] text-slate-400">{firm.phone}</p>}
+                      {firm.website && (
+                        <p className="text-[9px] text-slate-400">{firm.website.replace(/^https?:\/\//, "")}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Document body */}
               <div

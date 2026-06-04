@@ -11,6 +11,7 @@ export interface Company {
   description: string | null;
   document_rules: Record<string, unknown> | null;
   status: "active" | "inactive" | "suspended";
+  letterhead_url: string | null;
   created_at: string;
   updated_at: string;
 }
