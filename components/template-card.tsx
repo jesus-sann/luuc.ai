@@ -13,6 +13,7 @@ import {
   UserCheck,
   ClipboardList,
   Briefcase,
+  Languages,
   LucideIcon,
 } from "lucide-react";
 import { Template } from "@/types";
@@ -29,6 +30,7 @@ const iconMap: Record<string, LucideIcon> = {
   UserCheck,
   ClipboardList,
   Briefcase,
+  Languages,
 };
 
 interface TemplateCardProps {

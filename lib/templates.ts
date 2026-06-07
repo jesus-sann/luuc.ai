@@ -898,7 +898,101 @@ const immigrationTemplates: Template[] = [
   },
 ];
 
-export const templates: Template[] = [...baseTemplates, ...immigrationTemplates];
+const translationTemplates: Template[] = [
+  {
+    id: "14",
+    name: "Certified Translation (Spanish → English)",
+    slug: "certified-translation",
+    description:
+      "Translate affidavits, declarations, and USCIS documents from Spanish to English and receive a complete package: English translation + original + USCIS-compliant certificate of translation",
+    icon: "Languages",
+    category: "Immigration — Translation",
+    outputType: "Translation Package",
+    endpoint: "/api/translate",
+    system_prompt: "",
+    variables: [
+      {
+        name: "document_type",
+        label: "Document Type",
+        type: "select",
+        required: true,
+        options: [
+          "Affidavit / Sworn Statement",
+          "Personal Declaration",
+          "Support Letter / Carta de Apoyo",
+          "Birth Certificate / Acta de Nacimiento",
+          "Marriage Certificate / Acta de Matrimonio",
+          "Divorce Decree / Decreto de Divorcio",
+          "Death Certificate / Acta de Defunción",
+          "Police Records / Antecedentes Penales",
+          "Court Document / Documento Judicial",
+          "Power of Attorney / Poder Notarial",
+          "Medical Records / Expediente Médico",
+          "Other / Otro",
+        ],
+      },
+      {
+        name: "spanish_variant",
+        label: "Spanish Dialect / Region of Origin",
+        type: "select",
+        required: true,
+        options: [
+          "Mexican Spanish",
+          "Colombian Spanish",
+          "Central American Spanish (Guatemala, Honduras, El Salvador, Nicaragua)",
+          "South American Spanish (Peru, Bolivia, Ecuador)",
+          "Southern Cone Spanish (Argentina, Chile, Uruguay)",
+          "Caribbean Spanish (Dominican Republic, Cuba, Puerto Rico)",
+          "General / Standard Spanish",
+        ],
+      },
+      {
+        name: "subject_name",
+        label: "Full Name of Document Subject",
+        type: "text",
+        required: true,
+        placeholder: "e.g. María Elena García Pérez",
+      },
+      {
+        name: "original_text",
+        label: "Original Spanish Text",
+        type: "textarea",
+        required: true,
+        placeholder: "Paste the full Spanish text here...",
+      },
+      {
+        name: "translator_name",
+        label: "Translator / Certifier Name",
+        type: "text",
+        required: true,
+        placeholder: "e.g. Aaron G. Christensen",
+      },
+      {
+        name: "translator_qualifications",
+        label: "Translator Qualifications",
+        type: "text",
+        required: true,
+        placeholder: "e.g. Certified paralegal fluent in Spanish and English with 10+ years immigration experience",
+      },
+    ],
+    steps: [
+      {
+        title: "Document Details",
+        fields: ["document_type", "spanish_variant", "subject_name"],
+      },
+      {
+        title: "Original Text",
+        fields: ["original_text"],
+      },
+      {
+        title: "Translator Information",
+        fields: ["translator_name", "translator_qualifications"],
+      },
+    ],
+  },
+];
+
+export const templates: Template[] = [...baseTemplates, ...immigrationTemplates, ...translationTemplates];
 
 export function getTemplateBySlug(slug: string): Template | undefined {
   return templates.find((t) => t.slug === slug);

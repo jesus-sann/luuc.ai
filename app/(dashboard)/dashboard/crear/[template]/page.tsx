@@ -91,19 +91,26 @@ export default function TemplateFormPage() {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 55_000);
 
-    try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
-        body: JSON.stringify({
+    // Translation templates use a dedicated endpoint and send variables flat
+    const isTranslation = !!template.endpoint;
+    const endpoint = template.endpoint ?? "/api/generate";
+    const requestBody = isTranslation
+      ? variables
+      : {
           template: template.slug,
           variables,
           title: `${template.name} - ${new Date().toLocaleDateString("es-CO")}`,
           ...(aiProvider !== "auto" && { provider: aiProvider }),
           language: docLanguage,
           ...(userInstructions.trim() && { userInstructions: userInstructions.trim() }),
-        }),
+        };
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -172,9 +179,10 @@ export default function TemplateFormPage() {
         </div>
       )}
 
-      {/* Extra controls: language, AI model, custom instructions — shared by both wizard and flat form */}
+      {/* Extra controls: language, AI model, custom instructions — hidden for translation templates */}
       {(() => {
-        const extraControls = (
+        const isTranslation = !!template.endpoint;
+        const extraControls = !isTranslation ? (
           <div className="space-y-4">
             <div className="space-y-1.5">
               <Label className="text-sm">Idioma del documento</Label>
@@ -225,7 +233,7 @@ export default function TemplateFormPage() {
               </p>
             </div>
           </div>
-        );
+        ) : null;
 
         // Wizard mode: template has steps defined
         if (template.steps && template.steps.length > 0) {

@@ -6,8 +6,8 @@ import { templates } from "@/lib/templates";
 import { TemplateCard } from "@/components/template-card";
 import { useTranslations } from "@/hooks/use-translations";
 
-// Immigration first, then other categories alphabetically
-const CATEGORY_ORDER = ["Inmigración"];
+// Immigration first, then translation, then other categories alphabetically
+const CATEGORY_ORDER = ["Inmigración", "Immigration — Translation"];
 
 const rawGrouped = templates.reduce((acc, template) => {
   if (!acc[template.category]) acc[template.category] = [];

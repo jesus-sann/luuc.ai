@@ -41,7 +41,8 @@ export type DocumentType =
   | "personal-declaration"
   | "legal-argument"
   | "evidence-summary"
-  | "case-summary";
+  | "case-summary"
+  | "certified-translation";
 
 // Paso de wizard de template
 export interface TemplateStep {
@@ -61,6 +62,7 @@ export interface Template {
   variables: TemplateVariable[];
   system_prompt: string;
   steps?: TemplateStep[]; // optional wizard steps
+  endpoint?: string; // override API endpoint (e.g. /api/translate for translation templates)
 }
 
 // Variable de template
