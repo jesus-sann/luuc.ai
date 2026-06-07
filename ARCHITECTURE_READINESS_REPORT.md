@@ -11,7 +11,7 @@
 
 Luuc.ai is a legal document automation SaaS built with Next.js 14, TypeScript, Supabase (PostgreSQL), and multi-provider AI (Anthropic Claude, Google Gemini, Groq Llama). It enables law firms and corporate legal teams to generate legal documents from templates, perform custom AI-powered drafting, analyze uploaded contracts for risk assessment, and review multiple documents simultaneously — with multi-tenant company isolation, a knowledge base system, team invitations, firm branding (logo, letterhead, colors), DOCX/PDF export, dark mode, multi-language document generation, AI suggestions, audit logging, and comprehensive infrastructure services.
 
-**Overall Readiness Score: 96/100 — ACTIVE PILOT (CLIENT TESTING IN PROGRESS)**
+**Overall Readiness Score: 97/100 — ACTIVE PILOT (CLIENT TESTING IN PROGRESS)**
 
 The platform is live on Vercel. AGC Immigration Law Firm (`agcfirm.com`) is actively testing the platform as the first early adopter. Several reliability and security hardening sprints were completed since the Feb 18 report.
 
@@ -23,7 +23,7 @@ The platform is live on Vercel. AGC Immigration Law Firm (`agcfirm.com`) is acti
 |----------|-------|---------|------------------|
 | Project Overview | 10/10 | EXCELLENT | — |
 | Code Quality | 9/10 | EXCELLENT | — |
-| Testing | 6/10 | FAIR | +0 (128 tests now, 2 suites) |
+| Testing | 7/10 | GOOD | +1 (174 tests, 5 suites — constants, templates, rate-limit added) |
 | Security | 10/10 | EXCELLENT | +0 (hardening completed) |
 | DevOps/CI/CD | 9/10 | EXCELLENT | — |
 | Documentation | 10/10 | EXCELLENT | — |
@@ -32,7 +32,7 @@ The platform is live on Vercel. AGC Immigration Law Firm (`agcfirm.com`) is acti
 | Scalability | 8/10 | GOOD | — |
 | UX/Frontend | 9/10 | EXCELLENT | -1 (active bugs during pilot) |
 | Internationalization | 8/10 | GOOD | — |
-| **Overall** | **96/100** | **PILOT ACTIVE** | **-3 from Feb 18 (real-world bugs surfaced)** |
+| **Overall** | **97/100** | **PILOT ACTIVE** | **-2 from Feb 18 (real-world bugs surfaced and fixed; P1 gaps resolved)** |
 
 > Score reflects honest assessment after live usage revealed real bugs fixed in this sprint. Feb 18 score of 99 was pre-pilot; real usage surfaces issues that test suites do not.
 
@@ -213,10 +213,10 @@ The platform is live on Vercel. AGC Immigration Law Firm (`agcfirm.com`) is acti
 
 | # | Gap | Priority | Effort | Status |
 |---|-----|----------|--------|--------|
-| 1 | Limited test coverage (128 tests, 2 suites) | MEDIUM | 1 week | ⚠️ Pending — only `validators` and `utils` are covered |
-| 2 | No staging environment | MEDIUM | 1 day | ⚠️ Pending — all changes go directly to production |
-| 3 | `maxDuration` not set on `/api/parse-file` | LOW | 5 min | ⚠️ Pending — file parsing can be slow for large docs |
-| 4 | Stripe env vars empty in Vercel | HIGH | 10 min | ⚠️ User must fill in real keys in Vercel dashboard |
+| 1 | Limited test coverage | MEDIUM | — | ✅ Fixed — 174 tests across 5 suites (`validators`, `utils`, `constants`, `templates`, `rate-limit`) |
+| 2 | No staging environment | MEDIUM | — | ✅ Fixed — `staging` branch created and pushed; see [STAGING.md](./STAGING.md) |
+| 3 | `maxDuration` not set on `/api/parse-file` | LOW | — | ✅ Fixed — `maxDuration = 30` added |
+| 4 | Stripe env vars empty in Vercel | HIGH | 10 min | ⚠️ User action required — enter real Stripe keys in Vercel dashboard |
 
 ### P2 — Fix Before Scale
 
