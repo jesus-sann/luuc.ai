@@ -137,14 +137,8 @@ export default function TemplateFormPage() {
     await generateDocument(values);
   };
 
-  const handleNewDocument = () => {
-    setGeneratedContent(null);
-    setGeneratedDocId(null);
-    setShowModal(false);
-    setFormData({});
-    setAiProvider("auto");
-    setDocLanguage("es");
-    setUserInstructions("");
+  const handleModalClose = () => {
+    router.push("/dashboard/documentos");
   };
 
   return (
@@ -312,8 +306,7 @@ export default function TemplateFormPage() {
         <DocumentViewerModal
           open={showModal}
           onOpenChange={(open) => {
-            setShowModal(open);
-            if (!open) handleNewDocument();
+            if (!open) handleModalClose();
           }}
           title={generatedTitle}
           content={generatedContent}
