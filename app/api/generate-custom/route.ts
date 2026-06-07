@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 export const revalidate = 0;
+export const maxDuration = 60;
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "@/lib/ai-provider";
 import { generateDocumentTitle } from "@/lib/claude";
