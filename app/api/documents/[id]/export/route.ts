@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDocumentById } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { generateDocx, generatePdf } from "@/lib/document-export";
+import { getCompanyByUser } from "@/lib/company";
 import { withRateLimit } from "@/lib/api-middleware";
 
 async function handler(
@@ -47,16 +48,20 @@ async function handler(
     const title = document.title || "Documento";
     const content = document.content || "";
 
+    // Fetch company for letterhead
+    const company = await getCompanyByUser(user.id).catch(() => null);
+    const firmInfo = company as import("@/lib/document-export").FirmInfo | null;
+
     let buffer: Buffer;
     let contentType: string;
     let extension: string;
 
     if (format === "docx") {
-      buffer = await generateDocx(title, content);
+      buffer = await generateDocx(title, content, firmInfo);
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
       extension = "docx";
     } else {
-      buffer = generatePdf(title, content);
+      buffer = await generatePdf(title, content, firmInfo);
       contentType = "application/pdf";
       extension = "pdf";
     }
