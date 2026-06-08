@@ -125,7 +125,7 @@ export async function generateDocx(
   content: string,
   firm?: FirmInfo | null
 ): Promise<Buffer> {
-  const FONT = "Calibri";
+  const FONT = "Times New Roman";
   const SIZE = 24; // half-points = 12pt
 
   // ── Build document header (repeats on every page) ──
@@ -318,7 +318,7 @@ export async function generateDocx(
     ],
     numbering: { config: [] },
     styles: {
-      default: { document: { run: { font: FONT, size: SIZE } } },
+      default: { document: { run: { font: "Times New Roman", size: SIZE } } },
     },
   });
 
@@ -373,7 +373,7 @@ export async function generatePdf(
       doc.line(margin, 10 + lhH + 1, pageW - margin, 10 + lhH + 1);
     } else if (firm?.name) {
       let hy = 14;
-      doc.setFont("helvetica", "bold");
+      doc.setFont("times", "bold");
       doc.setFontSize(12);
       doc.text(firm.name, pageW / 2, hy, { align: "center" });
       hy += 5;
@@ -384,7 +384,7 @@ export async function generatePdf(
         firm.website,
       ].filter(Boolean) as string[];
       if (parts.length) {
-        doc.setFont("helvetica", "normal");
+        doc.setFont("times", "normal");
         doc.setFontSize(8);
         doc.setTextColor(100);
         doc.text(parts.join("  •  "), pageW / 2, hy, { align: "center" });
@@ -419,7 +419,7 @@ export async function generatePdf(
 
   const flushPara = (rightAlign = false) => {
     if (!paraBuffer.trim()) return;
-    doc.setFont("helvetica", "normal");
+    doc.setFont("times", "normal");
     doc.setFontSize(11);
     const lineW = inRE ? contentW - 12 : contentW;
     const xStart = inRE ? margin + 12 : margin;
@@ -463,7 +463,7 @@ export async function generatePdf(
       inRE = false;
       const lvl = (trimmed.match(/^(#{1,3})\s/)![1]).length;
       const text = stripMdHeading(trimmed);
-      doc.setFont("helvetica", "bold");
+      doc.setFont("times", "bold");
       doc.setFontSize(lvl === 1 ? 13 : 11);
       const hw = doc.splitTextToSize(text, contentW);
       checkSpace(hw.length * 6 + 6);
@@ -478,7 +478,7 @@ export async function generatePdf(
       flushPara();
       inRE = false;
       const text = stripMarkdown(trimmed);
-      doc.setFont("helvetica", "bold");
+      doc.setFont("times", "bold");
       doc.setFontSize(11);
       const hw = doc.splitTextToSize(text, contentW);
       checkSpace(hw.length * 6 + 6);
@@ -501,7 +501,7 @@ export async function generatePdf(
       flushPara();
       inRE = false;
       const text = stripMarkdown(trimmed);
-      doc.setFont("helvetica", "bold");
+      doc.setFont("times", "bold");
       doc.setFontSize(11);
       const hw = doc.splitTextToSize(text, contentW - 12);
       checkSpace(hw.length * 6 + 4);
@@ -522,7 +522,7 @@ export async function generatePdf(
   const totalPages = doc.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
-    doc.setFont("helvetica", "normal");
+    doc.setFont("times", "normal");
     doc.setFontSize(9);
     doc.setTextColor(150);
     doc.text(`${i}`, pageW / 2, pageH - 8, { align: "center" });
