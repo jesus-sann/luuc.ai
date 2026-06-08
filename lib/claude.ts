@@ -49,7 +49,8 @@ export async function generateDocumentWithContext(
   companyInstructions: string,
   provider?: AIProvider,
   language?: string,
-  userInstructions?: string
+  userInstructions?: string,
+  caseSummary?: string
 ): Promise<string> {
   const lang = language || "es";
   const langInstructions: Record<string, { locale: string; region: string }> = {
@@ -105,12 +106,23 @@ pero mantén la esencia y calidad de los documentos aprobados.`;
 
   let userPrompt = `TIPO DE DOCUMENTO: ${templateName}
 
-INFORMACIÓN PROPORCIONADA:
+`;
+
+  if (caseSummary && caseSummary.trim()) {
+    userPrompt += `RESUMEN DEL CASO:
+═══════════════════════════════════════════════════════════════════════════════
+${caseSummary.trim()}
+═══════════════════════════════════════════════════════════════════════════════
+
+Con base en el resumen del caso proporcionado, extrae toda la información relevante (partes, fechas, montos, condiciones, etc.) y úsala para generar el documento.`;
+  } else {
+    userPrompt += `INFORMACIÓN PROPORCIONADA:
 ${Object.entries(variables)
+  .filter(([, v]) => v)
   .map(([k, v]) => `- ${k}: ${v}`)
   .join("\n")}`;
+  }
 
-  // Add user-specific instructions if provided
   if (userInstructions && userInstructions.trim()) {
     userPrompt += `
 

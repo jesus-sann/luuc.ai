@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
+import { useState, useCallback } from "react";
+import { ArrowLeft, Loader2, Sparkles, Upload, AlertCircle, CheckCircle2, X } from "lucide-react";
+import { useDropzone } from "react-dropzone";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DocumentViewerModal } from "@/components/document-viewer-modal";
@@ -60,6 +61,48 @@ export default function CreacionPersonalizadaPage() {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // File upload for case summary
+  const [isParsingFile, setIsParsingFile] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string>("");
+  const [parseError, setParseError] = useState<string | null>(null);
+
+  const onDrop = useCallback(async (files: File[]) => {
+    const file = files[0];
+    if (!file) return;
+    setIsParsingFile(true);
+    setParseError(null);
+    setUploadedFileName("");
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await fetch("/api/parse-file", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.success) {
+        setDescripcion(data.data.text.slice(0, 8000));
+        setUploadedFileName(data.data.filename);
+      } else {
+        setParseError(data.error || "Error al procesar el archivo.");
+      }
+    } catch {
+      setParseError("Error de conexión al procesar el archivo.");
+    } finally {
+      setIsParsingFile(false);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "application/pdf": [".pdf"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "application/msword": [".doc"],
+      "text/plain": [".txt"],
+    },
+    maxFiles: 1,
+    disabled: isParsingFile,
+    multiple: false,
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -113,6 +156,8 @@ export default function CreacionPersonalizadaPage() {
     setAiProvider("auto");
     setDocLanguage("es");
     setError(null);
+    setUploadedFileName("");
+    setParseError(null);
   };
 
   return (
@@ -191,20 +236,56 @@ export default function CreacionPersonalizadaPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="descripcion" className="text-sm">
-                  ¿Qué documento necesitas? <span className="text-red-500">*</span>
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="descripcion" className="text-sm">
+                    ¿Qué documento necesitas? <span className="text-red-500">*</span>
+                  </Label>
+                  {/* Upload trigger */}
+                  {!uploadedFileName && (
+                    <div {...getRootProps()} className="cursor-pointer">
+                      <input {...getInputProps()} />
+                      <span className={`inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 transition-colors ${isParsingFile ? "opacity-50 cursor-not-allowed" : ""}`}>
+                        {isParsingFile ? (
+                          <><Loader2 className="h-3 w-3 animate-spin" />Procesando...</>
+                        ) : (
+                          <><Upload className="h-3 w-3" />Importar desde archivo</>
+                        )}
+                      </span>
+                    </div>
+                  )}
+                  {uploadedFileName && (
+                    <span className="inline-flex items-center gap-1 rounded-md border border-green-200 bg-green-50 px-2 py-1 text-xs text-green-700 dark:border-green-800 dark:bg-green-950/20 dark:text-green-400">
+                      <CheckCircle2 className="h-3 w-3" />
+                      {uploadedFileName}
+                      <button
+                        type="button"
+                        onClick={() => { setDescripcion(""); setUploadedFileName(""); }}
+                        className="ml-0.5 hover:text-red-500"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  )}
+                </div>
                 <Textarea
                   id="descripcion"
-                  placeholder="Ej: Necesito un contrato de arrendamiento comercial para un local en Bogotá..."
-                  rows={4}
+                  placeholder="Ej: Necesito un contrato de arrendamiento comercial para un local en Bogotá... o importa un archivo con los detalles del caso."
+                  rows={uploadedFileName ? 6 : 4}
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
                   className="text-sm"
                   required
                 />
+                {parseError && (
+                  <div className="flex items-start gap-1.5 text-xs text-red-600 dark:text-red-400">
+                    <AlertCircle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                    {parseError}
+                  </div>
+                )}
                 <p className="text-xs text-slate-400">
-                  Sé lo más específico posible sobre el propósito y características.
+                  {uploadedFileName
+                    ? "Texto importado del archivo. Puedes editarlo antes de generar."
+                    : "Sé lo más específico posible, o importa un archivo con los detalles del caso."}
                 </p>
               </div>
 

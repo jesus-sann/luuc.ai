@@ -62,6 +62,9 @@ async function handler(request: NextRequest) {
     const userInstructions = typeof body.userInstructions === "string"
       ? body.userInstructions.slice(0, 2000) // Limit to 2000 chars for safety
       : undefined;
+    const caseSummary = typeof body.caseSummary === "string"
+      ? body.caseSummary.slice(0, 20000) // Limit to ~20k chars
+      : undefined;
 
     // Determinar companyId (del request o del usuario)
     let effectiveCompanyId: string | undefined = companyId;
@@ -120,7 +123,8 @@ ${knowledgeContext}
       companyInstructions,
       provider,
       language,
-      userInstructions
+      userInstructions,
+      caseSummary
     );
 
     // Generate AI title from content
