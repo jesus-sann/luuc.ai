@@ -5,7 +5,13 @@
       "Bash(git init:*)",
       "Bash(git add:*)",
       "Bash(gh auth status:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "Bash(npx tsc *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }

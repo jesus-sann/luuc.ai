@@ -16,6 +16,7 @@ export default defineConfig({
       'build',
       'coverage',
       '.vercel',
+      '.claude',
     ],
     coverage: {
       provider: 'v8',
