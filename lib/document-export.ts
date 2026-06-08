@@ -4,10 +4,12 @@ import {
   Paragraph,
   TextRun,
   ImageRun,
+  Header,
+  Footer,
   HeadingLevel,
   AlignmentType,
-  Footer,
   PageNumber,
+  BorderStyle,
 } from "docx";
 import { jsPDF } from "jspdf";
 
@@ -27,7 +29,7 @@ export interface FirmInfo {
   bar_number?: string | null;
 }
 
-/** Fetch an image from a URL and return its bytes + detected MIME type. */
+/** Fetch an image URL and return bytes + MIME type. */
 async function fetchImageBytes(
   url: string
 ): Promise<{ data: ArrayBuffer; mimeType: "image/png" | "image/jpeg" } | null> {
@@ -42,236 +44,281 @@ async function fetchImageBytes(
   }
 }
 
-// ─── Markdown helpers ───────────────────────────────────────────────────────
+// ─── Line classifiers ────────────────────────────────────────────────────────
 
-/** Return 1-3 if the line starts with # / ## / ###, else 0. */
-function mdHeadingLevel(line: string): number {
-  const m = line.match(/^(#{1,3})\s/);
-  return m ? m[1].length : 0;
+/** True if a line looks like a date (e.g. "June __, 2026" / "January 15, 2026"). */
+function isDateLine(line: string): boolean {
+  return /^(January|February|March|April|May|June|July|August|September|October|November|December)\b.{0,20}\d{4}$/.test(line.trim());
 }
 
-/** Strip leading # markers and trailing colons from a heading line. */
+/** True if a line starts with "RE:" or "Re:" — the reference block of a letter. */
+function isRELine(line: string): boolean {
+  return /^RE:/i.test(line.trim());
+}
+
+/**
+ * True if the line is a structural section heading:
+ *  - Markdown # / ## prefix
+ *  - ALL-CAPS text (≥4 alpha chars)
+ *  - Roman-numeral or numbered sections  (I. / II. / 1. / 1.1)
+ *  - Named keywords (CLÁUSULA, ARTÍCULO …)
+ */
+function isHeading(line: string): boolean {
+  const t = line.trim();
+  if (!t) return false;
+  if (/^#{1,3}\s/.test(t)) return true;
+  const letters = t.replace(/[^a-záéíóúñA-ZÁÉÍÓÚÑ]/g, "");
+  if (letters.length >= 4 && letters === letters.toUpperCase()) return true;
+  if (/^(CLÁUSULA|CLAUSULA|ARTÍCULO|ARTICULO|SECCIÓN|SECCION|CAPÍTULO|CAPITULO)\b/i.test(t)) return true;
+  if (/^(I{1,3}V?|VI{0,3}|IX|X{1,3})\.\s/i.test(t) && t.length < 120) return true; // Roman numerals
+  return false;
+}
+
+/** True if a line is a bold sub-heading (A. / B. / C. pattern). */
+function isSubHeading(line: string): boolean {
+  return /^\*\*[A-Z]\.\s/.test(line.trim()) || /^[A-Z]\.\s[A-Z]/.test(line.trim());
+}
+
+/** Strip leading # markers. */
 function stripMdHeading(line: string): string {
-  return line.replace(/^#{1,3}\s*/, "").replace(/:$/, "").trim();
+  return line.replace(/^#{1,3}\s*/, "").trim();
 }
 
-/**
- * Parse a line of text that may contain **bold** and *italic* spans into an
- * array of docx TextRun objects so formatting is preserved in the .docx file.
- */
-function parseInlineMarkdown(
-  text: string,
-  baseSize = 24,
-  baseFont = "Calibri"
-): TextRun[] {
-  const runs: TextRun[] = [];
-  // Match **bold**, *italic*, or plain text segments in order
-  const regex = /\*\*(.+?)\*\*|\*(.+?)\*|([^*]+)/g;
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(text)) !== null) {
-    if (match[1] !== undefined) {
-      runs.push(new TextRun({ text: match[1], bold: true, size: baseSize, font: baseFont }));
-    } else if (match[2] !== undefined) {
-      runs.push(new TextRun({ text: match[2], italics: true, size: baseSize, font: baseFont }));
-    } else if (match[3]) {
-      runs.push(new TextRun({ text: match[3], size: baseSize, font: baseFont }));
-    }
-  }
-  return runs.length ? runs : [new TextRun({ text, size: baseSize, font: baseFont })];
-}
-
-/**
- * Strip ALL markdown syntax from a line, returning plain text.
- * Used by the PDF generator which cannot do inline mixed styles.
- */
+/** Strip ALL markdown syntax → plain text. */
 function stripMarkdown(text: string): string {
   return text
-    .replace(/^#{1,6}\s*/, "")   // headings
-    .replace(/\*\*(.+?)\*\*/g, "$1") // bold
-    .replace(/\*(.+?)\*/g, "$1")     // italic
-    .replace(/__(.+?)__/g, "$1")     // alt bold
-    .replace(/_(.+?)_/g, "$1")       // alt italic
-    .replace(/`(.+?)`/g, "$1")       // inline code
+    .replace(/^#{1,6}\s*/, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/_(.+?)_/g, "$1")
+    .replace(/`(.+?)`/g, "$1")
     .trim();
 }
 
-/** True if a line is a structural heading (markdown or ALL-CAPS or numbered). */
-function isHeading(line: string): boolean {
-  const trimmed = line.trim();
-  if (!trimmed) return false;
-  if (mdHeadingLevel(trimmed) > 0) return true;
-  // ALL CAPS lines (≥4 letters, >60% uppercase)
-  const letters = trimmed.replace(/[^a-záéíóúñA-ZÁÉÍÓÚÑ]/g, "");
-  if (letters.length >= 4 && letters === letters.toUpperCase()) return true;
-  // Named section keywords
-  if (/^(CLÁUSULA|CLAUSULA|ARTÍCULO|ARTICULO|SECCIÓN|SECCION|CAPÍTULO|CAPITULO)\b/i.test(trimmed)) return true;
-  // Short lines ending with a colon
-  if (trimmed.endsWith(":") && trimmed.length < 80) return true;
-  return false;
+// ─── Inline markdown → TextRun[] ────────────────────────────────────────────
+
+function parseInline(
+  text: string,
+  baseSize = 24,
+  font = "Calibri",
+  extraBold = false
+): TextRun[] {
+  const runs: TextRun[] = [];
+  const regex = /\*\*(.+?)\*\*|\*(.+?)\*|([^*]+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = regex.exec(text)) !== null) {
+    if (m[1] !== undefined)
+      runs.push(new TextRun({ text: m[1], bold: true, size: baseSize, font }));
+    else if (m[2] !== undefined)
+      runs.push(new TextRun({ text: m[2], italics: true, size: baseSize, font }));
+    else if (m[3])
+      runs.push(new TextRun({ text: m[3], bold: extraBold, size: baseSize, font }));
+  }
+  return runs.length ? runs : [new TextRun({ text, bold: extraBold, size: baseSize, font })];
 }
 
 // ─── DOCX Generation ────────────────────────────────────────────────────────
 
-export async function generateDocx(title: string, content: string, firm?: FirmInfo | null): Promise<Buffer> {
-  const lines = content.split("\n");
-  const children: Paragraph[] = [];
+export async function generateDocx(
+  title: string,
+  content: string,
+  firm?: FirmInfo | null
+): Promise<Buffer> {
+  const FONT = "Calibri";
+  const SIZE = 24; // half-points = 12pt
 
-  // ── Letterhead / firm header ──
+  // ── Build document header (repeats on every page) ──
+  const headerChildren: Paragraph[] = [];
   const letterheadUrl = firm?.letterhead_url || firm?.logo_url;
+
   if (letterheadUrl) {
     const img = await fetchImageBytes(letterheadUrl);
     if (img) {
-      children.push(
+      headerChildren.push(
         new Paragraph({
           children: [
             new ImageRun({
               data: img.data,
-              transformation: { width: 540, height: 100 },
+              transformation: { width: 600, height: 90 },
               type: img.mimeType === "image/png" ? "png" : "jpg",
             }),
           ],
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 200 },
+          alignment: AlignmentType.LEFT,
+          spacing: { after: 80 },
         })
       );
     }
   } else if (firm?.name) {
-    // Text-based firm header
-    children.push(
+    headerChildren.push(
       new Paragraph({
-        children: [new TextRun({ text: firm.name, bold: true, size: 28, font: "Calibri" })],
+        children: [new TextRun({ text: firm.name, bold: true, size: 28, font: FONT })],
         alignment: AlignmentType.CENTER,
-        spacing: { after: 60 },
+        spacing: { after: 40 },
       })
     );
-    const addressParts = [
+    const parts = [
       firm.address_line1,
-      firm.address_line2,
       [firm.city, firm.state, firm.zip].filter(Boolean).join(", "),
       firm.phone,
       firm.website,
-    ].filter(Boolean);
-    if (addressParts.length) {
-      children.push(
+    ].filter(Boolean) as string[];
+    if (parts.length) {
+      headerChildren.push(
         new Paragraph({
-          children: [new TextRun({ text: addressParts.join("  |  "), size: 18, font: "Calibri", color: "666666" })],
+          children: [new TextRun({ text: parts.join("  •  "), size: 18, font: FONT, color: "666666" })],
           alignment: AlignmentType.CENTER,
-          spacing: { after: 200 },
+          spacing: { after: 60 },
         })
       );
     }
   }
 
-  // Horizontal rule (empty paragraph with border)
-  if (firm?.name || letterheadUrl) {
-    children.push(
+  // Thin rule under header
+  if (headerChildren.length) {
+    headerChildren.push(
       new Paragraph({
-        border: { bottom: { color: "CCCCCC", size: 6, space: 1, style: "single" } },
-        spacing: { after: 240 },
+        border: {
+          bottom: { color: "CCCCCC", size: 4, space: 1, style: BorderStyle.SINGLE },
+        },
+        spacing: { after: 0 },
       })
     );
   }
 
-  // Document title
-  children.push(
-    new Paragraph({
-      children: [new TextRun({ text: title, bold: true, size: 32, font: "Calibri" })],
-      alignment: AlignmentType.CENTER,
-      spacing: { after: 400 },
-    })
-  );
-  children.push(new Paragraph({ spacing: { after: 200 } }));
+  // ── Parse content lines ──
+  const body: Paragraph[] = [];
+  const lines = content.split("\n");
+  let runBuffer: TextRun[] = [];
+  let isRE = false; // inside a RE: block
 
-  // Buffer consecutive body lines into paragraphs so word-wrap works correctly
-  let paragraphRuns: TextRun[] = [];
-
-  const flushParagraph = () => {
-    if (paragraphRuns.length) {
-      children.push(
-        new Paragraph({
-          children: paragraphRuns,
-          spacing: { after: 120, line: 276 },
-          alignment: AlignmentType.JUSTIFIED,
-        })
-      );
-      paragraphRuns = [];
-    }
+  const flushBuffer = (align = AlignmentType.JUSTIFIED) => {
+    if (!runBuffer.length) return;
+    body.push(
+      new Paragraph({
+        children: runBuffer,
+        spacing: { after: 160, line: 276 },
+        alignment: align,
+        ...(isRE && { indent: { left: 720 } }),
+      })
+    );
+    runBuffer = [];
   };
 
   for (const raw of lines) {
     const trimmed = raw.trim();
 
     if (!trimmed) {
-      flushParagraph();
+      flushBuffer();
+      isRE = false;
       continue;
     }
 
-    const mdLevel = mdHeadingLevel(trimmed);
-
-    if (mdLevel > 0) {
-      flushParagraph();
-      const text = stripMdHeading(trimmed);
-      const level = mdLevel === 1 ? HeadingLevel.HEADING_1 : HeadingLevel.HEADING_2;
-      children.push(
+    // Date line → right-aligned, no bold
+    if (isDateLine(trimmed)) {
+      flushBuffer();
+      body.push(
         new Paragraph({
-          children: [new TextRun({ text, bold: true, size: mdLevel === 1 ? 28 : 24, font: "Calibri" })],
-          heading: level,
-          spacing: { before: 240, after: 120 },
+          children: [new TextRun({ text: trimmed, size: SIZE, font: FONT })],
+          alignment: AlignmentType.RIGHT,
+          spacing: { before: 200, after: 200 },
         })
       );
-    } else if (isHeading(trimmed)) {
-      flushParagraph();
-      const text = stripMarkdown(trimmed);
-      children.push(
-        new Paragraph({
-          children: [new TextRun({ text, bold: true, size: 24, font: "Calibri" })],
-          heading: HeadingLevel.HEADING_2,
-          spacing: { before: 240, after: 120 },
-        })
-      );
-    } else {
-      // Body line — parse inline markdown and append to current paragraph buffer.
-      // A new paragraph starts after a blank line (handled above by flushParagraph).
-      const runs = parseInlineMarkdown(trimmed);
-      if (paragraphRuns.length > 0) {
-        // Add a space between lines that were joined
-        paragraphRuns.push(new TextRun({ text: " ", size: 24, font: "Calibri" }));
-      }
-      paragraphRuns.push(...runs);
+      continue;
     }
+
+    // Markdown heading
+    const mdLevel = trimmed.match(/^(#{1,3})\s/) ? trimmed.match(/^(#{1,3})\s/)![1].length : 0;
+    if (mdLevel > 0) {
+      flushBuffer();
+      isRE = false;
+      const text = stripMdHeading(trimmed);
+      body.push(
+        new Paragraph({
+          children: [new TextRun({ text, bold: true, size: mdLevel === 1 ? 28 : SIZE, font: FONT })],
+          heading: mdLevel === 1 ? HeadingLevel.HEADING_1 : HeadingLevel.HEADING_2,
+          spacing: { before: 280, after: 120 },
+        })
+      );
+      continue;
+    }
+
+    // ALL-CAPS / roman numeral section heading
+    if (isHeading(trimmed)) {
+      flushBuffer();
+      isRE = false;
+      body.push(
+        new Paragraph({
+          children: [new TextRun({ text: stripMarkdown(trimmed), bold: true, size: SIZE, font: FONT })],
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 280, after: 120 },
+        })
+      );
+      continue;
+    }
+
+    // RE: block — bold, indented
+    if (isRELine(trimmed)) {
+      flushBuffer();
+      isRE = true;
+      runBuffer = parseInline(trimmed, SIZE, FONT, true);
+      continue;
+    }
+
+    // Sub-heading (A. / B. / C.)
+    if (isSubHeading(trimmed)) {
+      flushBuffer();
+      isRE = false;
+      body.push(
+        new Paragraph({
+          children: parseInline(trimmed, SIZE, FONT),
+          spacing: { before: 200, after: 80 },
+          indent: { left: 360 },
+        })
+      );
+      continue;
+    }
+
+    // Normal body line — accumulate into paragraph buffer
+    if (runBuffer.length > 0) {
+      runBuffer.push(new TextRun({ text: " ", size: SIZE, font: FONT }));
+    }
+    runBuffer.push(...parseInline(trimmed, SIZE, FONT, isRE));
   }
 
-  flushParagraph();
+  flushBuffer();
+
+  // ── Assemble document ──
+  const topMargin = headerChildren.length ? 1800 : 1440; // extra space for header
 
   const doc = new Document({
     sections: [
       {
         properties: {
           page: {
-            margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 },
+            margin: { top: topMargin, bottom: 1440, left: 1440, right: 1440 },
             size: { width: 12240, height: 15840 },
           },
         },
-        children,
+        headers: headerChildren.length
+          ? { default: new Header({ children: headerChildren }) }
+          : undefined,
         footers: {
           default: new Footer({
             children: [
               new Paragraph({
-                children: [
-                  new TextRun({ children: [PageNumber.CURRENT], size: 18, font: "Calibri" }),
-                ],
+                children: [new TextRun({ children: [PageNumber.CURRENT], size: 18, font: FONT })],
                 alignment: AlignmentType.CENTER,
               }),
             ],
           }),
         },
+        children: body,
       },
     ],
     numbering: { config: [] },
     styles: {
-      default: {
-        document: { run: { font: "Calibri", size: 24 } },
-      },
+      default: { document: { run: { font: FONT, size: SIZE } } },
     },
   });
 
@@ -280,129 +327,205 @@ export async function generateDocx(title: string, content: string, firm?: FirmIn
 
 // ─── PDF Generation ──────────────────────────────────────────────────────────
 
-export async function generatePdf(title: string, content: string, firm?: FirmInfo | null): Promise<Buffer> {
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
-  const pageWidth = 210;
-  const pageHeight = 297;
-  const margin = 25;
-  const contentWidth = pageWidth - margin * 2;
-  let y = margin;
+export async function generatePdf(
+  title: string,
+  content: string,
+  firm?: FirmInfo | null
+): Promise<Buffer> {
+  const doc = new jsPDF({ unit: "mm", format: "letter" });
+  const pageW = 215.9;
+  const pageH = 279.4;
+  const margin = 25.4; // 1 inch
+  const contentW = pageW - margin * 2;
 
-  const addPage = () => { doc.addPage(); y = margin; };
-  const checkSpace = (needed: number) => { if (y + needed > pageHeight - margin) addPage(); };
-
-  // ── Letterhead / firm header ──
+  // Pre-fetch letterhead image so we can draw it on every page
   const letterheadUrl = firm?.letterhead_url || firm?.logo_url;
+  let lhImg: { base64: string; fmt: "PNG" | "JPEG"; mimeType: string } | null = null;
+  let lhH = 0; // letterhead height in mm
+
   if (letterheadUrl) {
-    const img = await fetchImageBytes(letterheadUrl);
-    if (img) {
-      const imgData = Buffer.from(img.data).toString("base64");
-      const fmt = img.mimeType === "image/png" ? "PNG" : "JPEG";
-      const imgH = 20; // 20mm tall
-      const imgW = contentWidth;
-      doc.addImage(`data:${img.mimeType};base64,${imgData}`, fmt, margin, y, imgW, imgH);
-      y += imgH + 4;
-      doc.setDrawColor(200);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 6;
+    const raw = await fetchImageBytes(letterheadUrl);
+    if (raw) {
+      lhImg = {
+        base64: Buffer.from(raw.data).toString("base64"),
+        fmt: raw.mimeType === "image/png" ? "PNG" : "JPEG",
+        mimeType: raw.mimeType,
+      };
+      lhH = 22; // 22mm tall image
     }
-  } else if (firm?.name) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.text(firm.name, pageWidth / 2, y, { align: "center" });
-    y += 6;
-    const addressParts = [
-      firm.address_line1,
-      [firm.city, firm.state, firm.zip].filter(Boolean).join(", "),
-      firm.phone,
-      firm.website,
-    ].filter(Boolean);
-    if (addressParts.length) {
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(100);
-      doc.text(addressParts.join("   |   "), pageWidth / 2, y, { align: "center" });
-      doc.setTextColor(0);
-      y += 5;
-    }
-    doc.setDrawColor(200);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 6;
   }
 
-  // Title
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  const titleLines = doc.splitTextToSize(title, contentWidth);
-  checkSpace(titleLines.length * 8);
-  doc.text(titleLines, pageWidth / 2, y, { align: "center" });
-  y += titleLines.length * 8 + 6;
+  const textLhH = !lhImg && firm?.name ? (firm.phone || firm.address_line1 ? 14 : 9) : 0;
+  const headerH = lhImg ? lhH + 4 : textLhH > 0 ? textLhH + 4 : 0; // total header block height
 
-  // Separator
-  doc.setDrawColor(200);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 8;
+  /** Draw the letterhead on whatever the current page is. */
+  const drawHeader = () => {
+    if (lhImg) {
+      doc.addImage(
+        `data:${lhImg.mimeType};base64,${lhImg.base64}`,
+        lhImg.fmt,
+        margin,
+        10,
+        contentW,
+        lhH
+      );
+      doc.setDrawColor(200);
+      doc.line(margin, 10 + lhH + 1, pageW - margin, 10 + lhH + 1);
+    } else if (firm?.name) {
+      let hy = 14;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text(firm.name, pageW / 2, hy, { align: "center" });
+      hy += 5;
+      const parts = [
+        firm.address_line1,
+        [firm.city, firm.state, firm.zip].filter(Boolean).join(", "),
+        firm.phone,
+        firm.website,
+      ].filter(Boolean) as string[];
+      if (parts.length) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(100);
+        doc.text(parts.join("  •  "), pageW / 2, hy, { align: "center" });
+        doc.setTextColor(0);
+        hy += 4;
+      }
+      doc.setDrawColor(200);
+      doc.line(margin, hy, pageW - margin, hy);
+    }
+  };
 
-  // Content
+  // Starting y — below header block
+  let y = margin + headerH;
+
+  const addPage = () => {
+    doc.addPage();
+    drawHeader();
+    y = margin + headerH;
+  };
+
+  const checkSpace = (needed: number) => {
+    if (y + needed > pageH - margin) addPage();
+  };
+
+  // Draw header on page 1
+  drawHeader();
+
+  // ── Render content ──
   const lines = content.split("\n");
-  let paragraphBuffer = "";
+  let paraBuffer = "";
+  let inRE = false;
 
-  const flushParagraph = () => {
-    if (!paragraphBuffer.trim()) return;
+  const flushPara = (rightAlign = false) => {
+    if (!paraBuffer.trim()) return;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    const wrapped = doc.splitTextToSize(paragraphBuffer.trim(), contentWidth);
-    for (const wline of wrapped) {
+    const lineW = inRE ? contentW - 12 : contentW;
+    const xStart = inRE ? margin + 12 : margin;
+    const wrapped = doc.splitTextToSize(paraBuffer.trim(), lineW);
+    for (const wl of wrapped) {
       checkSpace(5);
-      doc.text(wline, margin, y);
+      doc.text(wl, rightAlign ? pageW - margin : xStart, y, {
+        align: rightAlign ? "right" : "left",
+      });
       y += 5;
     }
     y += 3;
-    paragraphBuffer = "";
+    paraBuffer = "";
   };
 
   for (const raw of lines) {
     const trimmed = raw.trim();
 
     if (!trimmed) {
-      flushParagraph();
+      flushPara();
+      inRE = false;
+      y += 1;
+      continue;
+    }
+
+    // Date → right-aligned
+    if (isDateLine(trimmed)) {
+      flushPara();
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      checkSpace(6);
+      y += 4;
+      doc.text(trimmed, pageW - margin, y, { align: "right" });
+      y += 7;
+      continue;
+    }
+
+    // Markdown heading
+    if (/^#{1,3}\s/.test(trimmed)) {
+      flushPara();
+      inRE = false;
+      const lvl = (trimmed.match(/^(#{1,3})\s/)![1]).length;
+      const text = stripMdHeading(trimmed);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(lvl === 1 ? 13 : 11);
+      const hw = doc.splitTextToSize(text, contentW);
+      checkSpace(hw.length * 6 + 6);
+      y += 4;
+      for (const hl of hw) { doc.text(hl, margin, y); y += 6; }
       y += 2;
       continue;
     }
 
-    const mdLevel = mdHeadingLevel(trimmed);
-
-    if (mdLevel > 0 || isHeading(trimmed)) {
-      flushParagraph();
-      const text = mdLevel > 0 ? stripMdHeading(trimmed) : stripMarkdown(trimmed);
-      const fontSize = mdLevel === 1 ? 13 : 11;
+    // ALL-CAPS / roman numeral heading
+    if (isHeading(trimmed)) {
+      flushPara();
+      inRE = false;
+      const text = stripMarkdown(trimmed);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(fontSize);
-      const headingLines = doc.splitTextToSize(text, contentWidth);
-      checkSpace(headingLines.length * 6 + 4);
-      y += 3;
-      for (const hl of headingLines) {
-        doc.text(hl, margin, y);
-        y += 6;
-      }
+      doc.setFontSize(11);
+      const hw = doc.splitTextToSize(text, contentW);
+      checkSpace(hw.length * 6 + 6);
+      y += 4;
+      for (const hl of hw) { doc.text(hl, margin, y); y += 6; }
       y += 2;
-    } else {
-      // Strip markdown and accumulate into paragraph
-      const plain = stripMarkdown(trimmed);
-      paragraphBuffer += (paragraphBuffer ? " " : "") + plain;
+      continue;
     }
+
+    // RE: block
+    if (isRELine(trimmed)) {
+      flushPara();
+      inRE = true;
+      paraBuffer = stripMarkdown(trimmed);
+      continue;
+    }
+
+    // Sub-heading (A. / B. / C.)
+    if (isSubHeading(trimmed)) {
+      flushPara();
+      inRE = false;
+      const text = stripMarkdown(trimmed);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      const hw = doc.splitTextToSize(text, contentW - 12);
+      checkSpace(hw.length * 6 + 4);
+      y += 3;
+      for (const hl of hw) { doc.text(hl, margin + 12, y); y += 6; }
+      y += 2;
+      continue;
+    }
+
+    // Normal body — accumulate
+    const plain = stripMarkdown(trimmed);
+    paraBuffer += (paraBuffer ? " " : "") + plain;
   }
 
-  flushParagraph();
+  flushPara();
 
-  // Page numbers
+  // Page numbers on every page
   const totalPages = doc.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(150);
-    doc.text(`${i} / ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: "center" });
+    doc.text(`${i}`, pageW / 2, pageH - 8, { align: "center" });
     doc.setTextColor(0);
   }
 
