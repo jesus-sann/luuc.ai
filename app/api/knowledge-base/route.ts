@@ -13,6 +13,14 @@ import {
 import { ApiResponse, KnowledgeBaseDocument } from "@/types";
 import { withRateLimit } from "@/lib/api-middleware";
 import { auditLog } from "@/lib/audit-log";
+import { validateTags, validateMetadata } from "@/lib/validators";
+
+const ALLOWED_MIME_TYPES: Record<string, string[]> = {
+  pdf:  ["application/pdf"],
+  docx: ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/octet-stream"],
+  txt:  ["text/plain", "application/octet-stream"],
+  md:   ["text/markdown", "text/plain", "application/octet-stream"],
+};
 
 /**
  * GET /api/knowledge-base
@@ -113,8 +121,41 @@ async function postHandler(request: NextRequest) {
       const tagsStr = formData.get("tags") as string;
       const metadataStr = formData.get("metadata") as string;
 
-      const tags = tagsStr ? JSON.parse(tagsStr) : [];
-      const metadata = metadataStr ? JSON.parse(metadataStr) : {};
+      // Safe JSON parsing with validation (M-6)
+      let tags: string[] = [];
+      let metadata: Record<string, unknown> = {};
+      try {
+        const parsedTags = tagsStr ? JSON.parse(tagsStr) : [];
+        const tagsResult = validateTags(parsedTags);
+        if (!tagsResult.valid) {
+          return NextResponse.json<ApiResponse<null>>(
+            { success: false, error: tagsResult.error || "Tags inválidos" },
+            { status: 400 }
+          );
+        }
+        tags = tagsResult.sanitized ?? [];
+      } catch {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: "Tags con formato inválido" },
+          { status: 400 }
+        );
+      }
+      try {
+        const parsedMeta = metadataStr ? JSON.parse(metadataStr) : {};
+        const metaResult = validateMetadata(parsedMeta);
+        if (!metaResult.valid) {
+          return NextResponse.json<ApiResponse<null>>(
+            { success: false, error: metaResult.error || "Metadata inválida" },
+            { status: 400 }
+          );
+        }
+        metadata = metaResult.sanitized ?? {};
+      } catch {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: "Metadata con formato inválido" },
+          { status: 400 }
+        );
+      }
 
       if (!file || !title || !category) {
         return NextResponse.json<ApiResponse<null>>(
@@ -123,7 +164,7 @@ async function postHandler(request: NextRequest) {
         );
       }
 
-      // Validar tipo de archivo
+      // Validar extensión y MIME type (M-3)
       const allowedTypes = ["pdf", "docx", "txt", "md"];
       const fileType = file.name.split(".").pop()?.toLowerCase() || "other";
 
@@ -133,6 +174,14 @@ async function postHandler(request: NextRequest) {
             success: false,
             error: `Tipo de archivo no soportado. Permitidos: ${allowedTypes.join(", ")}`,
           },
+          { status: 400 }
+        );
+      }
+      const fileMime = file.type || "application/octet-stream";
+      const allowedMimes = ALLOWED_MIME_TYPES[fileType];
+      if (!allowedMimes?.includes(fileMime)) {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: "El tipo MIME del archivo no corresponde a su extensión" },
           { status: 400 }
         );
       }

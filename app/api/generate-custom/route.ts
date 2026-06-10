@@ -8,6 +8,7 @@ import { generateDocumentTitle } from "@/lib/claude";
 import { saveDocument, logUsage } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { sanitizeString } from "@/lib/validators";
+import { getCompanyByUser } from "@/lib/company";
 import { ALLOWED_CUSTOM_DOCUMENT_TYPES, TIMEOUTS, USAGE_ACTION_TYPES } from "@/lib/constants";
 import { withRateLimit } from "@/lib/api-middleware";
 
@@ -265,8 +266,13 @@ async function handler(request: NextRequest) {
     let savedDocument = null;
     try {
 
+      // Include company_id for proper multi-tenant scoping (H-5)
+      const company = await getCompanyByUser(user.id).catch(() => null);
+      const effectiveCompanyId = company?.id || user.company_id || undefined;
+
       savedDocument = await saveDocument({
         user_id: user.id,
+        company_id: effectiveCompanyId,
         title,
         doc_type: `custom_${data.tipoDocumento}`,
         content: generatedText,

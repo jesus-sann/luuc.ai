@@ -47,8 +47,8 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname === "/forgot-password" ||
     request.nextUrl.pathname === "/reset-password";
 
-  // Si no hay usuario y la ruta requiere autenticación, redirigir a login
-  if (!user && !isPublicRoute && request.nextUrl.pathname.startsWith("/dashboard")) {
+  // Protect all non-public page routes — not just /dashboard (M-7)
+  if (!user && !isPublicRoute && !request.nextUrl.pathname.startsWith("/api/")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

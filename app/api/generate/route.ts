@@ -13,7 +13,7 @@ import {
 } from "@/lib/company";
 import { getRelevantKnowledgeContext } from "@/lib/knowledge-base";
 import { ApiResponse } from "@/types";
-import { validateGenerateRequest } from "@/lib/validators";
+import { validateGenerateRequest, validateFocusContext } from "@/lib/validators";
 import { USAGE_ACTION_TYPES } from "@/lib/constants";
 import { withRateLimit } from "@/lib/api-middleware";
 import { auditLog } from "@/lib/audit-log";
@@ -59,12 +59,31 @@ async function handler(request: NextRequest) {
     const { template, variables, title, companyId } = validation.sanitized!;
     const provider = body.provider; // optional AI provider override
     const language = body.language; // optional output language
-    const userInstructions = typeof body.userInstructions === "string"
-      ? body.userInstructions.slice(0, 2000) // Limit to 2000 chars for safety
+    // Validate userInstructions against prompt injection patterns (M-2)
+    const rawInstructions = typeof body.userInstructions === "string"
+      ? body.userInstructions.slice(0, 2000)
       : undefined;
-    const caseSummary = typeof body.caseSummary === "string"
-      ? body.caseSummary.slice(0, 20000) // Limit to ~20k chars
+    if (rawInstructions) {
+      const instrCheck = validateFocusContext(rawInstructions);
+      if (!instrCheck.valid) {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: "Instrucciones contienen patrones no permitidos" },
+          { status: 400 }
+        );
+      }
+    }
+    const userInstructions = rawInstructions;
+    // caseSummary is legal document text — screen for null bytes only
+    const rawSummary = typeof body.caseSummary === "string"
+      ? body.caseSummary.slice(0, 20000)
       : undefined;
+    if (rawSummary && rawSummary.includes("\0")) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Contenido inválido" },
+        { status: 400 }
+      );
+    }
+    const caseSummary = rawSummary;
 
     // Determinar companyId (del request o del usuario)
     let effectiveCompanyId: string | undefined = companyId;
@@ -157,7 +176,7 @@ ${knowledgeContext}
         },
       });
 
-      // Audit log
+      // Audit log — include IP and user-agent for forensic trail (L-5)
       auditLog({
         userId: user.id,
         companyId: effectiveCompanyId,
@@ -168,6 +187,8 @@ ${knowledgeContext}
           template,
           usedContext: !!companyContext || !!knowledgeContext,
         },
+        ip: request.headers.get("x-forwarded-for")?.split(",")[0].trim() || undefined,
+        userAgent: request.headers.get("user-agent") || undefined,
       });
     } catch (dbError) {
       console.error("Error saving to database:", dbError);

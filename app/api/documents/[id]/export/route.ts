@@ -37,8 +37,13 @@ async function handler(
       );
     }
 
-    // Verify ownership
-    if (document.user_id !== user.id && document.company_id !== user.company_id) {
+    // Verify ownership — explicit null check prevents null !== null bypass (C-2)
+    const userOwnsDocument = document.user_id === user.id;
+    const sameCompany =
+      user.company_id != null &&
+      document.company_id != null &&
+      document.company_id === user.company_id;
+    if (!userOwnsDocument && !sameCompany) {
       return NextResponse.json(
         { success: false, error: "No tienes permiso para exportar este documento" },
         { status: 403 }
@@ -66,13 +71,14 @@ async function handler(
       extension = "pdf";
     }
 
-    // Sanitize filename
+    // Sanitize filename + RFC 5987 encoding for non-ASCII chars (L-3)
     const safeName = title.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ\s\-_]/g, "").trim() || "documento";
+    const encodedName = encodeURIComponent(`${safeName}.${extension}`);
 
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${safeName}.${extension}"`,
+        "Content-Disposition": `attachment; filename="${safeName}.${extension}"; filename*=UTF-8''${encodedName}`,
         "Content-Length": buffer.length.toString(),
       },
     });

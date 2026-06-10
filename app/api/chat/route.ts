@@ -52,9 +52,20 @@ async function handler(request: NextRequest) {
       );
     }
 
-    // Build conversation context from history (last 10 messages max)
-    const recentHistory = (history || []).slice(-10);
-    const conversationContext = recentHistory
+    // Build conversation context — validate each history entry (H-4)
+    const MAX_HISTORY_MSG = 2000;
+    const validatedHistory = (Array.isArray(history) ? history : [])
+      .slice(-10)
+      .filter(
+        (m): m is { role: "user" | "assistant"; content: string } =>
+          typeof m === "object" &&
+          m !== null &&
+          (m.role === "user" || m.role === "assistant") &&
+          typeof m.content === "string"
+      )
+      .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_HISTORY_MSG) }));
+
+    const conversationContext = validatedHistory
       .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
       .join("\n\n");
 
