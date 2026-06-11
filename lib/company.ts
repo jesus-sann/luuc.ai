@@ -12,6 +12,16 @@ export interface Company {
   document_rules: Record<string, unknown> | null;
   status: "active" | "inactive" | "suspended";
   letterhead_url: string | null;
+  // Contact / identity fields (may be null if not filled in settings)
+  address_line1: string | null;
+  address_line2: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
+  phone: string | null;
+  website: string | null;
+  bar_number: string | null;
+  practice_areas: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -333,27 +343,42 @@ ${doc.content.substring(0, 5000)}${doc.content.length > 5000 ? "\n[... documento
 }
 
 /**
- * Construir instrucciones adicionales basadas en reglas de la empresa
+ * Build the firm identity + style block injected into every AI system prompt.
+ * The identity section tells the AI which firm it is drafting for so it never
+ * invents attorney names or law firm names from training data.
  */
 export async function getCompanyInstructions(companyId: string): Promise<string> {
   try {
     const company = await getCompanyById(companyId);
-    if (!company || !company.document_rules) return "";
+    if (!company) return "";
 
-    const rules = company.document_rules as DocumentRules;
-    let instructions = "";
+    // --- Firm identity (use only these details, never substitute from training data) ---
+    let identity = `FIRM IDENTITY — use ONLY these details in the document; never substitute names or information from training data:\n`;
+    identity += `- Firm name: ${company.name}\n`;
 
-    if (rules.style) {
-      instructions += `- Estilo de redacción: ${rules.style}\n`;
+    const addressParts = [
+      company.address_line1,
+      company.address_line2,
+      company.city,
+      company.state,
+      company.zip,
+    ].filter(Boolean);
+    if (addressParts.length > 0) {
+      identity += `- Address: ${addressParts.join(", ")}\n`;
     }
-    if (rules.tone) {
-      instructions += `- Tono: ${rules.tone}\n`;
-    }
-    if (rules.customInstructions) {
-      instructions += `- Instrucciones específicas: ${rules.customInstructions}\n`;
-    }
+    if (company.phone) identity += `- Phone: ${company.phone}\n`;
+    if (company.website) identity += `- Website: ${company.website}\n`;
+    if (company.bar_number) identity += `- Bar number: ${company.bar_number}\n`;
+    if (company.practice_areas) identity += `- Practice areas: ${company.practice_areas}\n`;
 
-    return instructions;
+    // --- Style / tone from document_rules ---
+    const rules = (company.document_rules || {}) as DocumentRules;
+    let style = "";
+    if (rules.style) style += `- Writing style: ${rules.style}\n`;
+    if (rules.tone) style += `- Tone: ${rules.tone}\n`;
+    if (rules.customInstructions) style += `- Additional instructions: ${rules.customInstructions}\n`;
+
+    return style ? `${identity}\nSTYLE AND TONE:\n${style}` : identity;
   } catch (error) {
     console.error("Error getting company instructions:", error);
     return "";

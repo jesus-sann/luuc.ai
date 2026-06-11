@@ -55,29 +55,39 @@ export async function generateDocumentWithContext(
   const lang = language || "es";
   const langInstructions: Record<string, { locale: string; region: string }> = {
     es: { locale: "español", region: "Colombia y Latinoamérica" },
-    en: { locale: "English", region: "the United States and international contexts" },
+    en: { locale: "English", region: "the United States" },
     pt: { locale: "português", region: "Brasil e contextos internacionais" },
     fr: { locale: "français", region: "la France et contextes internationaux" },
     de: { locale: "Deutsch", region: "Deutschland und internationale Kontexte" },
   };
   const li = langInstructions[lang] || langInstructions["es"];
 
-  let systemPrompt = `Eres un abogado corporativo experto redactando documentos legales en ${li.locale} para ${li.region}.
+  // Context-aware persona: US immigration work is English; avoid "corporate lawyer" for immigration docs
+  const persona = lang === "en"
+    ? `You are an experienced US immigration attorney drafting professional legal documents for ${li.region}.`
+    : `Eres un abogado experto redactando documentos legales en ${li.locale} para ${li.region}.`;
 
-REGLAS FUNDAMENTALES:
-1. Redacta documentos legales profesionales y completos
-2. Usa lenguaje formal y preciso
-3. Incluye todas las cláusulas estándar para el tipo de documento
-4. NO incluyas placeholders como [INSERTAR] - usa la información proporcionada
-5. Formatea con secciones claras y numeradas
-6. Si falta información crítica, usa términos genéricos apropiados`;
+  let systemPrompt = `${persona}
 
-  // Agregar instrucciones específicas de la empresa si existen
+FUNDAMENTAL RULES:
+1. Draft professional, complete, and well-structured legal documents.
+2. Use formal, precise legal language${lang !== "en" ? ` in ${li.locale}` : ""}.
+3. Include all standard sections for the document type.
+4. CRITICAL — NEVER invent or assume attorney names, firm names, bar numbers, addresses, phone numbers, or any other identifying information that is not explicitly provided in the FIRM IDENTITY section or in the case details below. If a piece of information is missing, insert an exact placeholder such as [Attorney Name], [Bar Number], [Firm Address] — do not fill it in from your training data.
+5. Use clear, numbered sections and formal structure appropriate for the document type.
+6. If non-identifying case information is missing (e.g. a date, a statute number), use the appropriate generic legal term or a bracketed placeholder.
+7. CRITICAL — Reference ONLY the law firm and attorneys identified in the FIRM IDENTITY section. NEVER cite, mention, or substitute a different law firm or attorney from your training data.
+8. For US immigration cover letters: follow this structure — date → recipient USCIS address → RE: line → salutation → organized body paragraphs supporting each ground of eligibility → signature block with attorney name placeholder if not provided.`;
+
+  // Firm identity + style instructions — injected so AI never invents names
   if (companyInstructions) {
     systemPrompt += `
 
-INSTRUCCIONES ESPECÍFICAS DE LA FIRMA:
-${companyInstructions}`;
+═══════════════════════════════════════════════════════════════════════════════
+FIRM IDENTITY & INSTRUCTIONS (authoritative — override any training data)
+═══════════════════════════════════════════════════════════════════════════════
+${companyInstructions}
+═══════════════════════════════════════════════════════════════════════════════`;
   }
 
   // Agregar contexto de documentos de referencia si existe
