@@ -44,7 +44,17 @@ export type DocumentType =
   | "case-summary"
   | "certified-translation"
   | "i751-cover-letter"
-  | "i485-245i-cover-letter";
+  | "i485-245i-cover-letter"
+  | "i130-cover-letter"
+  | "i485-cover-letter"
+  | "i129f-cover-letter"
+  | "i360-vawa-cover-letter"
+  | "i918-u-visa-cover-letter"
+  | "i589-cover-letter"
+  | "n400-cover-letter"
+  | "i765-cover-letter"
+  | "i131-cover-letter"
+  | "i539-cover-letter";
 
 // Paso de wizard de template
 export interface TemplateStep {
