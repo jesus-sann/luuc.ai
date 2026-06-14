@@ -1,15 +1,28 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles, ArrowRight } from "lucide-react";
-import { templates } from "@/lib/templates";
+import { Sparkles, ArrowRight, Mail } from "lucide-react";
+import { templates, IMMIGRATION_COVER_LETTER_SLUGS } from "@/lib/templates";
 import { TemplateCard } from "@/components/template-card";
+import { CoverLetterSelectorModal } from "@/components/cover-letter-selector-modal";
 import { useTranslations } from "@/hooks/use-translations";
 
 // Immigration first, then translation, then other categories alphabetically
 const CATEGORY_ORDER = ["Inmigración", "Immigration — Translation"];
 
+/**
+ * Build the grouped template map at module level.
+ * IMMIGRATION_COVER_LETTER_SLUGS templates are filtered OUT here because
+ * they are represented by a single synthetic "grouped" card in the gallery.
+ * This keeps the Inmigración section from flooding with 13 near-identical cards.
+ */
+const slugSet = new Set<string>(IMMIGRATION_COVER_LETTER_SLUGS);
+
 const rawGrouped = templates.reduce((acc, template) => {
+  // Exclude the individual cover letter templates — they appear as one grouped card
+  if (slugSet.has(template.slug)) return acc;
   if (!acc[template.category]) acc[template.category] = [];
   acc[template.category].push(template);
   return acc;
@@ -24,6 +37,16 @@ const groupedTemplates = Object.fromEntries(
 
 export default function CrearPage() {
   const t = useTranslations();
+  const router = useRouter();
+
+  // Controls visibility of the case-type selector modal
+  const [coverLetterModalOpen, setCoverLetterModalOpen] = useState(false);
+
+  // When the user picks a case type, navigate straight to the wizard for that slug.
+  // Navigation pattern matches TemplateCard: /dashboard/crear/{slug}
+  function handleCoverLetterSelect(slug: string) {
+    router.push(`/dashboard/crear/${slug}`);
+  }
 
   return (
     <div>
@@ -79,15 +102,70 @@ export default function CrearPage() {
                 </h2>
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
               </div>
+
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {/*
+                 * Render individual template cards for non-cover-letter templates.
+                 * The cover letter group injects a single synthetic card below.
+                 */}
                 {(categoryTemplates as typeof templates).map((template) => (
                   <TemplateCard key={template.id} template={template} />
                 ))}
+
+                {/*
+                 * Grouped Cover Letter card — only injected into the Inmigración section.
+                 * Clicking it opens the CoverLetterSelectorModal instead of navigating
+                 * directly to a template wizard. The count badge signals to María that
+                 * this is a multi-type entry point.
+                 */}
+                {isImmigration && (
+                  <button
+                    type="button"
+                    onClick={() => setCoverLetterModalOpen(true)}
+                    className="group flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 text-left transition-all hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-800"
+                  >
+                    <div className="mb-3 flex items-start gap-3">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 transition-colors group-hover:bg-blue-100">
+                        <Mail className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                            Cover Letters de Inmigración
+                          </h3>
+                          {/* Count badge: lets María know this isn't a single-form template */}
+                          <span className="shrink-0 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                            13 tipos
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                          I-751, I-485, I-130, VAWA, U-Visa, Asilo y más — 13 tipos de caso
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-auto flex items-center gap-2 pt-3 text-xs text-slate-400">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-500 dark:bg-slate-700 dark:text-slate-400">
+                        <Mail className="h-3 w-3" />
+                        Cover Letter
+                      </span>
+                      <span>·</span>
+                      <span>Selecciona el tipo</span>
+                    </div>
+                  </button>
+                )}
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Case-type selector modal — rendered once at the page level, not per-card,
+          to avoid duplicate DOM nodes and portal stacking issues. */}
+      <CoverLetterSelectorModal
+        open={coverLetterModalOpen}
+        onClose={() => setCoverLetterModalOpen(false)}
+        onSelect={handleCoverLetterSelect}
+      />
     </div>
   );
 }

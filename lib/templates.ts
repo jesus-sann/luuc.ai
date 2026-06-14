@@ -2927,6 +2927,30 @@ const translationTemplates: Template[] = [
 
 export const templates: Template[] = [...baseTemplates, ...immigrationTemplates, ...translationTemplates];
 
+/**
+ * Slugs for all immigration case-specific cover letter templates.
+ * These are grouped under a single gallery card to avoid clutter.
+ * cover-letter-consular and cover-letter-uscis are intentionally excluded
+ * because they are general/consular cover letters, not case-specific ones.
+ */
+export const IMMIGRATION_COVER_LETTER_SLUGS = [
+  "i751-cover-letter",
+  "i485-245i-cover-letter",
+  "i130-cover-letter",
+  "i485-cover-letter",
+  "i129f-cover-letter",
+  "i360-vawa-cover-letter",
+  "i918-u-visa-cover-letter",
+  "i589-cover-letter",
+  "n400-cover-letter",
+  "i765-cover-letter",
+  "i131-cover-letter",
+  "i539-cover-letter",
+  "custom-immigration-cover-letter",
+] as const;
+
+export type ImmigrationCoverLetterSlug = typeof IMMIGRATION_COVER_LETTER_SLUGS[number];
+
 export function getTemplateBySlug(slug: string): Template | undefined {
   return templates.find((t) => t.slug === slug);
 }
