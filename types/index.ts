@@ -54,7 +54,8 @@ export type DocumentType =
   | "n400-cover-letter"
   | "i765-cover-letter"
   | "i131-cover-letter"
-  | "i539-cover-letter";
+  | "i539-cover-letter"
+  | "custom-immigration-cover-letter";
 
 // Paso de wizard de template
 export interface TemplateStep {

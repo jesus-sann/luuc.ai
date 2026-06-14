@@ -2714,6 +2714,121 @@ const immigrationTemplates: Template[] = [
     system_prompt:
       "You are an expert US immigration attorney. Generate a professional USCIS cover letter for an I-539 Application to Extend or Change Nonimmigrant Status. STRUCTURE: (1) Today's date, (2) USCIS address, (3) RE: I-539 — applicant name, current status, extension or change requested, (4) Dear Officer, (5) Opening identifying applicant, current nonimmigrant status, and whether this is an extension or a change, (6) Eligibility paragraph — applicant has maintained lawful status, filed timely, (7) Reason paragraph explaining the purpose and necessity of the extension or change, (8) If change of status: address eligibility for the requested status, (9) Financial ability to remain without working unlawfully, (10) Ties to home country if relevant, (11) Evidence tab list, (12) Request for approval, (13) Signature block. Do NOT invent any facts not provided.",
   },
+  {
+    id: "27",
+    name: "Custom Immigration Cover Letter",
+    slug: "custom-immigration-cover-letter",
+    description:
+      "Cover letter for any immigration form or case type not covered by the other templates — you specify the form and basis",
+    icon: "FilePlus",
+    category: "Inmigración",
+    outputType: "Cover Letter",
+    variables: [
+      {
+        name: "form_type",
+        label: "USCIS Form / Filing Type",
+        type: "text",
+        required: true,
+        placeholder: "e.g. I-601A, I-212, I-290B, I-824, I-824, Motion to Reopen...",
+      },
+      {
+        name: "uscis_office",
+        label: "Filing Destination",
+        type: "text",
+        required: false,
+        placeholder: "e.g. USCIS Nebraska Service Center, Immigration Court, Consulate in Bogotá...",
+      },
+      {
+        name: "applicant_name",
+        label: "Applicant / Petitioner Full Name",
+        type: "text",
+        required: true,
+        placeholder: "Full legal name",
+      },
+      {
+        name: "a_number",
+        label: "A-Number",
+        type: "text",
+        required: false,
+        placeholder: "e.g. A220-252-084",
+      },
+      {
+        name: "dob",
+        label: "Date of Birth",
+        type: "date",
+        required: true,
+      },
+      {
+        name: "country_of_birth",
+        label: "Country of Birth / Nationality",
+        type: "text",
+        required: true,
+        placeholder: "e.g. Mexico, Colombia",
+      },
+      {
+        name: "beneficiary_name",
+        label: "Beneficiary Name (if different from applicant)",
+        type: "text",
+        required: false,
+        placeholder: "Leave blank if same person",
+      },
+      {
+        name: "receipt_numbers",
+        label: "Receipt / Case Numbers",
+        type: "text",
+        required: false,
+        placeholder: "Any relevant receipt numbers, priority dates, or case IDs",
+      },
+      {
+        name: "legal_basis",
+        label: "Legal Basis / Filing Grounds",
+        type: "textarea",
+        required: true,
+        placeholder: "Describe the legal basis for this filing — which statute or regulation applies, why the applicant is eligible, and what relief is being requested...",
+      },
+      {
+        name: "key_facts",
+        label: "Key Facts & Case History",
+        type: "textarea",
+        required: true,
+        placeholder: "Summarize the relevant facts: immigration history, prior filings, relationship to petitioner, hardship factors, or any other facts the officer needs to adjudicate this filing...",
+      },
+      {
+        name: "special_circumstances",
+        label: "Special Circumstances or Issues to Address",
+        type: "textarea",
+        required: false,
+        placeholder: "Any inadmissibility grounds, prior denials, RFE responses, grounds for expedite, or other issues the cover letter should directly address...",
+      },
+      {
+        name: "evidence_tabs",
+        label: "Evidence Tabs",
+        type: "textarea",
+        required: true,
+        placeholder: "Tab A: ...\nTab B: ...\nTab C: ...",
+      },
+    ],
+    steps: [
+      {
+        title: "Filing Info",
+        fields: ["form_type", "uscis_office"],
+      },
+      {
+        title: "Applicant",
+        fields: ["applicant_name", "a_number", "dob", "country_of_birth", "beneficiary_name", "receipt_numbers"],
+      },
+      {
+        title: "Legal Basis & Facts",
+        fields: ["legal_basis", "key_facts", "special_circumstances"],
+      },
+      {
+        title: "Evidence",
+        fields: ["evidence_tabs"],
+      },
+    ],
+    system_prompt:
+      "You are an expert US immigration attorney. Generate a professional USCIS cover letter for the immigration filing specified. STRUCTURE: (1) Today's date, (2) Filing destination address (use the USCIS office specified, or default to USCIS if unspecified), (3) RE: line — form type, applicant name, A-Number if provided, any receipt numbers, (4) Dear Officer, (5) Opening paragraph identifying the applicant/petitioner and the specific form being filed, (6) Legal basis paragraph — cite the applicable INA section, CFR regulation, or USCIS policy relevant to this form, (7) Key facts paragraph — present the facts concisely and persuasively, (8) If there are special circumstances or issues (prior denials, inadmissibility, expedite request), address each one directly and thoroughly, (9) Evidence paragraph listing each tab by label and explaining what it establishes, (10) Closing paragraph requesting approval, (11) Respectfully submitted signature block with [Attorney Name] placeholder if attorney name not provided. Do NOT invent any facts not provided. Adapt tone and structure to the specific form and context.",
+  },
 ];
 
 const translationTemplates: Template[] = [
