@@ -197,7 +197,7 @@ async function deleteHandler(request: NextRequest) {
       );
     }
 
-    const success = await deleteCompanyDocument(docId);
+    const success = await deleteCompanyDocument(docId, user.id);
 
     if (!success) {
       return NextResponse.json<ApiResponse<null>>(

@@ -136,15 +136,22 @@ export async function createCompany(
  */
 export async function updateCompany(
   companyId: string,
+  userId: string,
   updates: Partial<Company>
 ): Promise<Company | null> {
   try {
+    // Verify ownership before mutating — supabaseAdmin bypasses RLS
+    const { data: existing } = await supabaseAdmin
+      .from("companies")
+      .select("id")
+      .eq("id", companyId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!existing) return null;
+
     const { data, error } = await supabaseAdmin
       .from("companies")
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
+      .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", companyId)
       .select()
       .single();
@@ -286,8 +293,18 @@ export async function updateCompanyDocument(
 /**
  * Eliminar documento de referencia
  */
-export async function deleteCompanyDocument(docId: string): Promise<boolean> {
+export async function deleteCompanyDocument(docId: string, userId: string): Promise<boolean> {
   try {
+    // Verify document belongs to a company the user owns before deleting
+    const { data: existing } = await supabaseAdmin
+      .from("company_documents")
+      .select("id, company_id, companies!inner(user_id)")
+      .eq("id", docId)
+      .maybeSingle();
+    if (!existing) return false;
+    const owner = (existing as any).companies?.user_id;
+    if (owner !== userId) return false;
+
     const { error } = await supabaseAdmin
       .from("company_documents")
       .delete()

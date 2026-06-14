@@ -10,6 +10,8 @@ import { saveDocument, logUsage } from "@/lib/supabase";
 import { getCompanyByUser } from "@/lib/company";
 import { generateDocumentTitle } from "@/lib/claude";
 import { withRateLimit } from "@/lib/api-middleware";
+import { validateFocusContext } from "@/lib/validators";
+import { auditLog } from "@/lib/audit-log";
 import { ApiResponse } from "@/types";
 
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
@@ -71,6 +73,24 @@ async function handler(request: NextRequest) {
       );
     }
 
+    // SECURITY: Cap original_text and reject null bytes
+    const safeOriginalText = original_text.slice(0, 20000);
+    if (safeOriginalText.includes("\0")) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Contenido inválido" },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Run prompt-injection check on subject_name (highest-risk free-text field)
+    const subjectCheck = validateFocusContext(subject_name);
+    if (!subjectCheck.valid) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "El nombre del sujeto contiene patrones no permitidos" },
+        { status: 400 }
+      );
+    }
+
     const docTypeLabel = DOCUMENT_TYPE_LABELS[document_type] || "Document";
     const today = new Date().toLocaleDateString("en-US", {
       year: "numeric",
@@ -86,7 +106,7 @@ Your task is to produce a complete, USCIS-compliant translation package that con
 
 ORIGINAL TEXT:
 """
-${original_text.trim()}
+${safeOriginalText.trim()}
 """
 
 Produce the following THREE sections in this EXACT order and format. Use the exact section headers shown:
@@ -128,10 +148,10 @@ Important: Replace the bracketed placeholders above with the actual content. Do 
     const content = await generateWithClaude(systemPrompt, userPrompt);
 
     // Determine company for saving
-    let companyId: string | undefined;
+    let effectiveCompanyId: string | undefined;
     try {
       const company = await getCompanyByUser(user.id);
-      companyId = company?.id || user.company_id || undefined;
+      effectiveCompanyId = company?.id || user.company_id || undefined;
     } catch {
       // Non-critical
     }
@@ -143,7 +163,7 @@ Important: Replace the bracketed placeholders above with the actual content. Do 
     try {
       savedDocument = await saveDocument({
         user_id: user.id,
-        company_id: companyId,
+        company_id: effectiveCompanyId,
         title: aiTitle,
         doc_type: "certified-translation",
         content,
@@ -161,6 +181,17 @@ Important: Replace the bracketed placeholders above with the actual content. Do 
         user_id: user.id,
         action_type: "generate",
         metadata: { template: "certified-translation", document_type, spanish_variant },
+      });
+
+      auditLog({
+        userId: user.id,
+        companyId: effectiveCompanyId,
+        action: "document.translate",
+        resourceType: "document",
+        resourceId: savedDocument?.id,
+        metadata: { documentType: document_type, language: "es->en" },
+        ip: request.headers.get("x-forwarded-for")?.split(",")[0].trim() || undefined,
+        userAgent: request.headers.get("user-agent") || undefined,
       });
     } catch (dbError) {
       console.error("Error saving translation:", dbError);

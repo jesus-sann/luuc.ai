@@ -167,7 +167,7 @@ async function putHandler(request: NextRequest) {
       bar_number, practice_areas, letterhead_url,
     } = body;
 
-    const updatedCompany = await updateCompany(company.id, {
+    const updatedCompany = await updateCompany(company.id, user.id, {
       name: name || company.name,
       industry: industry || company.industry,
       description: description !== undefined ? description : company.description,

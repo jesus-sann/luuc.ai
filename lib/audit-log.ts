@@ -8,6 +8,7 @@ import { supabaseAdmin } from "./supabase";
 
 export type AuditAction =
   | "document.generate"
+  | "document.translate"
   | "document.view"
   | "document.review"
   | "document.delete"

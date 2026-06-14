@@ -252,8 +252,9 @@ async function handler(request: NextRequest) {
 
     // Verificar que no sea un mensaje de error del modelo
     if (generatedText.startsWith("ERROR:")) {
+      console.error("AI returned error response:", generatedText);
       return NextResponse.json(
-        { success: false, error: generatedText.replace("ERROR: ", "") },
+        { success: false, error: "La solicitud no pudo procesarse como documento legal. Verifica el tipo de documento y la descripción." },
         { status: 400 }
       );
     }
