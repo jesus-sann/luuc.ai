@@ -81,7 +81,7 @@ const sections = [
   {
     icon: Server,
     title: "5. Proveedores y Certificaciones de Infraestructura",
-    content: `Luuc.ai se apoya en proveedores de infraestructura de nivel empresarial con certificaciones independientes. Al igual que plataformas legales de referencia como Harvey.ai y Plaud.ai, no necesitamos construir seguridad desde cero — la heredamos de los mismos proveedores que usan los bufetes más grandes del mundo.
+    content: `Luuc.ai está construido sobre proveedores de infraestructura con auditorías de seguridad independientes y certificaciones reconocidas internacionalmente. Cada capa de la plataforma — base de datos, hosting, IA y pagos — está respaldada por cumplimiento verificado por terceros.
 
 **Supabase — Base de datos y autenticación:**
 • SOC 2 Type II certificado
@@ -130,7 +130,6 @@ const sections = [
   {
     icon: UserCheck,
     title: "7. Tus Derechos",
-
     content: `Tienes los siguientes derechos sobre tus datos personales:
 
 **Acceso:** Puedes solicitar una copia de todos los datos que tenemos sobre ti.
