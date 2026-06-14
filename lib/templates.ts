@@ -2928,12 +2928,12 @@ const translationTemplates: Template[] = [
 export const templates: Template[] = [...baseTemplates, ...immigrationTemplates, ...translationTemplates];
 
 /**
- * Slugs for all immigration case-specific cover letter templates.
- * These are grouped under a single gallery card to avoid clutter.
- * cover-letter-consular and cover-letter-uscis are intentionally excluded
- * because they are general/consular cover letters, not case-specific ones.
+ * All cover letter template slugs — grouped under a single gallery card.
+ * General consular/USCIS cover letters are listed first, then case-specific ones.
  */
 export const IMMIGRATION_COVER_LETTER_SLUGS = [
+  "cover-letter-consular",
+  "cover-letter-uscis",
   "i751-cover-letter",
   "i485-245i-cover-letter",
   "i130-cover-letter",

@@ -69,10 +69,13 @@ export function CoverLetterSelectorModal({
   onClose,
   onSelect,
 }: CoverLetterSelectorModalProps) {
-  // Separate the custom template so it renders at the bottom with a
-  // distinct visual treatment (dashed border). All others are "standard".
+  const GENERAL_SLUGS = ["cover-letter-consular", "cover-letter-uscis"];
+  const generalTemplates = coverLetterTemplates.filter((t) =>
+    GENERAL_SLUGS.includes(t.slug)
+  );
   const standardTemplates = coverLetterTemplates.filter(
-    (t) => t.slug !== "custom-immigration-cover-letter"
+    (t) =>
+      !GENERAL_SLUGS.includes(t.slug) && t.slug !== "custom-immigration-cover-letter"
   );
   const customTemplate = coverLetterTemplates.find(
     (t) => t.slug === "custom-immigration-cover-letter"
@@ -94,8 +97,41 @@ export function CoverLetterSelectorModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Standard case types — 2 columns on mobile, 3 on desktop */}
-        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {/* General cover letters (Consular, USCIS) */}
+        {generalTemplates.length > 0 && (
+          <div className="mt-2">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+              General
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {generalTemplates.map((template) => {
+                const Icon = iconMap[template.icon] || FileCheck;
+                return (
+                  <button
+                    key={template.slug}
+                    type="button"
+                    onClick={() => { onSelect(template.slug); onClose(); }}
+                    className="group flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-3 text-left transition-all hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 transition-colors group-hover:bg-blue-100">
+                      <Icon className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold leading-snug text-slate-900">{template.name}</p>
+                      <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-slate-500">{template.description}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Case-specific cover letters — 2 columns on mobile, 3 on desktop */}
+        <p className="mt-3 mb-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+          Por tipo de caso
+        </p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {standardTemplates.map((template) => {
             const Icon = iconMap[template.icon] || FileCheck;
             return (

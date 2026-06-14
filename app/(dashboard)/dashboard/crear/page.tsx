@@ -135,11 +135,11 @@ export default function CrearPage() {
                           </h3>
                           {/* Count badge: lets María know this isn't a single-form template */}
                           <span className="shrink-0 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                            13 tipos
+                            15 tipos
                           </span>
                         </div>
                         <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                          I-751, I-485, I-130, VAWA, U-Visa, Asilo y más — 13 tipos de caso
+                          Consular, USCIS, I-751, I-485, I-130, VAWA, U-Visa, Asilo y más — 15 tipos
                         </p>
                       </div>
                     </div>
