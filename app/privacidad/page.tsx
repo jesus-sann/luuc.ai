@@ -80,28 +80,57 @@ const sections = [
   },
   {
     icon: Server,
-    title: "5. Proveedores y Terceros",
-    content: `Trabajamos con proveedores de confianza para proporcionar el Servicio:
+    title: "5. Proveedores y Certificaciones de Infraestructura",
+    content: `Luuc.ai se apoya en proveedores de infraestructura de nivel empresarial con certificaciones independientes. Al igual que plataformas legales de referencia como Harvey.ai y Plaud.ai, no necesitamos construir seguridad desde cero — la heredamos de los mismos proveedores que usan los bufetes más grandes del mundo.
 
-**Infraestructura:**
-• Supabase (base de datos y autenticación)
-• Vercel (hosting y CDN)
-• AWS (infraestructura cloud)
+**Supabase — Base de datos y autenticación:**
+• SOC 2 Type II certificado
+• ISO 27001 certificado
+• HIPAA compliant
+• GDPR compliant
+• Infraestructura sobre AWS us-east-1 (Virginia)
 
-**IA:**
-• Anthropic (procesamiento de IA con Claude)
+**Vercel — Hosting y CDN:**
+• SOC 2 Type II certificado
+• ISO 27001 certificado
+• GDPR compliant
 
-**Pagos:**
-• Stripe (procesamiento de pagos)
+**Anthropic — Procesamiento de IA (Claude):**
+• No entrena modelos con datos del API ([Términos Comerciales](https://www.anthropic.com/legal/commercial-terms))
+• Data Processing Addendum (DPA) vigente por defecto ([DPA](https://www.anthropic.com/legal/data-processing-addendum))
+• Retención temporal máxima de 30 días para monitoreo de seguridad
 
-**Emails:**
-• Resend (envío de correos transaccionales)
+**AWS — Infraestructura subyacente:**
+• SOC 1, SOC 2 y SOC 3 certificados
+• ISO 27001, 27017 y 27018 certificados
+• HIPAA, PCI DSS y FedRAMP compliant
 
-Todos nuestros proveedores cumplen con estándares de seguridad y privacidad equivalentes o superiores a los nuestros.`
+**Stripe — Pagos:**
+• PCI DSS Level 1 (el nivel más alto)
+• Sin almacenamiento de datos de tarjetas en servidores de Luuc.ai
+
+**Resend — Emails transaccionales:**
+• Comunicaciones de servicio únicamente`
+  },
+  {
+    icon: Lock,
+    title: "6. Protección de la Confidencialidad Cliente-Abogado",
+    content: `Luuc.ai está diseñado para cumplir con las obligaciones de confidencialidad de los abogados bajo las reglas deontológicas aplicables:
+
+**ABA Model Rule 1.6 y equivalentes estatales:** Los documentos e información del cliente procesados en Luuc.ai nunca se comparten con terceros, no se usan para entrenar IA, y están protegidos por aislamiento técnico por firma (Row Level Security).
+
+**Información de casos de inmigración — INA § 1367:** La información de beneficiarios de VAWA, Visa U y Visa T está protegida por confidencialidad federal. Luuc.ai no divulga esta información a ninguna entidad gubernamental ni tercero.
+
+**Sin acceso humano al contenido de documentos:** El contenido de los documentos que generas o subes solo es procesado por los modelos de IA de Anthropic para devolver una respuesta. Ningún empleado de Luuc.ai puede leer el contenido de tus documentos.
+
+**Audit logs inmutables:** Cada acción sobre documentos queda registrada en un log de auditoría protegido que no puede ser modificado ni eliminado, incluso por administradores del sistema.
+
+**Aislamiento por organización:** Los datos de cada firma de abogados están completamente separados mediante Row Level Security (RLS) en base de datos. Es técnicamente imposible que los datos de una firma sean accesibles desde otra cuenta.`
   },
   {
     icon: UserCheck,
-    title: "6. Tus Derechos",
+    title: "7. Tus Derechos",
+
     content: `Tienes los siguientes derechos sobre tus datos personales:
 
 **Acceso:** Puedes solicitar una copia de todos los datos que tenemos sobre ti.
@@ -118,7 +147,7 @@ Para ejercer estos derechos, contacta a privacidad@luuc.ai.`
   },
   {
     icon: Trash2,
-    title: "7. Retención de Datos",
+    title: "8. Retención de Datos",
     content: `Conservamos tu información mientras tu cuenta esté activa:
 
 **Cuenta activa:** Todos tus datos se conservan en Supabase (base de datos cifrada) para proporcionar el servicio.
@@ -133,7 +162,7 @@ Para ejercer estos derechos, contacta a privacidad@luuc.ai.`
   },
   {
     icon: Globe,
-    title: "8. Transferencias Internacionales",
+    title: "9. Transferencias Internacionales",
     content: `Tus datos pueden ser procesados en servidores ubicados fuera de Colombia:
 
 **Ubicación de servidores:** AWS us-east-1 (Virginia, EE.UU.)
