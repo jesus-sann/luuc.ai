@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { ArrowLeft, Eye, Database, Lock, FileText, UserCheck, Trash2, Globe, Server, Mail, CheckCircle2 } from "lucide-react";
 
@@ -71,11 +72,11 @@ const sections = [
 
 **No compartimos:** Nunca vendemos, alquilamos ni compartimos el contenido de tus documentos con terceros.
 
-**No entrenamos modelos:** Tus documentos NO se utilizan para entrenar modelos de IA. Tenemos un Data Processing Agreement (DPA) con Anthropic que garantiza esto.
+**No entrenamos modelos:** Tus documentos NO se utilizan para entrenar modelos de IA. Este compromiso está garantizado directamente por los Términos Comerciales de Anthropic y su Data Processing Addendum (DPA), que entran en vigor automáticamente para todos los usuarios del API — no requieren ningún acuerdo adicional por parte de Luuc.ai. Puedes verificarlos directamente: [Términos Comerciales](https://www.anthropic.com/legal/commercial-terms) · [DPA de Anthropic](https://www.anthropic.com/legal/data-processing-addendum)
 
 **Acceso limitado:** Ni siquiera los administradores de Luuc.ai pueden acceder al contenido de tus documentos sin tu autorización explícita.
 
-**Procesamiento temporal:** Los documentos solo se procesan en memoria para generar respuestas y no se retienen más allá de lo necesario.`
+**Retención temporal por procesamiento de IA:** Cuando un documento se procesa mediante Claude (Anthropic), los prompts y respuestas pueden ser retenidos temporalmente por Anthropic por hasta 30 días con fines de seguridad y detección de abuso, conforme a su política estándar. Luuc.ai está gestionando activamente la implementación de Zero Data Retention (ZDR) con Anthropic para eliminar incluso esta retención temporal.`
   },
   {
     icon: Server,
@@ -120,13 +121,15 @@ Para ejercer estos derechos, contacta a privacidad@luuc.ai.`
     title: "7. Retención de Datos",
     content: `Conservamos tu información mientras tu cuenta esté activa:
 
-**Cuenta activa:** Todos tus datos se conservan para proporcionar el servicio.
+**Cuenta activa:** Todos tus datos se conservan en Supabase (base de datos cifrada) para proporcionar el servicio.
 
 **Cuenta eliminada:** Eliminamos todos tus datos personales y documentos dentro de 30 días.
 
 **Datos anonimizados:** Podemos conservar datos agregados y anonimizados para análisis estadísticos.
 
-**Obligaciones legales:** Podemos conservar ciertos datos si es requerido por ley (ej: registros de facturación).`
+**Obligaciones legales:** Podemos conservar ciertos datos si es requerido por ley (ej: registros de facturación).
+
+**Procesamiento por IA — retención en Anthropic:** Los prompts enviados al API de Claude (Anthropic) durante la generación de documentos pueden ser retenidos temporalmente por Anthropic por hasta 30 días con fines de seguridad y monitoreo de abuso, conforme a su política estándar ([Términos Comerciales](https://www.anthropic.com/legal/commercial-terms)). Anthropic NO usa estos datos para entrenar modelos. Luuc.ai está en proceso de implementar Zero Data Retention (ZDR) para eliminar completamente esta retención temporal.`
   },
   {
     icon: Globe,
@@ -140,6 +143,48 @@ Para ejercer estos derechos, contacta a privacidad@luuc.ai.`
 **Cumplimiento:** Cumplimos con la Ley 1581 de 2012 (Habeas Data Colombia) y el Reglamento General de Protección de Datos (GDPR) de la Unión Europea.`
   },
 ];
+
+function renderLine(line: string, lineIndex: number) {
+  // Parse markdown links [text](url) and **bold** within a single line
+  const linkPattern = /(\[([^\]]+)\]\(([^)]+)\))/g;
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = linkPattern.exec(line)) !== null) {
+    if (match.index > last) {
+      parts.push(...renderBold(line.slice(last, match.index), `${lineIndex}-pre-${last}`));
+    }
+    parts.push(
+      <a
+        key={`${lineIndex}-link-${match.index}`}
+        href={match[3]}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-purple-600 underline hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
+      >
+        {match[2]}
+      </a>
+    );
+    last = match.index + match[0].length;
+  }
+  if (last < line.length) {
+    parts.push(...renderBold(line.slice(last), `${lineIndex}-post-${last}`));
+  }
+  return parts;
+}
+
+function renderBold(text: string, key: string): React.ReactNode[] {
+  return text.split("**").map((part, j) =>
+    j % 2 === 1 ? (
+      <strong key={`${key}-b-${j}`} className="text-slate-900 dark:text-white">
+        {part}
+      </strong>
+    ) : (
+      part
+    )
+  );
+}
 
 export default function PrivacidadPage() {
   return (
@@ -166,7 +211,7 @@ export default function PrivacidadPage() {
             recopilamos, usamos y protegemos tu información.
           </p>
           <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
-            Última actualización: Febrero 2025
+            Última actualización: Junio 2026
           </p>
         </div>
 
@@ -198,6 +243,12 @@ export default function PrivacidadPage() {
               <CheckCircle2 className="mt-0.5 h-5 w-5 text-green-600" />
               <span className="text-sm text-green-800 dark:text-green-300">
                 Puedes eliminar tus datos cuando quieras
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 text-green-600" />
+              <span className="text-sm text-green-800 dark:text-green-300">
+                DPA con Anthropic vigente por defecto bajo sus Términos Comerciales
               </span>
             </div>
           </div>
@@ -243,13 +294,7 @@ export default function PrivacidadPage() {
                 <div className="prose prose-slate max-w-none text-slate-600 dark:text-slate-400">
                   {section.content.split('\n').map((paragraph, i) => (
                     <p key={i} className="mb-3 whitespace-pre-line">
-                      {paragraph.split('**').map((part, j) =>
-                        j % 2 === 1 ? (
-                          <strong key={j} className="text-slate-900 dark:text-white">{part}</strong>
-                        ) : (
-                          part
-                        )
-                      )}
+                      {renderLine(paragraph, i)}
                     </p>
                   ))}
                 </div>
