@@ -76,23 +76,25 @@ const sections = [
 
 **Acceso limitado:** Ni siquiera los administradores de Luuc.ai pueden acceder al contenido de tus documentos sin tu autorización explícita.
 
-**Retención temporal por procesamiento de IA:** Cuando un documento se procesa mediante Claude (Anthropic), los prompts y respuestas pueden ser retenidos temporalmente por Anthropic por hasta 30 días con fines de seguridad y detección de abuso, conforme a su política estándar. Luuc.ai está gestionando activamente la implementación de Zero Data Retention (ZDR) con Anthropic para eliminar incluso esta retención temporal.`
+**Retención temporal por procesamiento de IA:** Cuando un documento se procesa mediante Claude (Anthropic), los prompts y respuestas pueden ser retenidos temporalmente por Anthropic por hasta 30 días con fines de seguridad y detección de abuso, conforme a su política estándar. Luuc.ai está gestionando activamente la implementación de Zero Data Retention (ZDR) con Anthropic para eliminar incluso esta retención temporal.
+
+Para casos bajo INA §1367 (VAWA, U-Visa, T-Visa, Asilo), los documentos generados durante este período de retención estarían técnicamente accesibles bajo una orden judicial federal válida. Luuc.ai gestiona activamente la implementación de Zero Data Retention (ZDR) con Anthropic para eliminar esta ventana.`
   },
   {
     icon: Server,
     title: "5. Proveedores y Certificaciones de Infraestructura",
-    content: `Luuc.ai está construido sobre proveedores de infraestructura con auditorías de seguridad independientes y certificaciones reconocidas internacionalmente. Cada capa de la plataforma — base de datos, hosting, IA y pagos — está respaldada por cumplimiento verificado por terceros.
+    content: `Luuc.ai está construido sobre proveedores de infraestructura con certificación SOC 2 Type II e ISO 27001 independientes. Las certificaciones listadas a continuación corresponden a cada proveedor de infraestructura subyacente — no a Luuc.ai como plataforma. Luuc.ai como plataforma persigue su propia certificación SOC 2 a medida que escala.
 
 **Supabase — Base de datos y autenticación:**
-• SOC 2 Type II certificado
-• ISO 27001 certificado
+• SOC 2 Type II certificado (Supabase, Inc.)
+• ISO 27001 certificado (Supabase, Inc.)
 • HIPAA compliant
 • GDPR compliant
 • Infraestructura sobre AWS us-east-1 (Virginia)
 
 **Vercel — Hosting y CDN:**
-• SOC 2 Type II certificado
-• ISO 27001 certificado
+• SOC 2 Type II certificado (Vercel, Inc.)
+• ISO 27001 certificado (Vercel, Inc.)
 • GDPR compliant
 
 **Anthropic — Procesamiento de IA (Claude):**
@@ -101,12 +103,12 @@ const sections = [
 • Retención temporal máxima de 30 días para monitoreo de seguridad
 
 **AWS — Infraestructura subyacente:**
-• SOC 1, SOC 2 y SOC 3 certificados
-• ISO 27001, 27017 y 27018 certificados
+• SOC 1, SOC 2 y SOC 3 certificados (Amazon Web Services, Inc.)
+• ISO 27001, 27017 y 27018 certificados (Amazon Web Services, Inc.)
 • HIPAA, PCI DSS y FedRAMP compliant
 
 **Stripe — Pagos:**
-• PCI DSS Level 1 (el nivel más alto)
+• PCI DSS Level 1 (el nivel más alto) (Stripe, Inc.)
 • Sin almacenamiento de datos de tarjetas en servidores de Luuc.ai
 
 **Resend — Emails transaccionales:**
@@ -125,7 +127,15 @@ const sections = [
 
 **Audit logs inmutables:** Cada acción sobre documentos queda registrada en un log de auditoría protegido que no puede ser modificado ni eliminado, incluso por administradores del sistema.
 
-**Aislamiento por organización:** Los datos de cada firma de abogados están completamente separados mediante Row Level Security (RLS) en base de datos. Es técnicamente imposible que los datos de una firma sean accesibles desde otra cuenta.`
+**Aislamiento por organización:** Los datos de cada firma de abogados están completamente separados mediante Row Level Security (RLS) en base de datos. Es técnicamente imposible que los datos de una firma sean accesibles desde otra cuenta.
+
+**Órdenes judiciales y requerimientos legales**
+
+El personal de Luuc.ai no puede acceder al contenido de los documentos en el curso normal de operaciones. Sin embargo, como toda plataforma SaaS con sede en los Estados Unidos, estamos sujetos a órdenes judiciales federales válidas que pueden ser dirigidas a nuestros proveedores de infraestructura (Supabase, Vercel, Anthropic, AWS).
+
+INA §1367 restringe específicamente la divulgación por parte de DHS y DOJ de información sobre solicitantes de VAWA, T-Visa y U-Visa. Esta protección aplica a las agencias del gobierno federal, no a órdenes de tribunales federales en contextos distintos.
+
+En caso de recibir un requerimiento legal, notificaremos al cliente afectado en la medida en que la ley lo permita, y nos opondremos a solicitudes que excedan el alcance legal aplicable.`
   },
   {
     icon: UserCheck,

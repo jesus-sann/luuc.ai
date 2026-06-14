@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Template, TemplateStep, TemplateVariable } from "@/types";
+import { SensitiveCaseWarning } from "@/components/sensitive-case-warning";
 
 interface DocumentFormWizardProps {
   template: Template;
@@ -166,6 +167,11 @@ export function DocumentFormWizard({
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      {/* INA §1367 sensitive-case warning — shown above step 1, dismissed per-session per-template.
+          Rendering it here (above the step indicator) ensures it is the first thing the user
+          sees before entering any personal data, fulfilling the informed-consent obligation. */}
+      <SensitiveCaseWarning templateSlug={template.slug} />
+
       {/* Step indicator */}
       <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {steps.map((s, idx) => {
