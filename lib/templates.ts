@@ -896,6 +896,435 @@ const immigrationTemplates: Template[] = [
       },
     ],
   },
+  {
+    id: "15",
+    name: "I-751 Cover Letter",
+    slug: "i751-cover-letter",
+    description:
+      "USCIS cover letter for I-751 Petition to Remove Conditions on Residence",
+    icon: "FileCheck",
+    category: "Inmigración",
+    outputType: "Cover Letter",
+    variables: [
+      // Step 1 — Applicant
+      {
+        name: "applicant_name",
+        label: "Applicant Full Name",
+        type: "text",
+        required: true,
+        placeholder: "Full legal name",
+      },
+      {
+        name: "a_number",
+        label: "A-Number",
+        type: "text",
+        required: false,
+        placeholder: "e.g. A220-252-084",
+      },
+      {
+        name: "date_of_birth",
+        label: "Date of Birth",
+        type: "date",
+        required: true,
+      },
+      {
+        name: "country_of_birth",
+        label: "Country of Birth",
+        type: "text",
+        required: true,
+        placeholder: "e.g. Mexico, Colombia",
+      },
+      {
+        name: "applicant_address",
+        label: "Applicant Address",
+        type: "text",
+        required: true,
+        placeholder: "Street, Apt, City, State, ZIP",
+      },
+      {
+        name: "applicant_phone",
+        label: "Phone Number",
+        type: "text",
+        required: false,
+      },
+      // Step 2 — Case Details
+      {
+        name: "i751_basis",
+        label: "I-751 Filing Basis",
+        type: "select",
+        required: true,
+        options: [
+          "Abuse / Battery Waiver (INA 216(c)(4)(C))",
+          "Extreme Cruelty Waiver (INA 216(c)(4)(C))",
+          "Good Faith Marriage — Joint Petition",
+          "Good Faith Marriage — Divorce/Separation",
+          "Death of Petitioning Spouse",
+        ],
+      },
+      {
+        name: "conditional_residency_expiry",
+        label: "Conditional Residency Expiration Date",
+        type: "date",
+        required: false,
+      },
+      {
+        name: "i129f_receipt",
+        label: "I-129F Receipt Number",
+        type: "text",
+        required: false,
+        placeholder: "e.g. WAC219007100",
+      },
+      {
+        name: "i485_receipt",
+        label: "I-485 Receipt Number",
+        type: "text",
+        required: false,
+        placeholder: "e.g. IOE0921361286",
+      },
+      {
+        name: "last_entry_date",
+        label: "Last Entry to the U.S.",
+        type: "date",
+        required: false,
+      },
+      {
+        name: "last_entry_port",
+        label: "Port of Entry",
+        type: "text",
+        required: false,
+        placeholder: "e.g. Nuevo Laredo, Texas",
+      },
+      // Step 3 — Legal Basis & Facts
+      {
+        name: "abuse_facts",
+        label: "Facts Supporting the Waiver",
+        type: "textarea",
+        required: true,
+        placeholder:
+          "Describe the abuse, battery, or extreme cruelty suffered. Include timeline, impact on applicant and children, and why the applicant qualifies for this waiver...",
+      },
+      {
+        name: "filing_delay_explanation",
+        label: "Reason for Late Filing (if applicable)",
+        type: "textarea",
+        required: false,
+        placeholder:
+          "If the I-751 is filed after the 90-day window, explain why...",
+      },
+      // Step 4 — Family
+      {
+        name: "spouse_name",
+        label: "U.S. Citizen Spouse Full Name",
+        type: "text",
+        required: false,
+      },
+      {
+        name: "spouse_dob",
+        label: "Spouse Date of Birth",
+        type: "date",
+        required: false,
+      },
+      {
+        name: "children",
+        label: "Children (if any)",
+        type: "textarea",
+        required: false,
+        placeholder:
+          "Child 1: [Name], DOB [Date], Country [Country], Status [LPR/USC]\nChild 2: ...",
+      },
+      // Step 5 — Evidence
+      {
+        name: "evidence_tabs",
+        label: "Evidence Tabs",
+        type: "textarea",
+        required: true,
+        placeholder:
+          "Tab A: Form G-1650\nTab B: Form G-28\nTab C: Form I-751\nTab D: Copy of LPR Card, Passport, I-94\nTab E: Marriage Certificate, Joint evidence, Applicant Affidavit...",
+      },
+    ],
+    system_prompt:
+      "You are an expert US immigration attorney specializing in VAWA and removal of conditions cases. Generate a professional USCIS cover letter for an I-751 Petition to Remove Conditions on Residence. Use formal legal language throughout. STRUCTURE: (1) Date (use today's date), (2) USCIS filing address appropriate for I-751, (3) RE: line with applicant name, A-Number, and petition type, (4) Dear Officer salutation, (5) Opening paragraph identifying the applicant, her A-Number, conditional residency, and the basis for filing, (6) Factual paragraph explaining the marriage history and the abuse/waiver grounds with reference to INA 216(c)(4)(C), (7) If filed late, address the good cause for delay, (8) Paragraph listing the attached evidence by tab label and explaining what each proves, (9) Closing paragraph requesting approval, (10) Respectfully submitted signature block with [Attorney Name] placeholder if not provided. Do NOT invent any facts not in the provided information.",
+    steps: [
+      {
+        title: "Applicant",
+        fields: [
+          "applicant_name",
+          "a_number",
+          "date_of_birth",
+          "country_of_birth",
+          "applicant_address",
+          "applicant_phone",
+        ],
+      },
+      {
+        title: "Case Details",
+        fields: [
+          "i751_basis",
+          "conditional_residency_expiry",
+          "i129f_receipt",
+          "i485_receipt",
+          "last_entry_date",
+          "last_entry_port",
+        ],
+      },
+      {
+        title: "Legal Basis & Facts",
+        fields: ["abuse_facts", "filing_delay_explanation"],
+      },
+      {
+        title: "Family",
+        fields: ["spouse_name", "spouse_dob", "children"],
+      },
+      {
+        title: "Evidence",
+        fields: ["evidence_tabs"],
+      },
+    ],
+  },
+  {
+    id: "16",
+    name: "I-485 Cover Letter (245(i))",
+    slug: "i485-245i-cover-letter",
+    description:
+      "USCIS cover letter for I-485 Adjustment of Status filed under INA 245(i)",
+    icon: "Scale",
+    category: "Inmigración",
+    outputType: "Cover Letter",
+    variables: [
+      // Step 1 — Petitioner
+      {
+        name: "petitioner_name",
+        label: "Petitioner Full Name",
+        type: "text",
+        required: true,
+        placeholder: "U.S. Citizen or LPR filing the I-130",
+      },
+      {
+        name: "petitioner_a_number",
+        label: "Petitioner A-Number (if LPR)",
+        type: "text",
+        required: false,
+        placeholder: "e.g. A092922496",
+      },
+      {
+        name: "petitioner_status",
+        label: "Petitioner Immigration Status",
+        type: "select",
+        required: true,
+        options: [
+          "U.S. Citizen by Birth",
+          "U.S. Citizen by Naturalization",
+          "Lawful Permanent Resident",
+        ],
+      },
+      {
+        name: "petitioner_address",
+        label: "Petitioner Address",
+        type: "text",
+        required: true,
+        placeholder: "Street, City, State, ZIP",
+      },
+      // Step 2 — Beneficiary
+      {
+        name: "beneficiary_name",
+        label: "Beneficiary Full Name",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "beneficiary_other_name",
+        label: "Other Name Used",
+        type: "text",
+        required: false,
+        placeholder: "If any",
+      },
+      {
+        name: "beneficiary_dob",
+        label: "Beneficiary Date of Birth",
+        type: "date",
+        required: true,
+      },
+      {
+        name: "beneficiary_country_of_birth",
+        label: "Beneficiary Country of Birth",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "beneficiary_address",
+        label: "Beneficiary Address",
+        type: "text",
+        required: true,
+        placeholder: "Street, City, State, ZIP",
+      },
+      // Step 3 — 245(i) Eligibility
+      {
+        name: "family_relationship",
+        label: "Family Relationship / Preference Category",
+        type: "select",
+        required: true,
+        options: [
+          "Immediate Relative (spouse, parent, child)",
+          "F1 — Unmarried son/daughter of USC",
+          "F2A — Spouse/child of LPR",
+          "F2B — Unmarried son/daughter of LPR",
+          "F3 — Married son/daughter of USC",
+          "F4 — Brother/sister of USC",
+        ],
+      },
+      {
+        name: "underlying_petition_receipt",
+        label: "Underlying I-130 Receipt Number",
+        type: "text",
+        required: true,
+        placeholder: "e.g. WAC0117357120",
+      },
+      {
+        name: "priority_date",
+        label: "Priority Date of Underlying Petition",
+        type: "text",
+        required: true,
+        placeholder: "e.g. 04/09/2001",
+      },
+      {
+        name: "grandfathered_evidence",
+        label: "Grandfathered Case Evidence",
+        type: "textarea",
+        required: true,
+        placeholder:
+          "Describe the approval notice — receipt number, receipt date, priority date (must be on or before April 30, 2001)...",
+      },
+      // Step 4 — Immigration History & Admissibility
+      {
+        name: "last_entry_date",
+        label: "Date of Last Entry to the U.S.",
+        type: "date",
+        required: true,
+      },
+      {
+        name: "last_entry_port",
+        label: "Port of Last Entry",
+        type: "text",
+        required: true,
+        placeholder: "e.g. Nuevo Laredo, Texas",
+      },
+      {
+        name: "manner_of_entry",
+        label: "Manner of Entry / Visa Class",
+        type: "text",
+        required: true,
+        placeholder: "e.g. Admitted as B-2 tourist visa",
+      },
+      {
+        name: "immigration_violations",
+        label: "Immigration Violations / Inadmissibility (if any)",
+        type: "textarea",
+        required: false,
+        placeholder:
+          "e.g. Unauthorized employment, overstay. Explain why these do not bar adjustment under 245(i) or describe any hardship arguments...",
+      },
+      // Step 5 — Family & Employment
+      {
+        name: "marital_status",
+        label: "Beneficiary Current Marital Status",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "spouse_name",
+        label: "Spouse Name (if married)",
+        type: "text",
+        required: false,
+      },
+      {
+        name: "children",
+        label: "Children (if any)",
+        type: "textarea",
+        required: false,
+        placeholder:
+          "Child 1: [Name], DOB [Date], Country [Country], Status [USC/LPR/other]",
+      },
+      {
+        name: "current_employment",
+        label: "Current Employment in the U.S.",
+        type: "text",
+        required: false,
+        placeholder: "e.g. Chef at Chuy's TexMex Restaurant since 11/2019",
+      },
+      {
+        name: "hardship_factors",
+        label: "Hardship / Discretionary Factors",
+        type: "textarea",
+        required: false,
+        placeholder:
+          "Factors supporting favorable discretion: family ties, community ties, children's needs, country conditions, length of U.S. residence...",
+      },
+      // Step 6 — Evidence
+      {
+        name: "evidence_tabs",
+        label: "Evidence Tabs",
+        type: "textarea",
+        required: true,
+        placeholder:
+          "Tab A: Forms G-1650\nTab B: Form G-28 for Petitioner\nTab C: Form G-28 for Beneficiary\nTab D: Form I-130\nTab E: Form I-485\nTab F: Form I-485A\nTab G: Form I-765\nTab H: Identity documents\nTab I: I-130 Approval Notice + Proof of Physical Presence\nTab J: Form I-864\nTab K: Country conditions evidence\nTab L: Form I-693",
+      },
+    ],
+    system_prompt:
+      "You are an expert US immigration attorney specializing in adjustment of status cases. Generate a professional USCIS cover letter for an I-485 Application to Register Permanent Residence or Adjust Status filed under INA § 245(i). Use formal legal language throughout. STRUCTURE: (1) Date (use today's date), (2) USCIS filing address for I-485 filed under 245(i) in Texas (Vermont Service Center or National Benefits Center), (3) RE: line with petitioner name, beneficiary name, underlying petition receipt number, priority date, and form numbers being filed, (4) Dear Officer salutation, (5) Opening paragraph identifying the petitioner, beneficiary, their relationship, and the forms being submitted, (6) INA 245(i) eligibility paragraph — explain the grandfathered petition (receipt number, priority date on or before April 30, 2001, approval), (7) Immigration history paragraph — last entry, status, any violations and why they do not bar adjustment under 245(i), (8) Hardship and discretionary factors paragraph (if provided), (9) Paragraph listing attached evidence by tab and its purpose, (10) Closing paragraph requesting favorable adjudication, (11) Respectfully submitted signature block with [Attorney Name] placeholder if not provided. Do NOT invent any facts not in the provided information.",
+    steps: [
+      {
+        title: "Petitioner",
+        fields: [
+          "petitioner_name",
+          "petitioner_a_number",
+          "petitioner_status",
+          "petitioner_address",
+        ],
+      },
+      {
+        title: "Beneficiary",
+        fields: [
+          "beneficiary_name",
+          "beneficiary_other_name",
+          "beneficiary_dob",
+          "beneficiary_country_of_birth",
+          "beneficiary_address",
+        ],
+      },
+      {
+        title: "245(i) Eligibility",
+        fields: [
+          "family_relationship",
+          "underlying_petition_receipt",
+          "priority_date",
+          "grandfathered_evidence",
+        ],
+      },
+      {
+        title: "Immigration History & Admissibility",
+        fields: [
+          "last_entry_date",
+          "last_entry_port",
+          "manner_of_entry",
+          "immigration_violations",
+        ],
+      },
+      {
+        title: "Family & Employment",
+        fields: [
+          "marital_status",
+          "spouse_name",
+          "children",
+          "current_employment",
+          "hardship_factors",
+        ],
+      },
+      {
+        title: "Evidence",
+        fields: ["evidence_tabs"],
+      },
+    ],
+  },
 ];
 
 const translationTemplates: Template[] = [

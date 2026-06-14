@@ -42,7 +42,9 @@ export type DocumentType =
   | "legal-argument"
   | "evidence-summary"
   | "case-summary"
-  | "certified-translation";
+  | "certified-translation"
+  | "i751-cover-letter"
+  | "i485-245i-cover-letter";
 
 // Paso de wizard de template
 export interface TemplateStep {
