@@ -12,7 +12,6 @@ import {
   USER_ROLES,
   HTTP_STATUS,
   PLAN_LIMITS,
-  AI_PROVIDERS,
   AI_MODELS,
   CLAUDE_MODEL,
   TIMEOUTS,
@@ -107,14 +106,6 @@ describe('constants', () => {
       expect(HTTP_STATUS.FORBIDDEN).toBe(403);
       expect(HTTP_STATUS.NOT_FOUND).toBe(404);
       expect(HTTP_STATUS.INTERNAL_SERVER_ERROR).toBe(500);
-    });
-  });
-
-  describe('AI_PROVIDERS', () => {
-    it('has anthropic, google, groq', () => {
-      expect(AI_PROVIDERS.ANTHROPIC).toBe('anthropic');
-      expect(AI_PROVIDERS.GOOGLE).toBe('google');
-      expect(AI_PROVIDERS.GROQ).toBe('groq');
     });
   });
 

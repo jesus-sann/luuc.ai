@@ -31,12 +31,6 @@ const DOC_LANGUAGES = [
   { value: "de", label: "Deutsch" },
 ];
 
-const AI_PROVIDERS = [
-  { value: "auto", label: "Auto (predeterminado)", description: "Usa el modelo configurado por defecto" },
-  { value: "anthropic", label: "Claude (Anthropic)", description: "Más preciso para documentos legales" },
-  { value: "google", label: "Gemini (Google)", description: "Rápido y económico" },
-  { value: "groq", label: "Llama (Groq)", description: "Gratuito para pruebas" },
-];
 
 export default function TemplateFormPage() {
   const params = useParams();
@@ -51,7 +45,6 @@ export default function TemplateFormPage() {
   const [generatedDocId, setGeneratedDocId] = useState<string | null>(null);
   const [generatedTitle, setGeneratedTitle] = useState<string>("");
   const [showModal, setShowModal] = useState(false);
-  const [aiProvider, setAiProvider] = useState("auto");
   const [docLanguage, setDocLanguage] = useState("es");
   const [userInstructions, setUserInstructions] = useState("");
 
@@ -136,7 +129,7 @@ export default function TemplateFormPage() {
     setGenerateError(null);
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 55_000);
+    const timeout = setTimeout(() => controller.abort(), 90_000);
 
     // Translation templates use a dedicated endpoint and send variables flat
     const isTranslation = !!template.endpoint;
@@ -147,7 +140,6 @@ export default function TemplateFormPage() {
           template: template.slug,
           variables,
           title: `${template.name} - ${new Date().toLocaleDateString("es-CO")}`,
-          ...(aiProvider !== "auto" && { provider: aiProvider }),
           language: docLanguage,
           ...(userInstructions.trim() && { userInstructions: userInstructions.trim() }),
           ...(caseSummary && { caseSummary }),
@@ -360,20 +352,6 @@ export default function TemplateFormPage() {
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-sm">Modelo de IA</Label>
-                    <Select value={aiProvider} onValueChange={setAiProvider}>
-                      <SelectTrigger><SelectValue placeholder="Auto (predeterminado)" /></SelectTrigger>
-                      <SelectContent>
-                        {AI_PROVIDERS.map((p) => (
-                          <SelectItem key={p.value} value={p.value}>
-                            <span className="font-medium">{p.label}</span>
-                            <span className="ml-2 text-xs text-slate-500">— {p.description}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
                     <Label htmlFor="userInstructionsUpload" className="text-sm">
                       Instrucciones específicas <span className="text-slate-400 font-normal">(opcional)</span>
                     </Label>
@@ -427,23 +405,6 @@ export default function TemplateFormPage() {
                 <SelectContent>
                   {DOC_LANGUAGES.map((l) => (
                     <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-sm">Modelo de IA</Label>
-              <Select value={aiProvider} onValueChange={setAiProvider}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Auto (predeterminado)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AI_PROVIDERS.map((p) => (
-                    <SelectItem key={p.value} value={p.value}>
-                      <span className="font-medium">{p.label}</span>
-                      <span className="ml-2 text-xs text-slate-500">— {p.description}</span>
-                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>

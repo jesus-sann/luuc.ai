@@ -203,7 +203,6 @@ async function handler(request: NextRequest) {
     }
 
     const body = await request.json();
-    const providerOverride = body.provider;
     const languageOverride = body.language;
     const rawData: GenerateCustomRequest = body;
 
@@ -229,7 +228,7 @@ async function handler(request: NextRequest) {
     let aiResponse;
     try {
       aiResponse = await Promise.race([
-        generateText(getSystemPrompt(languageOverride), `Redacta el siguiente documento legal:\n${userPrompt}`, 4096, providerOverride),
+        generateText(getSystemPrompt(languageOverride), `Redacta el siguiente documento legal:\n${userPrompt}`, 4096),
         new Promise<never>((_, reject) => {
           controller.signal.addEventListener("abort", () => {
             reject(new Error("timeout"));

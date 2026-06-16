@@ -186,18 +186,8 @@ export const PLAN_LIMITS = {
 // AI PROVIDER CONFIGURATION
 // ===========================================
 
-export const AI_PROVIDERS = {
-  ANTHROPIC: "anthropic",
-  GOOGLE: "google",
-  GROQ: "groq",
-} as const;
-
-export type AIProvider = typeof AI_PROVIDERS[keyof typeof AI_PROVIDERS];
-
 export const AI_MODELS = {
   ANTHROPIC: "claude-sonnet-4-6",
-  GOOGLE: "gemini-2.0-flash",
-  GROQ: "llama-3.3-70b-versatile",
 } as const;
 
 // Legacy alias
@@ -208,7 +198,7 @@ export const CLAUDE_MODEL = AI_MODELS.ANTHROPIC;
 // ===========================================
 
 export const TIMEOUTS = {
-  CLAUDE_API: 60000, // 60 seconds
+  CLAUDE_API: 80000, // 80 seconds — gives room within 90s client abort
   DATABASE_QUERY: 10000, // 10 seconds
   FILE_UPLOAD: 30000, // 30 seconds
 } as const;

@@ -1,26 +1,16 @@
 import { generateTextSimple } from "@/lib/ai-provider";
-import { type AIProvider } from "@/lib/constants";
 import { TIMEOUTS } from "@/lib/constants";
 
 export async function generateWithClaude(
   systemPrompt: string,
-  userPrompt: string,
-  provider?: AIProvider
+  userPrompt: string
 ): Promise<string> {
-  // Create AbortController for timeout
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.CLAUDE_API);
 
   try {
-    const result = await Promise.race([
-      generateTextSimple(systemPrompt, userPrompt, 4096, provider),
-      new Promise<never>((_, reject) => {
-        controller.signal.addEventListener("abort", () => {
-          reject(new Error("AI request timed out after 60 seconds"));
-        });
-      }),
-    ]);
-
+    // Pass the signal to the SDK so the HTTP request is actually cancelled
+    const result = await generateTextSimple(systemPrompt, userPrompt, 4096, controller.signal);
     clearTimeout(timeoutId);
     return result;
   } catch (error) {
@@ -32,10 +22,9 @@ export async function generateWithClaude(
 export async function generateDocument(
   templateName: string,
   variables: Record<string, string>,
-  provider?: AIProvider,
   language?: string
 ): Promise<string> {
-  return generateDocumentWithContext(templateName, variables, "", "", provider, language);
+  return generateDocumentWithContext(templateName, variables, "", "", language);
 }
 
 /**
@@ -47,7 +36,6 @@ export async function generateDocumentWithContext(
   variables: Record<string, string>,
   companyContext: string,
   companyInstructions: string,
-  provider?: AIProvider,
   language?: string,
   userInstructions?: string,
   caseSummary?: string
@@ -148,7 +136,7 @@ IMPORTANTE: Presta especial atención a las instrucciones del usuario. Adapta el
 
 Genera el documento legal completo${companyContext ? " respetando el estilo de los documentos de referencia" : ""}:`;
 
-  return generateWithClaude(systemPrompt, userPrompt, provider);
+  return generateWithClaude(systemPrompt, userPrompt);
 }
 
 export async function analyzeDocument(
@@ -224,19 +212,36 @@ IMPORTANTE:
  * Generate a concise, descriptive title for a legal document based on its content.
  * Falls back to the provided fallback title if AI call fails.
  */
-export async function generateDocumentTitle(
-  content: string,
-  fallbackTitle: string,
-  provider?: AIProvider
-): Promise<string> {
-  try {
-    const systemPrompt = "You extract a concise professional title from legal documents. Return ONLY the title, nothing else. Max 80 characters. No quotes.";
-    const snippet = content.substring(0, 2000);
-    const userPrompt = `Extract a short descriptive title for this legal document:\n\n${snippet}`;
-    const title = await generateTextSimple(systemPrompt, userPrompt, 100, provider);
-    const cleaned = title.trim().replace(/^["']|["']$/g, "");
-    return cleaned.length > 0 && cleaned.length <= 100 ? cleaned : fallbackTitle;
-  } catch {
-    return fallbackTitle;
+// Heuristic title extraction — no AI call, instant.
+// Immigration cover letters always include a "RE:" line which is the best title.
+// Other documents are titled from the first meaningful heading line.
+export function generateDocumentTitle(content: string, fallbackTitle: string): string {
+  const lines = content.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
+
+  // RE: / SUBJECT: line — most cover letters have this
+  for (const line of lines) {
+    const m = line.match(/^(?:RE|SUBJECT|ASUNTO):\s+(.+)/i);
+    if (m) {
+      const t = m[1].trim();
+      if (t.length >= 5 && t.length <= 100) return t;
+    }
   }
+
+  // First non-boilerplate heading in the first 10 lines
+  const skip = [
+    /^(January|February|March|April|May|June|July|August|September|October|November|December)/i,
+    /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i,
+    /^\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}/,
+    /^(Dear|Estimad|A quien|To whom)/i,
+    /^(USCIS|U\.S\.|United States|Embassy|Consulate|Department)/i,
+    /^\[/,
+  ];
+  for (const line of lines.slice(0, 10)) {
+    if (line.length < 10 || line.length > 120) continue;
+    if (skip.some((p) => p.test(line))) continue;
+    const cleaned = line.replace(/^[#*\-=>\s]+/, "").trim();
+    if (cleaned.length >= 10) return cleaned.substring(0, 80);
+  }
+
+  return fallbackTitle;
 }

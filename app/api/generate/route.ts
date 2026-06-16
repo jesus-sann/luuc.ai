@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 export const revalidate = 0;
-export const maxDuration = 60; // AI generation can take 30-45s; default 10s causes silent 504s
+export const maxDuration = 90; // generate (up to 60s) + title (up to 15s) need headroom beyond client 90s abort
 import { NextRequest, NextResponse } from "next/server";
 import { generateDocumentWithContext, generateDocumentTitle } from "@/lib/claude";
 import { saveDocument, logUsage } from "@/lib/supabase";
@@ -57,7 +57,6 @@ async function handler(request: NextRequest) {
     }
 
     const { template, variables, title, companyId } = validation.sanitized!;
-    const provider = body.provider; // optional AI provider override
     const language = body.language; // optional output language
     // Validate userInstructions against prompt injection patterns (M-2)
     const rawInstructions = typeof body.userInstructions === "string"
@@ -140,7 +139,6 @@ ${knowledgeContext}
       variables,
       fullContext,
       companyInstructions,
-      provider,
       language,
       userInstructions,
       caseSummary
@@ -148,7 +146,7 @@ ${knowledgeContext}
 
     // Generate AI title from content
     const fallbackTitle = title || `${template} - ${new Date().toLocaleDateString("es-CO")}`;
-    const aiTitle = await generateDocumentTitle(content, fallbackTitle, provider);
+    const aiTitle = generateDocumentTitle(content, fallbackTitle);
 
     // Guardar en Supabase
     let savedDocument = null;
