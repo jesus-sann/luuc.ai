@@ -214,11 +214,15 @@ ${knowledgeContext}
   } catch (error) {
     // SECURITY: Do not expose internal error messages to clients — they can contain
     // AI model response fragments, prompt text, or SDK-level details.
-    console.error("Error generating document:", error instanceof Error ? error.message : error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error("Error generating document:", errMsg, error);
+    const isModelError = errMsg.includes("model") || errMsg.includes("deprecated") || errMsg.includes("not found");
     return NextResponse.json<ApiResponse<null>>(
       {
         success: false,
-        error: "Error generando documento. Intenta de nuevo.",
+        error: isModelError
+          ? "Error de configuración del modelo de IA. Contacta soporte."
+          : "Error generando documento. Intenta de nuevo.",
       },
       { status: 500 }
     );

@@ -195,7 +195,7 @@ export const AI_PROVIDERS = {
 export type AIProvider = typeof AI_PROVIDERS[keyof typeof AI_PROVIDERS];
 
 export const AI_MODELS = {
-  ANTHROPIC: "claude-sonnet-4-20250514",
+  ANTHROPIC: "claude-sonnet-4-6",
   GOOGLE: "gemini-2.0-flash",
   GROQ: "llama-3.3-70b-versatile",
 } as const;
