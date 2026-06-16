@@ -128,10 +128,6 @@ export default function TemplateFormPage() {
     setIsLoading(true);
     setGenerateError(null);
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 90_000);
-
-    // Translation templates use a dedicated endpoint and send variables flat
     const isTranslation = !!template.endpoint;
     const endpoint = template.endpoint ?? "/api/generate";
     const requestBody = isTranslation
@@ -145,32 +141,100 @@ export default function TemplateFormPage() {
           ...(caseSummary && { caseSummary }),
         };
 
+    // Translation templates use a regular JSON endpoint; everything else streams.
+    if (isTranslation) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 90_000);
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
+          body: JSON.stringify(requestBody),
+        });
+        const data = await response.json();
+        if (data.success) {
+          setGeneratedContent(data.data.content);
+          setGeneratedDocId(data.data.id || null);
+          setGeneratedTitle(data.data.title || template.name);
+          setShowModal(true);
+        } else {
+          setGenerateError(data.error || "Error al generar el documento. Intenta de nuevo.");
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          setGenerateError("La generación tardó demasiado. Intenta de nuevo o usa un documento más corto.");
+        } else {
+          setGenerateError("Error de conexión. Verifica tu internet e intenta de nuevo.");
+        }
+      } finally {
+        clearTimeout(timeout);
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // SSE streaming path for /api/generate
     try {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
         body: JSON.stringify(requestBody),
       });
 
-      const data = await response.json();
+      if (!response.ok || !response.body) {
+        const data = await response.json().catch(() => ({}));
+        setGenerateError((data as { error?: string }).error || "Error al generar el documento. Intenta de nuevo.");
+        return;
+      }
 
-      if (data.success) {
-        setGeneratedContent(data.data.content);
-        setGeneratedDocId(data.data.id || null);
-        setGeneratedTitle(data.data.title || template.name);
-        setShowModal(true);
-      } else {
-        setGenerateError(data.error || "Error al generar el documento. Intenta de nuevo.");
+      const reader = response.body.getReader();
+      const dec = new TextDecoder();
+      let buf = "";
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buf += dec.decode(value, { stream: true });
+        const lines = buf.split("\n");
+        buf = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const event = JSON.parse(line.slice(6)) as {
+              type: string;
+              text?: string;
+              id?: string;
+              title?: string;
+              usedCompanyContext?: boolean;
+              message?: string;
+            };
+
+            if (event.type === "done") {
+              setGeneratedContent((prev) => prev); // already accumulated via delta
+              setGeneratedDocId(event.id ?? null);
+              setGeneratedTitle(event.title || template.name);
+              setShowModal(true);
+            } else if (event.type === "delta") {
+              setGeneratedContent((prev) => (prev ?? "") + (event.text ?? ""));
+            } else if (event.type === "error") {
+              setGenerateError(event.message || "Error al generar el documento. Intenta de nuevo.");
+            }
+          } catch {
+            // malformed SSE line — skip
+          }
+        }
       }
     } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") {
-        setGenerateError("La generación tardó demasiado. Intenta de nuevo o usa un documento más corto.");
-      } else {
-        setGenerateError("Error de conexión. Verifica tu internet e intenta de nuevo.");
-      }
+      setGenerateError(
+        err instanceof Error && err.name === "AbortError"
+          ? "La generación tardó demasiado. Intenta de nuevo o usa un documento más corto."
+          : "Error de conexión. Verifica tu internet e intenta de nuevo."
+      );
     } finally {
-      clearTimeout(timeout);
       setIsLoading(false);
     }
   };

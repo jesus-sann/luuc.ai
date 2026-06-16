@@ -1,5 +1,5 @@
 import { generateTextSimple } from "@/lib/ai-provider";
-import { TIMEOUTS } from "@/lib/constants";
+import { AI_MODELS, TIMEOUTS } from "@/lib/constants";
 
 export async function generateWithClaude(
   systemPrompt: string,
@@ -9,7 +9,6 @@ export async function generateWithClaude(
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.CLAUDE_API);
 
   try {
-    // Pass the signal to the SDK so the HTTP request is actually cancelled
     const result = await generateTextSimple(systemPrompt, userPrompt, 4096, controller.signal);
     clearTimeout(timeoutId);
     return result;
@@ -19,19 +18,10 @@ export async function generateWithClaude(
   }
 }
 
-export async function generateDocument(
-  templateName: string,
-  variables: Record<string, string>,
-  language?: string
-): Promise<string> {
-  return generateDocumentWithContext(templateName, variables, "", "", language);
-}
-
-/**
- * Genera un documento usando contexto de documentos de referencia de la empresa
- * CLAVE: Esta funcion permite que los documentos generados respeten el estilo de la firma
- */
-export async function generateDocumentWithContext(
+// ---------------------------------------------------------------------------
+// Shared prompt builder used by both the streaming and non-streaming paths
+// ---------------------------------------------------------------------------
+function buildDocumentPrompts(
   templateName: string,
   variables: Record<string, string>,
   companyContext: string,
@@ -39,7 +29,7 @@ export async function generateDocumentWithContext(
   language?: string,
   userInstructions?: string,
   caseSummary?: string
-): Promise<string> {
+): { systemPrompt: string; userPrompt: string } {
   const lang = language || "es";
   const langInstructions: Record<string, { locale: string; region: string }> = {
     es: { locale: "español", region: "Colombia y Latinoamérica" },
@@ -50,10 +40,10 @@ export async function generateDocumentWithContext(
   };
   const li = langInstructions[lang] || langInstructions["es"];
 
-  // Context-aware persona: US immigration work is English; avoid "corporate lawyer" for immigration docs
-  const persona = lang === "en"
-    ? `You are an experienced US immigration attorney drafting professional legal documents for ${li.region}.`
-    : `Eres un abogado experto redactando documentos legales en ${li.locale} para ${li.region}.`;
+  const persona =
+    lang === "en"
+      ? `You are an experienced US immigration attorney drafting professional legal documents for ${li.region}.`
+      : `Eres un abogado experto redactando documentos legales en ${li.locale} para ${li.region}.`;
 
   let systemPrompt = `${persona}
 
@@ -67,7 +57,6 @@ FUNDAMENTAL RULES:
 7. CRITICAL — Reference ONLY the law firm and attorneys identified in the FIRM IDENTITY section. NEVER cite, mention, or substitute a different law firm or attorney from your training data.
 8. For US immigration cover letters: follow this structure — date → recipient USCIS address → RE: line → salutation → organized body paragraphs supporting each ground of eligibility → signature block with attorney name placeholder if not provided.`;
 
-  // Firm identity + style instructions — injected so AI never invents names
   if (companyInstructions) {
     systemPrompt += `
 
@@ -78,7 +67,6 @@ ${companyInstructions}
 ═══════════════════════════════════════════════════════════════════════════════`;
   }
 
-  // Agregar contexto de documentos de referencia si existe
   if (companyContext) {
     systemPrompt += `
 
@@ -102,9 +90,7 @@ en los documentos de referencia. Adapta el contenido a las variables proporciona
 pero mantén la esencia y calidad de los documentos aprobados.`;
   }
 
-  let userPrompt = `TIPO DE DOCUMENTO: ${templateName}
-
-`;
+  let userPrompt = `TIPO DE DOCUMENTO: ${templateName}\n\n`;
 
   if (caseSummary && caseSummary.trim()) {
     userPrompt += `RESUMEN DEL CASO:
@@ -132,11 +118,74 @@ ${userInstructions.trim()}
 IMPORTANTE: Presta especial atención a las instrucciones del usuario. Adapta el documento para cumplir con sus requisitos específicos.`;
   }
 
-  userPrompt += `
+  userPrompt += `\n\nGenera el documento legal completo${companyContext ? " respetando el estilo de los documentos de referencia" : ""}:`;
 
-Genera el documento legal completo${companyContext ? " respetando el estilo de los documentos de referencia" : ""}:`;
+  return { systemPrompt, userPrompt };
+}
 
+export async function generateDocument(
+  templateName: string,
+  variables: Record<string, string>,
+  language?: string
+): Promise<string> {
+  return generateDocumentWithContext(templateName, variables, "", "", language);
+}
+
+export async function generateDocumentWithContext(
+  templateName: string,
+  variables: Record<string, string>,
+  companyContext: string,
+  companyInstructions: string,
+  language?: string,
+  userInstructions?: string,
+  caseSummary?: string
+): Promise<string> {
+  const { systemPrompt, userPrompt } = buildDocumentPrompts(
+    templateName, variables, companyContext, companyInstructions,
+    language, userInstructions, caseSummary
+  );
   return generateWithClaude(systemPrompt, userPrompt);
+}
+
+// Streaming variant — yields text chunks as Claude generates them.
+// The route uses this to pipe an SSE response back to the client so that
+// there is no single long wait: Vercel keeps the connection alive because
+// data is flowing, and the user sees the document build up in real time.
+export async function* streamDocumentWithContext(
+  templateName: string,
+  variables: Record<string, string>,
+  companyContext: string,
+  companyInstructions: string,
+  language?: string,
+  userInstructions?: string,
+  caseSummary?: string
+): AsyncGenerator<string> {
+  const { systemPrompt, userPrompt } = buildDocumentPrompts(
+    templateName, variables, companyContext, companyInstructions,
+    language, userInstructions, caseSummary
+  );
+
+  const Anthropic = (await import("@anthropic-ai/sdk")).default;
+  if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is not configured");
+
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+  const stream = await client.messages.create({
+    model: AI_MODELS.ANTHROPIC,
+    max_tokens: 4096,
+    system: systemPrompt,
+    messages: [{ role: "user", content: userPrompt }],
+    stream: true,
+  });
+
+  for await (const event of stream) {
+    if (
+      event.type === "content_block_delta" &&
+      event.delta.type === "text_delta"
+    ) {
+      yield event.delta.text;
+    }
+  }
 }
 
 export async function analyzeDocument(
@@ -156,7 +205,6 @@ ${focusContext ? "SPECIAL FOCUS: The user has requested that you focus on specif
 IMPORTANT: All text values in your JSON response MUST be written in ${locale}.
 Always respond in valid JSON format.`;
 
-  // Truncate content if too long and log it
   const maxContentLength = 15000;
   const wasTruncated = content.length > maxContentLength;
   const truncatedContent = content.substring(0, maxContentLength);
@@ -208,17 +256,11 @@ IMPORTANTE:
   return generateWithClaude(systemPrompt, userPrompt);
 }
 
-/**
- * Generate a concise, descriptive title for a legal document based on its content.
- * Falls back to the provided fallback title if AI call fails.
- */
 // Heuristic title extraction — no AI call, instant.
 // Immigration cover letters always include a "RE:" line which is the best title.
-// Other documents are titled from the first meaningful heading line.
 export function generateDocumentTitle(content: string, fallbackTitle: string): string {
   const lines = content.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
 
-  // RE: / SUBJECT: line — most cover letters have this
   for (const line of lines) {
     const m = line.match(/^(?:RE|SUBJECT|ASUNTO):\s+(.+)/i);
     if (m) {
@@ -227,7 +269,6 @@ export function generateDocumentTitle(content: string, fallbackTitle: string): s
     }
   }
 
-  // First non-boilerplate heading in the first 10 lines
   const skip = [
     /^(January|February|March|April|May|June|July|August|September|October|November|December)/i,
     /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i,

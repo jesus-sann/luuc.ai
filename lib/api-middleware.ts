@@ -55,10 +55,10 @@ function getClientIp(request: NextRequest): string {
  * Higher-order function to wrap API handlers with rate limiting
  */
 export function withRateLimit(
-  handler: (request: NextRequest, context?: any) => Promise<NextResponse>,
+  handler: (request: NextRequest, context?: any) => Promise<NextResponse | Response>,
   routeType: RouteType = "crud"
 ) {
-  return async (request: NextRequest, context?: any): Promise<NextResponse> => {
+  return async (request: NextRequest, context?: any): Promise<NextResponse | Response> => {
     try {
       const ip = getClientIp(request);
       const token = `${ip}-${routeType}`;
