@@ -28,7 +28,8 @@ function buildDocumentPrompts(
   companyInstructions: string,
   language?: string,
   userInstructions?: string,
-  caseSummary?: string
+  caseSummary?: string,
+  templateSystemPrompt?: string
 ): { systemPrompt: string; userPrompt: string } {
   const lang = language || "es";
   const langInstructions: Record<string, { locale: string; region: string }> = {
@@ -56,6 +57,17 @@ FUNDAMENTAL RULES:
 6. If non-identifying case information is missing (e.g. a date, a statute number), use the appropriate generic legal term or a bracketed placeholder.
 7. CRITICAL — Reference ONLY the law firm and attorneys identified in the FIRM IDENTITY section. NEVER cite, mention, or substitute a different law firm or attorney from your training data.
 8. For US immigration cover letters: follow this structure — date → recipient USCIS address → RE: line → salutation → organized body paragraphs supporting each ground of eligibility → signature block with attorney name placeholder if not provided.`;
+
+  // Template-specific structure instructions take priority over the generic rules above
+  if (templateSystemPrompt) {
+    systemPrompt += `
+
+═══════════════════════════════════════════════════════════════════════════════
+DOCUMENT TYPE INSTRUCTIONS (follow exactly — these override generic rules)
+═══════════════════════════════════════════════════════════════════════════════
+${templateSystemPrompt}
+═══════════════════════════════════════════════════════════════════════════════`;
+  }
 
   if (companyInstructions) {
     systemPrompt += `
@@ -138,19 +150,17 @@ export async function generateDocumentWithContext(
   companyInstructions: string,
   language?: string,
   userInstructions?: string,
-  caseSummary?: string
+  caseSummary?: string,
+  templateSystemPrompt?: string
 ): Promise<string> {
   const { systemPrompt, userPrompt } = buildDocumentPrompts(
     templateName, variables, companyContext, companyInstructions,
-    language, userInstructions, caseSummary
+    language, userInstructions, caseSummary, templateSystemPrompt
   );
   return generateWithClaude(systemPrompt, userPrompt);
 }
 
 // Streaming variant — yields text chunks as Claude generates them.
-// The route uses this to pipe an SSE response back to the client so that
-// there is no single long wait: Vercel keeps the connection alive because
-// data is flowing, and the user sees the document build up in real time.
 export async function* streamDocumentWithContext(
   templateName: string,
   variables: Record<string, string>,
@@ -158,11 +168,12 @@ export async function* streamDocumentWithContext(
   companyInstructions: string,
   language?: string,
   userInstructions?: string,
-  caseSummary?: string
+  caseSummary?: string,
+  templateSystemPrompt?: string
 ): AsyncGenerator<string> {
   const { systemPrompt, userPrompt } = buildDocumentPrompts(
     templateName, variables, companyContext, companyInstructions,
-    language, userInstructions, caseSummary
+    language, userInstructions, caseSummary, templateSystemPrompt
   );
 
   const Anthropic = (await import("@anthropic-ai/sdk")).default;

@@ -15,6 +15,7 @@ import {
 import { getRelevantKnowledgeContext } from "@/lib/knowledge-base";
 import { ApiResponse } from "@/types";
 import { validateGenerateRequest, validateFocusContext } from "@/lib/validators";
+import { getTemplateBySlug } from "@/lib/templates";
 import { USAGE_ACTION_TYPES } from "@/lib/constants";
 import { withRateLimit } from "@/lib/api-middleware";
 import { auditLog } from "@/lib/audit-log";
@@ -117,7 +118,26 @@ async function handler(request: NextRequest): Promise<Response> {
     fullContext += `INSTRUCCIONES IMPORTANTES:\n- Usa TODOS los documentos anteriores como referencia de estilo, estructura y terminologia\n- Manten coherencia con los estandares de la firma\n- Si encuentras clausulas o parrafos relevantes en los ejemplos, adaptalos\n- Respeta el tono formal y el lenguaje tecnico usado\n- Asegurate de que el documento generado sea coherente con los documentos de referencia\n`;
   }
 
-  const fallbackTitle = title || `${template} - ${new Date().toLocaleDateString("es-CO")}`;
+  // Build a descriptive title from variables so it shows client name + case type
+  const clientName =
+    variables.applicant_name ||
+    variables.petitioner_name ||
+    variables.beneficiary_name ||
+    variables.self_petitioner_name ||
+    variables.nombre_cliente ||
+    "";
+  const caseType = variables.form_type || variables.visa_type || "";
+  const templateDef = getTemplateBySlug(template);
+  const templateLabel = templateDef?.name || template;
+  const dateStr = new Date().toLocaleDateString("es-CO");
+
+  const smartFallback = clientName && caseType
+    ? `${clientName} — ${caseType}`
+    : clientName
+    ? `${clientName} — ${templateLabel}`
+    : title || `${templateLabel} — ${dateStr}`;
+
+  const templateSystemPrompt = templateDef?.system_prompt;
   const usedCompanyContext = !!(companyContext || knowledgeContext);
 
   // Capture these for use inside the stream closure
@@ -138,14 +158,15 @@ async function handler(request: NextRequest): Promise<Response> {
           companyInstructions,
           language,
           userInstructions,
-          caseSummary
+          caseSummary,
+          templateSystemPrompt
         )) {
           fullContent += chunk;
           controller.enqueue(sse({ type: "delta", text: chunk }));
         }
 
         // Post-stream: extract title, save to DB
-        const aiTitle = generateDocumentTitle(fullContent, fallbackTitle);
+        const aiTitle = generateDocumentTitle(fullContent, smartFallback);
 
         let docId: string | undefined;
         try {
