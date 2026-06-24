@@ -63,8 +63,10 @@ export default function TemplateFormPage() {
   const [inputMode, setInputMode] = useState<"manual" | "case-builder">("manual");
 
   // Case Builder — Step 1 (build) / Step 2 (generate)
+  type ParsedFile = { name: string; text: string };
   const [cbStep, setCbStep] = useState<0 | 1>(0);
-  const [cbFiles, setCbFiles] = useState<File[]>([]);
+  const [cbParsedFiles, setCbParsedFiles] = useState<ParsedFile[]>([]);
+  const [cbParsingFile, setCbParsingFile] = useState(false);
   const [cbBrief, setCbBrief] = useState("");
   const [cbIsAnalyzing, setCbIsAnalyzing] = useState(false);
   const [cbAnalysisError, setCbAnalysisError] = useState<string | null>(null);
@@ -84,9 +86,31 @@ export default function TemplateFormPage() {
     }
   };
 
-  // Case Builder dropzone — accepts multiple files
+  // Case Builder dropzone: parse each file via /api/parse-file immediately on drop
+  // so we only send extracted text (not binary) to /api/case-builder — avoids 413.
   const { getRootProps: getCbRootProps, getInputProps: getCbInputProps, isDragActive: isCbDragActive } = useDropzone({
-    onDrop: (files: File[]) => setCbFiles((prev) => [...prev, ...files].slice(0, 5)),
+    onDrop: async (files: File[]) => {
+      const slots = Math.max(0, 5 - cbParsedFiles.length);
+      for (const file of files.slice(0, slots)) {
+        setCbParsingFile(true);
+        setCbAnalysisError(null);
+        const fd = new FormData();
+        fd.append("file", file);
+        try {
+          const res = await fetch("/api/parse-file", { method: "POST", body: fd });
+          const data = await res.json();
+          if (data.success) {
+            setCbParsedFiles((prev) => [...prev, { name: file.name, text: data.data.text }].slice(0, 5));
+          } else {
+            setCbAnalysisError(`${file.name}: ${data.error || "formato no soportado"}`);
+          }
+        } catch {
+          setCbAnalysisError(`No se pudo procesar ${file.name}`);
+        } finally {
+          setCbParsingFile(false);
+        }
+      }
+    },
     accept: {
       "application/pdf": [".pdf"],
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
@@ -94,7 +118,7 @@ export default function TemplateFormPage() {
       "text/plain": [".txt"],
     },
     multiple: true,
-    disabled: cbIsAnalyzing,
+    disabled: cbIsAnalyzing || cbParsingFile,
   });
 
   if (!template) {
@@ -236,28 +260,30 @@ export default function TemplateFormPage() {
     await generateDocument(values);
   };
 
-  // Case Builder Step 1: analyze uploaded forms + brief
+  // Case Builder Step 1: send extracted text + brief as JSON (no binary upload → no 413)
   const handleAnalyzeCase = async () => {
-    if (!cbBrief.trim() && cbFiles.length === 0) {
+    if (!cbBrief.trim() && cbParsedFiles.length === 0) {
       setCbAnalysisError("Sube al menos un formulario o escribe un brief del caso.");
       return;
     }
     setCbIsAnalyzing(true);
     setCbAnalysisError(null);
 
-    const fd = new FormData();
-    fd.append("brief", cbBrief);
-    fd.append("template", templateSlug);
-    for (const file of cbFiles) fd.append("files", file);
+    const formsText = cbParsedFiles
+      .map((f) => `--- ${f.name} ---\n${f.text}`)
+      .join("\n\n");
 
     try {
-      const res = await fetch("/api/case-builder", { method: "POST", body: fd });
+      const res = await fetch("/api/case-builder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brief: cbBrief, formsText, template: templateSlug }),
+      });
       const text = await res.text();
       let data: { success: boolean; data?: { case_summary: string }; error?: string };
       try {
         data = JSON.parse(text);
       } catch {
-        console.error("[case-builder] non-JSON response:", text.slice(0, 500));
         setCbAnalysisError(`Error del servidor (${res.status}). Intenta de nuevo.`);
         return;
       }
@@ -280,7 +306,8 @@ export default function TemplateFormPage() {
 
   const resetCaseBuilder = () => {
     setCbStep(0);
-    setCbFiles([]);
+    setCbParsedFiles([]);
+    setCbParsingFile(false);
     setCbBrief("");
     setCbIsAnalyzing(false);
     setCbAnalysisError(null);
@@ -416,33 +443,39 @@ export default function TemplateFormPage() {
                       isCbDragActive
                         ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
                         : "border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500"
-                    } ${cbIsAnalyzing ? "cursor-not-allowed opacity-50" : ""}`}
+                    } ${cbIsAnalyzing || cbParsingFile ? "cursor-not-allowed opacity-50" : ""}`}
                   >
                     <input {...getCbInputProps()} />
-                    <Upload className="mb-2 h-8 w-8 text-slate-400" />
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {isCbDragActive
-                        ? "Suelta los archivos aquí..."
-                        : "Arrastra formularios o haz clic"}
-                    </p>
-                    <p className="mt-0.5 text-xs text-slate-500">PDF, DOCX, TXT — hasta 5 archivos, 10 MB c/u</p>
+                    {cbParsingFile ? (
+                      <>
+                        <Loader2 className="mb-2 h-8 w-8 animate-spin text-blue-500" />
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Procesando archivo...</p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mb-2 h-8 w-8 text-slate-400" />
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          {isCbDragActive ? "Suelta los archivos aquí..." : "Arrastra formularios o haz clic"}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500">PDF, DOCX, TXT — hasta 5 archivos</p>
+                      </>
+                    )}
                   </div>
 
-                  {cbFiles.length > 0 && (
+                  {cbParsedFiles.length > 0 && (
                     <ul className="mt-2 space-y-1">
-                      {cbFiles.map((f, i) => (
+                      {cbParsedFiles.map((f, i) => (
                         <li
                           key={i}
-                          className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800"
+                          className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-3 py-1.5 text-xs dark:border-green-800 dark:bg-green-950/20"
                         >
-                          <FileText className="h-3.5 w-3.5 shrink-0 text-blue-500" />
-                          <span className="flex-1 truncate text-slate-700 dark:text-slate-300">
-                            {f.name}
-                          </span>
+                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-green-600" />
+                          <span className="flex-1 truncate text-slate-700 dark:text-slate-300">{f.name}</span>
+                          <span className="shrink-0 text-slate-400">{f.text.length.toLocaleString()} chars</span>
                           <button
                             type="button"
-                            onClick={() => setCbFiles((prev) => prev.filter((_, j) => j !== i))}
-                            className="rounded-full p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700"
+                            onClick={() => setCbParsedFiles((prev) => prev.filter((_, j) => j !== i))}
+                            className="rounded-full p-0.5 hover:bg-green-100 dark:hover:bg-green-900/30"
                           >
                             <X className="h-3 w-3 text-slate-500" />
                           </button>
@@ -483,7 +516,7 @@ export default function TemplateFormPage() {
                   type="button"
                   className="w-full"
                   onClick={handleAnalyzeCase}
-                  disabled={cbIsAnalyzing || (!cbBrief.trim() && cbFiles.length === 0)}
+                  disabled={cbIsAnalyzing || cbParsingFile || (!cbBrief.trim() && cbParsedFiles.length === 0)}
                 >
                   {cbIsAnalyzing ? (
                     <>

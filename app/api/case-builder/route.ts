@@ -10,37 +10,8 @@ import { ApiResponse } from "@/types";
 import { withRateLimit } from "@/lib/api-middleware";
 import { getTemplateBySlug } from "@/lib/templates";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const MAX_FILES = 5;
-
-const ALLOWED_EXTS: Record<string, string[]> = {
-  ".pdf": ["application/pdf"],
-  ".docx": [
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/octet-stream",
-  ],
-  ".doc": ["application/msword", "application/octet-stream"],
-  ".txt": ["text/plain", "application/octet-stream"],
-};
-
-async function parseFile(file: File): Promise<string> {
-  const name = file.name.toLowerCase();
-  if (name.endsWith(".txt")) return await file.text();
-  if (name.endsWith(".pdf")) {
-    const buf = Buffer.from(await file.arrayBuffer());
-    const pdfParse = (await import("pdf-parse")).default;
-    const parsed = await pdfParse(buf);
-    return parsed.text;
-  }
-  if (name.endsWith(".docx") || name.endsWith(".doc")) {
-    const buf = Buffer.from(await file.arrayBuffer());
-    const mammoth = await import("mammoth");
-    const result = await mammoth.extractRawText({ buffer: buf });
-    return result.value;
-  }
-  throw new Error("Formato no soportado");
-}
-
+// Files are parsed client-side via /api/parse-file first.
+// This route only receives extracted text (JSON), never binary — avoids 413.
 async function handler(request: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
@@ -50,33 +21,23 @@ async function handler(request: NextRequest) {
     );
   }
 
-  const fd = await request.formData();
-  const brief = ((fd.get("brief") as string) || "").trim().slice(0, 3000);
-  const templateSlug = ((fd.get("template") as string) || "").trim();
-  const rawFiles = fd.getAll("files") as File[];
-
-  if (!brief && rawFiles.length === 0) {
+  const body = await request.json().catch(() => null);
+  if (!body) {
     return NextResponse.json<ApiResponse<null>>(
-      { success: false, error: "Se requiere al menos un archivo o un brief del caso" },
+      { success: false, error: "Cuerpo de solicitud inválido" },
       { status: 400 }
     );
   }
 
-  // Parse each uploaded file, skip bad ones silently
-  const parsedTexts: string[] = [];
-  for (const file of rawFiles.slice(0, MAX_FILES)) {
-    if (file.size > MAX_FILE_SIZE) continue;
-    const fname = file.name.toLowerCase();
-    const ext = Object.keys(ALLOWED_EXTS).find((e) => fname.endsWith(e));
-    if (!ext) continue;
-    try {
-      const text = (await parseFile(file)).trim();
-      if (text.length >= 30) {
-        parsedTexts.push(`--- ${file.name} ---\n${text.slice(0, 8000)}`);
-      }
-    } catch {
-      // unparseable — skip
-    }
+  const brief = (typeof body.brief === "string" ? body.brief : "").trim().slice(0, 3000);
+  const formsText = (typeof body.formsText === "string" ? body.formsText : "").trim().slice(0, 40000);
+  const templateSlug = (typeof body.template === "string" ? body.template : "").trim();
+
+  if (!brief && !formsText) {
+    return NextResponse.json<ApiResponse<null>>(
+      { success: false, error: "Se requiere al menos un formulario o un brief del caso" },
+      { status: 400 }
+    );
   }
 
   const templateDef = templateSlug ? getTemplateBySlug(templateSlug) : undefined;
@@ -84,9 +45,9 @@ async function handler(request: NextRequest) {
 
   const systemPrompt = `You are an expert immigration attorney and legal case analyst.
 
-Read the uploaded forms and/or case brief and produce a structured case summary that will be used to generate a ${documentType}.
+Read the provided case documents and/or brief, then produce a structured case summary that will be used to generate a ${documentType}.
 
-Output EXACTLY these labeled sections (use the same language as the input documents):
+Output EXACTLY these labeled sections (use the same language as the input):
 
 PARTIES:
 • [Applicant/Petitioner/Beneficiary names, A-numbers if present]
@@ -112,10 +73,10 @@ Rules:
 - Keep each section to 2–5 bullet points
 - Be concise but complete`;
 
-  let userPrompt = `Produce the case summary for: ${documentType}\n\n`;
+  let userPrompt = `Generate a structured case summary for: ${documentType}\n\n`;
 
-  if (parsedTexts.length > 0) {
-    userPrompt += `UPLOADED FORMS/DOCUMENTS:\n${"═".repeat(60)}\n${parsedTexts.join("\n\n")}\n${"═".repeat(60)}\n\n`;
+  if (formsText) {
+    userPrompt += `UPLOADED FORMS/DOCUMENTS:\n${"═".repeat(60)}\n${formsText}\n${"═".repeat(60)}\n\n`;
   }
 
   if (brief) {
