@@ -92,6 +92,10 @@ export default function TemplateFormPage() {
     onDrop: async (files: File[]) => {
       const slots = Math.max(0, 5 - cbParsedFiles.length);
       for (const file of files.slice(0, slots)) {
+        if (file.size > 4 * 1024 * 1024) {
+          setCbAnalysisError(`"${file.name}" excede 4 MB. Usa un archivo más pequeño o escribe los datos en el brief.`);
+          continue;
+        }
         setCbParsingFile(true);
         setCbAnalysisError(null);
         const fd = new FormData();
@@ -457,7 +461,7 @@ export default function TemplateFormPage() {
                         <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                           {isCbDragActive ? "Suelta los archivos aquí..." : "Arrastra formularios o haz clic"}
                         </p>
-                        <p className="mt-0.5 text-xs text-slate-500">PDF, DOCX, TXT — hasta 5 archivos</p>
+                        <p className="mt-0.5 text-xs text-slate-500">PDF, DOCX, TXT — hasta 5 archivos, máx 4 MB c/u</p>
                       </>
                     )}
                   </div>
