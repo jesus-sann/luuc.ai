@@ -2,7 +2,18 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, FileText, AlertCircle, Upload, Edit3, ChevronDown, ChevronUp, CheckCircle2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Bot,
+  Loader2,
+  FileText,
+  AlertCircle,
+  Upload,
+  Edit3,
+  CheckCircle2,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { getTemplateBySlug } from "@/lib/templates";
 import { Button } from "@/components/ui/button";
@@ -31,13 +42,13 @@ const DOC_LANGUAGES = [
   { value: "de", label: "Deutsch" },
 ];
 
-
 export default function TemplateFormPage() {
   const params = useParams();
   const router = useRouter();
   const templateSlug = params.template as string;
   const template = getTemplateBySlug(templateSlug);
 
+  // Document generation state
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
@@ -48,15 +59,17 @@ export default function TemplateFormPage() {
   const [docLanguage, setDocLanguage] = useState("es");
   const [userInstructions, setUserInstructions] = useState("");
 
-  // Case summary upload mode
-  const [inputMode, setInputMode] = useState<"manual" | "upload">("manual");
-  const [caseSummary, setCaseSummary] = useState<string | null>(null);
-  const [summaryFileName, setSummaryFileName] = useState<string>("");
-  const [isParsingFile, setIsParsingFile] = useState(false);
-  const [parseError, setParseError] = useState<string | null>(null);
-  const [showSummaryPreview, setShowSummaryPreview] = useState(false);
+  // Input mode: manual | case-builder
+  const [inputMode, setInputMode] = useState<"manual" | "case-builder">("manual");
 
-  // Fetch AI suggestions when document is generated
+  // Case Builder — Step 1 (build) / Step 2 (generate)
+  const [cbStep, setCbStep] = useState<0 | 1>(0);
+  const [cbFiles, setCbFiles] = useState<File[]>([]);
+  const [cbBrief, setCbBrief] = useState("");
+  const [cbIsAnalyzing, setCbIsAnalyzing] = useState(false);
+  const [cbAnalysisError, setCbAnalysisError] = useState<string | null>(null);
+  const [cbCaseSummary, setCbCaseSummary] = useState<string | null>(null);
+
   const { suggestions, isLoading: suggestionsLoading } = useGenerationSuggestions(
     showModal ? templateSlug : null,
     showModal ? generatedContent : null,
@@ -71,42 +84,17 @@ export default function TemplateFormPage() {
     }
   };
 
-  const handleFileDrop = async (files: File[]) => {
-    const file = files[0];
-    if (!file) return;
-    setIsParsingFile(true);
-    setParseError(null);
-    setCaseSummary(null);
-    const fd = new FormData();
-    fd.append("file", file);
-    try {
-      const res = await fetch("/api/parse-file", { method: "POST", body: fd });
-      const data = await res.json();
-      if (data.success) {
-        setCaseSummary(data.data.text);
-        setSummaryFileName(data.data.filename);
-        setShowSummaryPreview(false);
-      } else {
-        setParseError(data.error || "Error al procesar el archivo.");
-      }
-    } catch {
-      setParseError("Error de conexión al procesar el archivo.");
-    } finally {
-      setIsParsingFile(false);
-    }
-  };
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: handleFileDrop,
+  // Case Builder dropzone — accepts multiple files
+  const { getRootProps: getCbRootProps, getInputProps: getCbInputProps, isDragActive: isCbDragActive } = useDropzone({
+    onDrop: (files: File[]) => setCbFiles((prev) => [...prev, ...files].slice(0, 5)),
     accept: {
       "application/pdf": [".pdf"],
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
       "application/msword": [".doc"],
       "text/plain": [".txt"],
     },
-    maxFiles: 1,
-    disabled: isParsingFile,
-    multiple: false,
+    multiple: true,
+    disabled: cbIsAnalyzing,
   });
 
   if (!template) {
@@ -124,9 +112,11 @@ export default function TemplateFormPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const generateDocument = async (variables: Record<string, string>) => {
+  // Core generation — accepts an optional case summary override (from Case Builder step 1)
+  const generateDocument = async (variables: Record<string, string>, caseSummaryOverride?: string) => {
     setIsLoading(true);
     setGenerateError(null);
+    setGeneratedContent(null);
 
     const isTranslation = !!template.endpoint;
     const endpoint = template.endpoint ?? "/api/generate";
@@ -138,10 +128,9 @@ export default function TemplateFormPage() {
           title: `${template.name} - ${new Date().toLocaleDateString("es-CO")}`,
           language: docLanguage,
           ...(userInstructions.trim() && { userInstructions: userInstructions.trim() }),
-          ...(caseSummary && { caseSummary }),
+          ...(caseSummaryOverride && { caseSummary: caseSummaryOverride }),
         };
 
-    // Translation templates use a regular JSON endpoint; everything else streams.
     if (isTranslation) {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 90_000);
@@ -162,11 +151,11 @@ export default function TemplateFormPage() {
           setGenerateError(data.error || "Error al generar el documento. Intenta de nuevo.");
         }
       } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") {
-          setGenerateError("La generación tardó demasiado. Intenta de nuevo o usa un documento más corto.");
-        } else {
-          setGenerateError("Error de conexión. Verifica tu internet e intenta de nuevo.");
-        }
+        setGenerateError(
+          err instanceof Error && err.name === "AbortError"
+            ? "La generación tardó demasiado. Intenta de nuevo o usa un documento más corto."
+            : "Error de conexión. Verifica tu internet e intenta de nuevo."
+        );
       } finally {
         clearTimeout(timeout);
         setIsLoading(false);
@@ -174,7 +163,7 @@ export default function TemplateFormPage() {
       return;
     }
 
-    // SSE streaming path for /api/generate
+    // SSE streaming path
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -214,7 +203,6 @@ export default function TemplateFormPage() {
             };
 
             if (event.type === "done") {
-              setGeneratedContent((prev) => prev); // already accumulated via delta
               setGeneratedDocId(event.id ?? null);
               setGeneratedTitle(event.title || template.name);
               setShowModal(true);
@@ -248,18 +236,57 @@ export default function TemplateFormPage() {
     await generateDocument(values);
   };
 
-  const handleUploadSubmit = async () => {
-    await generateDocument({});
+  // Case Builder Step 1: analyze uploaded forms + brief
+  const handleAnalyzeCase = async () => {
+    if (!cbBrief.trim() && cbFiles.length === 0) {
+      setCbAnalysisError("Sube al menos un formulario o escribe un brief del caso.");
+      return;
+    }
+    setCbIsAnalyzing(true);
+    setCbAnalysisError(null);
+
+    const fd = new FormData();
+    fd.append("brief", cbBrief);
+    fd.append("template", templateSlug);
+    for (const file of cbFiles) fd.append("files", file);
+
+    try {
+      const res = await fetch("/api/case-builder", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.success) {
+        setCbCaseSummary(data.data.case_summary);
+        setCbStep(1);
+      } else {
+        setCbAnalysisError(data.error || "Error al analizar el caso.");
+      }
+    } catch {
+      setCbAnalysisError("Error de conexión. Verifica tu internet.");
+    } finally {
+      setCbIsAnalyzing(false);
+    }
   };
 
   const handleModalClose = () => {
     router.push("/dashboard/documentos");
   };
 
+  const resetCaseBuilder = () => {
+    setCbStep(0);
+    setCbFiles([]);
+    setCbBrief("");
+    setCbIsAnalyzing(false);
+    setCbAnalysisError(null);
+    setCbCaseSummary(null);
+  };
+
   return (
     <div>
+      {/* Header */}
       <div className="mb-8">
-        <Link href="/dashboard/crear" className="mb-3 inline-flex items-center text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <Link
+          href="/dashboard/crear"
+          className="mb-3 inline-flex items-center text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white"
+        >
           <ArrowLeft className="mr-1.5 h-4 w-4" />
           Volver
         </Link>
@@ -271,14 +298,16 @@ export default function TemplateFormPage() {
             <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
               Plantilla
             </p>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{template.name}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              {template.name}
+            </h1>
           </div>
         </div>
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{template.description}</p>
       </div>
 
       {generateError && (
-        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
           <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
           <div>
             <p className="font-medium">Error al generar el documento</p>
@@ -292,7 +321,7 @@ export default function TemplateFormPage() {
         <div className="mb-6 flex gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800/50 max-w-xs">
           <button
             type="button"
-            onClick={() => { setInputMode("manual"); setCaseSummary(null); setParseError(null); }}
+            onClick={() => setInputMode("manual")}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               inputMode === "manual"
                 ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
@@ -304,270 +333,411 @@ export default function TemplateFormPage() {
           </button>
           <button
             type="button"
-            onClick={() => setInputMode("upload")}
+            onClick={() => { setInputMode("case-builder"); resetCaseBuilder(); }}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              inputMode === "upload"
+              inputMode === "case-builder"
                 ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
                 : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             }`}
           >
-            <Upload className="h-3.5 w-3.5" />
-            Subir resumen
+            <Bot className="h-3.5 w-3.5" />
+            Case Builder
           </button>
         </div>
       )}
 
-      {/* Upload mode UI */}
-      {inputMode === "upload" && !template.endpoint && (
+      {/* ─── Case Builder ──────────────────────────────────────────── */}
+      {inputMode === "case-builder" && !template.endpoint && (
         <div className="mx-auto max-w-2xl space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Resumen del caso</CardTitle>
-              <p className="text-xs text-slate-500">
-                Sube el archivo con los detalles del caso y la IA extraerá la información para generar el documento.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {!caseSummary ? (
-                <>
+          {/* Step indicator */}
+          <div className="flex items-center gap-2 mb-2">
+            <div
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                cbStep === 0 ? "bg-blue-600 text-white" : "bg-green-600 text-white"
+              }`}
+            >
+              {cbStep === 0 ? "1" : <CheckCircle2 className="h-4 w-4" />}
+            </div>
+            <span
+              className={`text-sm font-medium ${
+                cbStep === 0 ? "text-slate-900 dark:text-white" : "text-green-600 dark:text-green-400"
+              }`}
+            >
+              Construir caso
+            </span>
+            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700 mx-1" />
+            <div
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                cbStep === 1
+                  ? "bg-blue-600 text-white"
+                  : "bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500"
+              }`}
+            >
+              2
+            </div>
+            <span
+              className={`text-sm font-medium ${
+                cbStep === 1
+                  ? "text-slate-900 dark:text-white"
+                  : "text-slate-400 dark:text-slate-500"
+              }`}
+            >
+              Generar documento
+            </span>
+          </div>
+
+          {/* ── Step 1: Upload forms + brief ── */}
+          {cbStep === 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Datos del caso</CardTitle>
+                <p className="text-xs text-slate-500">
+                  Sube los formularios del caso (I-130, I-485, contratos, etc.) y escribe un brief. La IA extraerá y confirmará la información clave antes de generar el documento.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                {/* Multi-file dropzone */}
+                <div>
+                  <Label className="mb-1.5 block text-sm">
+                    Formularios / Documentos{" "}
+                    <span className="font-normal text-slate-400">(hasta 5 archivos, opcional)</span>
+                  </Label>
                   <div
-                    {...getRootProps()}
-                    className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
-                      isDragActive
+                    {...getCbRootProps()}
+                    className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors ${
+                      isCbDragActive
                         ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
                         : "border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500"
-                    } ${isParsingFile ? "cursor-not-allowed opacity-50" : ""}`}
+                    } ${cbIsAnalyzing ? "cursor-not-allowed opacity-50" : ""}`}
                   >
-                    <input {...getInputProps()} />
-                    {isParsingFile ? (
-                      <>
-                        <Loader2 className="mb-3 h-10 w-10 animate-spin text-blue-500" />
-                        <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Procesando archivo...</p>
-                      </>
-                    ) : isDragActive ? (
-                      <>
-                        <Upload className="mb-3 h-10 w-10 text-blue-500" />
-                        <p className="text-sm text-blue-600">Suelta el archivo aquí...</p>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="mb-3 h-10 w-10 text-slate-400" />
-                        <p className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
-                          Arrastra el archivo o haz clic para seleccionar
-                        </p>
-                        <p className="text-xs text-slate-500">PDF, DOCX, DOC, TXT — máximo 10 MB</p>
-                      </>
-                    )}
-                  </div>
-                  {parseError && (
-                    <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
-                      <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                      {parseError}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  {/* File confirmed */}
-                  <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/20">
-                    <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-green-600 dark:text-green-400" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-green-800 dark:text-green-300">{summaryFileName}</p>
-                      <p className="text-xs text-green-600 dark:text-green-500">{caseSummary.length.toLocaleString()} caracteres extraídos</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => { setCaseSummary(null); setSummaryFileName(""); setParseError(null); }}
-                      className="rounded-full p-1 hover:bg-green-100 dark:hover:bg-green-900/30"
-                    >
-                      <X className="h-4 w-4 text-green-600 dark:text-green-400" />
-                    </button>
+                    <input {...getCbInputProps()} />
+                    <Upload className="mb-2 h-8 w-8 text-slate-400" />
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      {isCbDragActive
+                        ? "Suelta los archivos aquí..."
+                        : "Arrastra formularios o haz clic"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-slate-500">PDF, DOCX, TXT — hasta 5 archivos, 10 MB c/u</p>
                   </div>
 
-                  {/* Collapsible preview */}
+                  {cbFiles.length > 0 && (
+                    <ul className="mt-2 space-y-1">
+                      {cbFiles.map((f, i) => (
+                        <li
+                          key={i}
+                          className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800"
+                        >
+                          <FileText className="h-3.5 w-3.5 shrink-0 text-blue-500" />
+                          <span className="flex-1 truncate text-slate-700 dark:text-slate-300">
+                            {f.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setCbFiles((prev) => prev.filter((_, j) => j !== i))}
+                            className="rounded-full p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700"
+                          >
+                            <X className="h-3 w-3 text-slate-500" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Case brief */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="cbBrief" className="text-sm">
+                    Brief del caso
+                  </Label>
+                  <Textarea
+                    id="cbBrief"
+                    placeholder="Ej: María García (colombiana) peticionada por su esposo John Smith (USC). Casados 15/03/2023 en NYC. Presentando I-485 con I-130 aprobado. Sin historial criminal ni solicitudes previas."
+                    value={cbBrief}
+                    onChange={(e) => setCbBrief(e.target.value)}
+                    rows={4}
+                    maxLength={3000}
+                    disabled={cbIsAnalyzing}
+                    className="resize-none text-sm"
+                  />
+                  <p className="text-xs text-slate-400">
+                    Describe brevemente: partes, formularios, fechas, base legal. La IA completará el resto desde los documentos subidos.
+                  </p>
+                </div>
+
+                {cbAnalysisError && (
+                  <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    {cbAnalysisError}
+                  </div>
+                )}
+
+                <Button
+                  type="button"
+                  className="w-full"
+                  onClick={handleAnalyzeCase}
+                  disabled={cbIsAnalyzing || (!cbBrief.trim() && cbFiles.length === 0)}
+                >
+                  {cbIsAnalyzing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analizando caso...
+                    </>
+                  ) : (
+                    <>
+                      Analizar caso
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ── Step 2: Review confirmed summary + generate ── */}
+          {cbStep === 1 && cbCaseSummary !== null && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      Resumen confirmado por IA
+                    </CardTitle>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      Revisa la información extraída. Puedes editarla antes de generar.
+                    </p>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setShowSummaryPreview((v) => !v)}
-                    className="flex w-full items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400 dark:hover:bg-slate-700/50"
+                    onClick={() => { setCbStep(0); setCbCaseSummary(null); }}
+                    className="flex shrink-0 items-center gap-1 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                   >
-                    <span className="font-medium">Vista previa del texto extraído</span>
-                    {showSummaryPreview ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    <Edit3 className="h-3 w-3" />
+                    Volver a editar
                   </button>
-                  {showSummaryPreview && (
-                    <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
-                      <pre className="whitespace-pre-wrap font-sans">{caseSummary.slice(0, 2000)}{caseSummary.length > 2000 ? "\n\n[...]" : ""}</pre>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* Extra controls for upload mode */}
-              {caseSummary && (
-                <div className="space-y-4 border-t border-slate-100 pt-4 dark:border-slate-800">
-                  <div className="space-y-1.5">
-                    <Label className="text-sm">Idioma del documento</Label>
-                    <Select value={docLanguage} onValueChange={setDocLanguage}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {DOC_LANGUAGES.map((l) => (
-                          <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="userInstructionsUpload" className="text-sm">
-                      Instrucciones específicas <span className="text-slate-400 font-normal">(opcional)</span>
-                    </Label>
-                    <Textarea
-                      id="userInstructionsUpload"
-                      placeholder="Ej: Incluir cláusula de confidencialidad estricta..."
-                      value={userInstructions}
-                      onChange={(e) => setUserInstructions(e.target.value)}
-                      rows={2}
-                      maxLength={2000}
-                      className="text-sm resize-none"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-400 text-center">
-                    El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico.
-                  </p>
-                  <Button
-                    type="button"
-                    className="w-full"
-                    size="lg"
-                    onClick={handleUploadSubmit}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generando documento...</>
-                    ) : (
-                      "Generar Documento con este Resumen"
-                    )}
-                  </Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Editable summary */}
+                <Textarea
+                  value={cbCaseSummary}
+                  onChange={(e) => setCbCaseSummary(e.target.value)}
+                  rows={12}
+                  className="resize-none border-slate-200 bg-slate-50 font-mono text-xs dark:border-slate-700 dark:bg-slate-900"
+                />
+
+                {/* Language */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm">Idioma del documento</Label>
+                  <Select value={docLanguage} onValueChange={setDocLanguage}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DOC_LANGUAGES.map((l) => (
+                        <SelectItem key={l.value} value={l.value}>
+                          {l.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Extra instructions */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="cbInstructions" className="text-sm">
+                    Instrucciones adicionales{" "}
+                    <span className="font-normal text-slate-400">(opcional)</span>
+                  </Label>
+                  <Textarea
+                    id="cbInstructions"
+                    placeholder="Ej: Enfatizar historial de viajes, incluir cita a regulación 8 CFR..."
+                    value={userInstructions}
+                    onChange={(e) => setUserInstructions(e.target.value)}
+                    rows={2}
+                    maxLength={2000}
+                    className="resize-none text-sm"
+                  />
+                </div>
+
+                <p className="text-center text-xs text-slate-400">
+                  El contenido generado por IA es un borrador que debe ser revisado por un profesional legal.
+                </p>
+
+                <Button
+                  type="button"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => generateDocument({}, cbCaseSummary ?? undefined)}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generando documento...
+                    </>
+                  ) : (
+                    "Generar Documento"
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 
-      {/* Manual mode — existing form */}
+      {/* ─── Manual / Wizard mode ──────────────────────────────────── */}
       {(inputMode === "manual" || !!template.endpoint) && (
-      <>
-      {/* Extra controls: language, AI model, custom instructions — hidden for translation templates */}
-      {(() => {
-        const isTranslation = !!template.endpoint;
-        const extraControls = !isTranslation ? (
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-sm">Idioma del documento</Label>
-              <Select value={docLanguage} onValueChange={setDocLanguage}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DOC_LANGUAGES.map((l) => (
-                    <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <>
+          {(() => {
+            const isTranslation = !!template.endpoint;
+            const extraControls = !isTranslation ? (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="text-sm">Idioma del documento</Label>
+                  <Select value={docLanguage} onValueChange={setDocLanguage}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DOC_LANGUAGES.map((l) => (
+                        <SelectItem key={l.value} value={l.value}>
+                          {l.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="userInstructions" className="text-sm">
-                Instrucciones específicas <span className="text-slate-400 font-normal">(opcional)</span>
-              </Label>
-              <Textarea
-                id="userInstructions"
-                placeholder="Ej: Incluir cláusula de confidencialidad estricta, usar lenguaje formal corporativo, enfatizar penalidades por incumplimiento..."
-                value={userInstructions}
-                onChange={(e) => setUserInstructions(e.target.value)}
-                rows={3}
-                maxLength={2000}
-                className="text-sm resize-none"
-              />
-              <p className="text-xs text-slate-400">
-                Guía a la IA con instrucciones adicionales para personalizar el documento según tus necesidades.
-              </p>
-            </div>
-          </div>
-        ) : null;
-
-        // Wizard mode: template has steps defined
-        if (template.steps && template.steps.length > 0) {
-          return (
-            <DocumentFormWizard
-              template={template}
-              onSubmit={handleWizardSubmit}
-              isLoading={isLoading}
-              extraControls={extraControls}
-            />
-          );
-        }
-
-        // Flat form mode: legacy templates without steps
-        return (
-          <div className="mx-auto max-w-2xl">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Información del Documento</CardTitle>
-                <p className="text-xs text-slate-500">{template.variables.length} campos requeridos</p>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {template.variables.map((variable) => (
-                    <div key={variable.name} className="space-y-1.5">
-                      <Label htmlFor={variable.name} className="text-sm">
-                        {variable.label}
-                        {variable.required && <span className="ml-1 text-red-500">*</span>}
-                      </Label>
-
-                      {variable.type === "text" && (
-                        <Input id={variable.name} placeholder={variable.placeholder} required={variable.required} value={formData[variable.name] || ""} onChange={(e) => handleInputChange(variable.name, e.target.value)} className="text-sm" />
-                      )}
-
-                      {variable.type === "textarea" && (
-                        <Textarea id={variable.name} placeholder={variable.placeholder} required={variable.required} rows={3} value={formData[variable.name] || ""} onChange={(e) => handleInputChange(variable.name, e.target.value)} className="text-sm" />
-                      )}
-
-                      {variable.type === "date" && (
-                        <Input id={variable.name} type="date" required={variable.required} value={formData[variable.name] || ""} onChange={(e) => handleInputChange(variable.name, e.target.value)} className="text-sm" />
-                      )}
-
-                      {variable.type === "select" && variable.options && (
-                        <Select value={formData[variable.name] || ""} onValueChange={(value) => handleInputChange(variable.name, value)}>
-                          <SelectTrigger><SelectValue placeholder="Selecciona una opción" /></SelectTrigger>
-                          <SelectContent>
-                            {variable.options.map((option) => (
-                              <SelectItem key={option} value={option}>{option}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-                  ))}
-
-                  {extraControls}
-
-                  <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
-                    El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico.
+                <div className="space-y-1.5">
+                  <Label htmlFor="userInstructions" className="text-sm">
+                    Instrucciones específicas{" "}
+                    <span className="font-normal text-slate-400">(opcional)</span>
+                  </Label>
+                  <Textarea
+                    id="userInstructions"
+                    placeholder="Ej: Incluir cláusula de confidencialidad estricta, usar lenguaje formal corporativo, enfatizar penalidades por incumplimiento..."
+                    value={userInstructions}
+                    onChange={(e) => setUserInstructions(e.target.value)}
+                    rows={3}
+                    maxLength={2000}
+                    className="resize-none text-sm"
+                  />
+                  <p className="text-xs text-slate-400">
+                    Guía a la IA con instrucciones adicionales para personalizar el documento.
                   </p>
+                </div>
+              </div>
+            ) : null;
 
-                  <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                    {isLoading ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generando documento...</>
-                    ) : (
-                      "Generar Documento"
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        );
-      })()}
-      </>
+            if (template.steps && template.steps.length > 0) {
+              return (
+                <DocumentFormWizard
+                  template={template}
+                  onSubmit={handleWizardSubmit}
+                  isLoading={isLoading}
+                  extraControls={extraControls}
+                />
+              );
+            }
+
+            return (
+              <div className="mx-auto max-w-2xl">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Información del Documento</CardTitle>
+                    <p className="text-xs text-slate-500">
+                      {template.variables.length} campos requeridos
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                      {template.variables.map((variable) => (
+                        <div key={variable.name} className="space-y-1.5">
+                          <Label htmlFor={variable.name} className="text-sm">
+                            {variable.label}
+                            {variable.required && (
+                              <span className="ml-1 text-red-500">*</span>
+                            )}
+                          </Label>
+
+                          {variable.type === "text" && (
+                            <Input
+                              id={variable.name}
+                              placeholder={variable.placeholder}
+                              required={variable.required}
+                              value={formData[variable.name] || ""}
+                              onChange={(e) => handleInputChange(variable.name, e.target.value)}
+                              className="text-sm"
+                            />
+                          )}
+
+                          {variable.type === "textarea" && (
+                            <Textarea
+                              id={variable.name}
+                              placeholder={variable.placeholder}
+                              required={variable.required}
+                              rows={3}
+                              value={formData[variable.name] || ""}
+                              onChange={(e) => handleInputChange(variable.name, e.target.value)}
+                              className="text-sm"
+                            />
+                          )}
+
+                          {variable.type === "date" && (
+                            <Input
+                              id={variable.name}
+                              type="date"
+                              required={variable.required}
+                              value={formData[variable.name] || ""}
+                              onChange={(e) => handleInputChange(variable.name, e.target.value)}
+                              className="text-sm"
+                            />
+                          )}
+
+                          {variable.type === "select" && variable.options && (
+                            <Select
+                              value={formData[variable.name] || ""}
+                              onValueChange={(value) => handleInputChange(variable.name, value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona una opción" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {variable.options.map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
+                      ))}
+
+                      {extraControls}
+
+                      <p className="text-center text-xs text-slate-400 dark:text-slate-500">
+                        El contenido generado por IA es un borrador que debe ser revisado por un profesional legal. Luuc.ai no sustituye el asesoramiento jurídico.
+                      </p>
+
+                      <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Generando documento...
+                          </>
+                        ) : (
+                          "Generar Documento"
+                        )}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          })()}
+        </>
       )}
 
       {/* Document Viewer Modal */}
