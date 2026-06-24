@@ -37,10 +37,9 @@ async function extractPdfText(file: File): Promise<string> {
   // Dynamic import keeps pdfjs-dist out of the initial bundle
   const pdfjsLib = await import("pdfjs-dist");
 
-  // Point the worker at the pre-built file that ships with pdfjs-dist.
-  // Use a CDN URL so Next.js doesn't need to bundle the worker separately.
+  // Worker is served from public/ — no CDN dependency, always matches installed version.
   if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
   }
 
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
