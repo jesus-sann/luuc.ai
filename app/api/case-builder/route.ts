@@ -24,17 +24,8 @@ async function handler(request: NextRequest) {
     );
   }
 
-  // ── Plan limit (mirrors /api/generate) ───────────────────────────────────
-  const FREE_LIMIT = parseInt(process.env.FREE_TIER_DOCUMENT_LIMIT || "10");
-  if (user.plan === "free" && user.usage_count >= FREE_LIMIT) {
-    return NextResponse.json<ApiResponse<null>>(
-      {
-        success: false,
-        error: `Has alcanzado el límite de ${FREE_LIMIT} documentos de tu plan gratuito. Actualiza a Pro para continuar.`,
-      },
-      { status: 403 }
-    );
-  }
+  // Case analysis is a pre-generation step — it does not consume document quota.
+  // The quota check runs in /api/generate when the actual document is produced.
 
   // ── Parse body ────────────────────────────────────────────────────────────
   const body = await request.json().catch(() => null);

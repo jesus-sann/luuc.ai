@@ -197,7 +197,12 @@ export default function TemplateFormPage() {
 
       if (!response.ok || !response.body) {
         const data = await response.json().catch(() => ({}));
-        setGenerateError((data as { error?: string }).error || "Error al generar el documento. Intenta de nuevo.");
+        const errMsg = (data as { error?: string }).error || "Error al generar el documento. Intenta de nuevo.";
+        // 403 = plan limit — surface it clearly
+        setGenerateError(response.status === 403
+          ? `Plan limitado: ${errMsg}`
+          : errMsg
+        );
         return;
       }
 
@@ -600,6 +605,13 @@ export default function TemplateFormPage() {
                     className="resize-none text-sm"
                   />
                 </div>
+
+                {generateError && (
+                  <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    {generateError}
+                  </div>
+                )}
 
                 <p className="text-center text-xs text-slate-400">
                   El contenido generado por IA es un borrador que debe ser revisado por un profesional legal.
