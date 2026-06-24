@@ -252,15 +252,23 @@ export default function TemplateFormPage() {
 
     try {
       const res = await fetch("/api/case-builder", { method: "POST", body: fd });
-      const data = await res.json();
+      const text = await res.text();
+      let data: { success: boolean; data?: { case_summary: string }; error?: string };
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error("[case-builder] non-JSON response:", text.slice(0, 500));
+        setCbAnalysisError(`Error del servidor (${res.status}). Intenta de nuevo.`);
+        return;
+      }
       if (data.success) {
-        setCbCaseSummary(data.data.case_summary);
+        setCbCaseSummary(data.data!.case_summary);
         setCbStep(1);
       } else {
         setCbAnalysisError(data.error || "Error al analizar el caso.");
       }
-    } catch {
-      setCbAnalysisError("Error de conexión. Verifica tu internet.");
+    } catch (err) {
+      setCbAnalysisError(`Error de conexión: ${err instanceof Error ? err.message : "desconocido"}`);
     } finally {
       setCbIsAnalyzing(false);
     }
