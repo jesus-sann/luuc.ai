@@ -33,6 +33,7 @@ import { useGenerationSuggestions } from "@/hooks/use-suggestions";
 import type { AISuggestion } from "@/types/suggestions";
 import { DocumentFormWizard } from "@/components/document-form-wizard";
 import { useDropzone } from "react-dropzone";
+import { extractTextFromFile } from "@/lib/client-file-parser";
 
 const DOC_LANGUAGES = [
   { value: "es", label: "Español" },
@@ -92,24 +93,19 @@ export default function TemplateFormPage() {
     onDrop: async (files: File[]) => {
       const slots = Math.max(0, 5 - cbParsedFiles.length);
       for (const file of files.slice(0, slots)) {
-        if (file.size > 4 * 1024 * 1024) {
-          setCbAnalysisError(`"${file.name}" excede 4 MB. Usa un archivo más pequeño o escribe los datos en el brief.`);
-          continue;
-        }
         setCbParsingFile(true);
         setCbAnalysisError(null);
-        const fd = new FormData();
-        fd.append("file", file);
         try {
-          const res = await fetch("/api/parse-file", { method: "POST", body: fd });
-          const data = await res.json();
-          if (data.success) {
-            setCbParsedFiles((prev) => [...prev, { name: file.name, text: data.data.text }].slice(0, 5));
+          // PDFs are parsed entirely in the browser — no upload, no size limit.
+          // DOCX/DOC fall back to /api/parse-file (typically small).
+          const text = await extractTextFromFile(file);
+          if (text.trim().length < 30) {
+            setCbAnalysisError(`"${file.name}" no tiene texto extraíble (¿es una imagen escaneada?). Escribe los datos en el brief.`);
           } else {
-            setCbAnalysisError(`${file.name}: ${data.error || "formato no soportado"}`);
+            setCbParsedFiles((prev) => [...prev, { name: file.name, text: text.trim() }].slice(0, 5));
           }
-        } catch {
-          setCbAnalysisError(`No se pudo procesar ${file.name}`);
+        } catch (err) {
+          setCbAnalysisError(`${file.name}: ${err instanceof Error ? err.message : "Error al procesar"}`);
         } finally {
           setCbParsingFile(false);
         }
@@ -461,7 +457,7 @@ export default function TemplateFormPage() {
                         <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                           {isCbDragActive ? "Suelta los archivos aquí..." : "Arrastra formularios o haz clic"}
                         </p>
-                        <p className="mt-0.5 text-xs text-slate-500">PDF, DOCX, TXT — hasta 5 archivos, máx 4 MB c/u</p>
+                        <p className="mt-0.5 text-xs text-slate-500">PDF, DOCX, TXT — hasta 5 archivos</p>
                       </>
                     )}
                   </div>
