@@ -3,23 +3,31 @@
 // TXT/MD files are read with FileReader.
 // DOCX files fall back to /api/parse-file (usually small enough).
 
+const ALLOWED_MIMES: Record<string, string[]> = {
+  ".pdf":  ["application/pdf"],
+  ".txt":  ["text/plain"],
+  ".md":   ["text/plain", "text/markdown"],
+  ".docx": [
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/octet-stream",
+  ],
+  ".doc":  ["application/msword", "application/octet-stream"],
+};
+
 export async function extractTextFromFile(file: File): Promise<string> {
   const name = file.name.toLowerCase();
+  const ext = Object.keys(ALLOWED_MIMES).find((e) => name.endsWith(e));
+  if (!ext) throw new Error("Formato no soportado (usa PDF, DOCX o TXT)");
 
-  if (name.endsWith(".txt") || name.endsWith(".md")) {
-    return readAsText(file);
+  // file.type is '' on some browsers — treat as octet-stream
+  const mime = file.type || "application/octet-stream";
+  if (!ALLOWED_MIMES[ext].includes(mime)) {
+    throw new Error(`Tipo de archivo inválido (${mime}) para extensión ${ext}`);
   }
 
-  if (name.endsWith(".pdf")) {
-    return extractPdfText(file);
-  }
-
-  // DOCX/DOC: fall back to server-side parse-file
-  if (name.endsWith(".docx") || name.endsWith(".doc")) {
-    return parseViaServer(file);
-  }
-
-  throw new Error("Formato no soportado");
+  if (ext === ".txt" || ext === ".md") return readAsText(file);
+  if (ext === ".pdf") return extractPdfText(file);
+  return parseViaServer(file); // .docx / .doc
 }
 
 function readAsText(file: File): Promise<string> {
