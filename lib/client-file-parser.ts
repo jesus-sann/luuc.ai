@@ -55,11 +55,33 @@ async function extractPdfText(file: File): Promise<string> {
 
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
+
+    // Static text layer (labels, instructions, static content)
     const content = await page.getTextContent();
-    const pageText = content.items
+    const staticText = content.items
       .map((item) => ("str" in item ? item.str : ""))
-      .join(" ");
-    if (pageText.trim()) parts.push(pageText.trim());
+      .join(" ")
+      .trim();
+
+    // AcroForm field values — USCIS forms store filled values as widget annotations.
+    // getTextContent() alone misses these entirely.
+    const annotations = await page.getAnnotations();
+    const fieldLines = annotations
+      .filter(
+        (a: { subtype?: string; fieldValue?: unknown; fieldName?: string }) =>
+          a.subtype === "Widget" && a.fieldValue != null && a.fieldValue !== ""
+      )
+      .map((a: { fieldName?: string; fieldValue?: unknown }) => {
+        const val = Array.isArray(a.fieldValue)
+          ? (a.fieldValue as unknown[]).join(", ")
+          : String(a.fieldValue);
+        return a.fieldName ? `${a.fieldName}: ${val}` : val;
+      });
+
+    const pageParts: string[] = [];
+    if (staticText) pageParts.push(staticText);
+    if (fieldLines.length > 0) pageParts.push(fieldLines.join("\n"));
+    if (pageParts.length > 0) parts.push(pageParts.join("\n"));
   }
 
   return parts.join("\n\n");

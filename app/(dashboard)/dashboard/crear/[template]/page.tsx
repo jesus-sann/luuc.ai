@@ -209,6 +209,8 @@ export default function TemplateFormPage() {
       const reader = response.body.getReader();
       const dec = new TextDecoder();
       let buf = "";
+      // Accumulate locally — set state once on "done" so the modal always opens with the full document.
+      let accumulated = "";
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -232,11 +234,12 @@ export default function TemplateFormPage() {
             };
 
             if (event.type === "done") {
+              setGeneratedContent(accumulated);
               setGeneratedDocId(event.id ?? null);
               setGeneratedTitle(event.title || template.name);
               setShowModal(true);
             } else if (event.type === "delta") {
-              setGeneratedContent((prev) => (prev ?? "") + (event.text ?? ""));
+              accumulated += event.text ?? "";
             } else if (event.type === "error") {
               setGenerateError(event.message || "Error al generar el documento. Intenta de nuevo.");
             }
