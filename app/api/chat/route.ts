@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { generateTextSimple } from "@/lib/ai-provider";
 import { withRateLimit } from "@/lib/api-middleware";
+import { auditLog } from "@/lib/audit-log";
 
 const SYSTEM_PROMPT = `You are a corporate legal assistant for Luuc.ai. You ONLY answer questions about:
 - Corporate law and governance
@@ -74,6 +75,16 @@ async function handler(request: NextRequest) {
       : message.trim();
 
     const reply = await generateTextSimple(SYSTEM_PROMPT, userPrompt, 1024);
+
+    auditLog({
+      userId: user.id,
+      companyId: user.company_id ?? undefined,
+      action: "chat.query",
+      resourceType: "chat",
+      metadata: { messageLength: message.trim().length },
+      ip: request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? undefined,
+      userAgent: request.headers.get("user-agent") ?? undefined,
+    });
 
     return NextResponse.json({
       success: true,

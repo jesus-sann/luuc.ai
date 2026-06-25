@@ -38,8 +38,14 @@ async function getHandler(
       );
     }
 
-    // Verificar que el análisis pertenece al usuario o su empresa
-    if (analysis.user_id !== user.id && analysis.company_id !== user.company_id) {
+    // Verificar que el análisis pertenece al usuario o su empresa.
+    // Explicit null guards prevent the null !== null JS quirk from granting cross-tenant access.
+    const ownedByUser = analysis.user_id === user.id;
+    const ownedByCompany =
+      user.company_id != null &&
+      analysis.company_id != null &&
+      analysis.company_id === user.company_id;
+    if (!ownedByUser && !ownedByCompany) {
       return NextResponse.json<ApiResponse<null>>(
         { success: false, error: "No tienes permiso para ver este análisis" },
         { status: 403 }

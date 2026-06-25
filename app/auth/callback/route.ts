@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { auditLog } from "@/lib/audit-log";
 
 /**
  * Sanitize the `next` redirect parameter to prevent open-redirect attacks.
@@ -31,7 +32,18 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Si es un reset de contraseña, redirigir a la página de nueva contraseña
+      // Fire-and-forget auth.login audit entry — do not block the redirect.
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user) {
+          auditLog({
+            userId: data.user.id,
+            action: "auth.login",
+            resourceType: "session",
+            metadata: { method: type === "recovery" ? "password_reset" : "oauth_or_email" },
+          });
+        }
+      }).catch(() => {/* non-critical */});
+
       if (type === "recovery") {
         return NextResponse.redirect(`${origin}/reset-password`);
       }

@@ -144,6 +144,7 @@ export async function createCategory(
  */
 export async function updateCategory(
   categoryId: string,
+  companyId: string,
   updates: Partial<KnowledgeBaseCategory>
 ): Promise<KnowledgeBaseCategory | null> {
   try {
@@ -154,6 +155,7 @@ export async function updateCategory(
         updated_at: new Date().toISOString(),
       })
       .eq("id", categoryId)
+      .eq("company_id", companyId)
       .select()
       .single();
 
@@ -168,12 +170,13 @@ export async function updateCategory(
 /**
  * Eliminar categoria
  */
-export async function deleteCategory(categoryId: string): Promise<boolean> {
+export async function deleteCategory(categoryId: string, companyId: string): Promise<boolean> {
   try {
     const { error } = await supabaseAdmin
       .from("knowledge_base_categories")
       .delete()
-      .eq("id", categoryId);
+      .eq("id", categoryId)
+      .eq("company_id", companyId);
 
     if (error) throw error;
     return true;

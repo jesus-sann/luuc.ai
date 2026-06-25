@@ -16,6 +16,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendEmail } from "@/lib/email";
 import { withRateLimit } from "@/lib/api-middleware";
+import { auditLog } from "@/lib/audit-log";
 import type { ApiResponse } from "@/types";
 
 function formatDate(date: Date): string {
@@ -205,13 +206,12 @@ async function deleteHandler(request: NextRequest) {
       );
     }
 
-    // Log to audit_logs
-    await supabaseAdmin.from("audit_logs").insert({
-      user_id: user.id,
-      company_id: effectiveCompanyId,
+    auditLog({
+      userId: user.id,
+      companyId: effectiveCompanyId ?? undefined,
       action: "account.deletion_requested",
-      resource_type: "company",
-      resource_id: effectiveCompanyId,
+      resourceType: "company",
+      resourceId: effectiveCompanyId ?? undefined,
       metadata: {
         deletion_id: deletionId,
         scheduled_for: scheduledFor.toISOString(),

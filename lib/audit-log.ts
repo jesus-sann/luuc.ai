@@ -14,11 +14,14 @@ export type AuditAction =
   | "document.delete"
   | "document.duplicate"
   | "document.update"
+  | "document.export"
   | "kb.upload"
   | "kb.delete"
   | "settings.update"
+  | "chat.query"
   | "auth.login"
-  | "auth.logout";
+  | "auth.logout"
+  | "account.deletion_requested";
 
 interface AuditLogEntry {
   userId: string;

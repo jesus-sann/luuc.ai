@@ -11,6 +11,7 @@ import { sanitizeString } from "@/lib/validators";
 import { getCompanyByUser } from "@/lib/company";
 import { ALLOWED_CUSTOM_DOCUMENT_TYPES, TIMEOUTS, USAGE_ACTION_TYPES } from "@/lib/constants";
 import { withRateLimit } from "@/lib/api-middleware";
+import { auditLog } from "@/lib/audit-log";
 
 // Palabras clave que indican solicitudes NO permitidas
 const BLOCKED_PATTERNS = [
@@ -298,6 +299,15 @@ async function handler(request: NextRequest) {
           jurisdiccion: data.jurisdiccion,
           aiProvider: aiResponse.provider,
         },
+      });
+
+      auditLog({
+        userId: user.id,
+        companyId: effectiveCompanyId,
+        action: "document.generate",
+        resourceType: "document",
+        resourceId: savedDocument?.id,
+        metadata: { tipoDocumento: data.tipoDocumento, isCustom: true },
       });
     } catch (dbError) {
       console.error("Error saving to database:", dbError);

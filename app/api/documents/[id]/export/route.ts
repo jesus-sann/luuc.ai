@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { generateDocx, generatePdf } from "@/lib/document-export";
 import { getCompanyByUser } from "@/lib/company";
 import { withRateLimit } from "@/lib/api-middleware";
+import { auditLog } from "@/lib/audit-log";
 
 async function handler(
   request: NextRequest,
@@ -49,6 +50,17 @@ async function handler(
         { status: 403 }
       );
     }
+
+    auditLog({
+      userId: user.id,
+      companyId: user.company_id ?? undefined,
+      action: "document.export",
+      resourceType: "document",
+      resourceId: params.id,
+      metadata: { format, title: document.title },
+      ip: request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? undefined,
+      userAgent: request.headers.get("user-agent") ?? undefined,
+    });
 
     const title = document.title || "Documento";
     const content = document.content || "";

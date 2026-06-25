@@ -28,12 +28,20 @@ async function handler(request: NextRequest) {
     const limit = Number.isNaN(rawLimit) ? 50 : Math.min(Math.max(rawLimit, 1), 100);
     const offset = Number.isNaN(rawOffset) ? 0 : Math.max(rawOffset, 0);
 
-    const { data, error } = await supabaseAdmin
+    // Scope by user; additionally scope by company when the user belongs to one,
+    // so company members only see analyses created within their firm.
+    let query = supabaseAdmin
       .from("analyses")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
+
+    if (user.company_id) {
+      query = query.eq("company_id", user.company_id);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Error fetching analyses:", error);
