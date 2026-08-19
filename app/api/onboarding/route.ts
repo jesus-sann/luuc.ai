@@ -50,13 +50,24 @@ async function handleGet() {
 
     const hasCompany = !!dbUser?.company_id;
 
-    // If no onboarding state, return default with company check
+    // If no onboarding state, infer from account maturity.
+    // Users who already have a company are existing users — treat as completed
+    // so the modal doesn't block them on every login.
     if (!onboardingState) {
-      const state: OnboardingState = {
-        ...DEFAULT_ONBOARDING_STATE,
-        companySetupComplete: hasCompany,
-        currentStep: hasCompany ? "tour_start" : "welcome",
-      };
+      const state: OnboardingState = hasCompany
+        ? {
+            ...DEFAULT_ONBOARDING_STATE,
+            completed: true,
+            companySetupComplete: true,
+            tourComplete: true,
+            currentStep: "completed",
+            completedSteps: ["welcome", "company_setup", "tour_start", "tour_create", "tour_review", "tour_knowledge", "first_action", "completed"],
+          }
+        : {
+            ...DEFAULT_ONBOARDING_STATE,
+            companySetupComplete: false,
+            currentStep: "welcome",
+          };
       return NextResponse.json<ApiResponse<OnboardingState>>({
         success: true,
         data: state,
