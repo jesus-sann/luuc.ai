@@ -145,7 +145,7 @@ Date: ${today}
 
 Important: Replace the bracketed placeholders above with the actual content. Do not include the brackets in the final output.`;
 
-    const content = await generateWithClaude(systemPrompt, userPrompt);
+    const { text: content, tokensUsed: translateTokens } = await generateWithClaude(systemPrompt, userPrompt);
 
     // Determine company for saving
     let effectiveCompanyId: string | undefined;
@@ -180,6 +180,7 @@ Important: Replace the bracketed placeholders above with the actual content. Do 
       await logUsage({
         user_id: user.id,
         action_type: "generate",
+        tokens_used: translateTokens,
         metadata: { template: "certified-translation", document_type, spanish_variant },
       });
 

@@ -1,17 +1,17 @@
-import { generateTextSimple } from "@/lib/ai-provider";
+import { generateText, generateTextSimple } from "@/lib/ai-provider";
 import { AI_MODELS, TIMEOUTS } from "@/lib/constants";
 
 export async function generateWithClaude(
   systemPrompt: string,
   userPrompt: string
-): Promise<string> {
+): Promise<{ text: string; tokensUsed: number }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.CLAUDE_API);
 
   try {
-    const result = await generateTextSimple(systemPrompt, userPrompt, 4096, controller.signal);
+    const result = await generateText(systemPrompt, userPrompt, 4096, controller.signal);
     clearTimeout(timeoutId);
-    return result;
+    return { text: result.text, tokensUsed: result.tokensUsed ?? 0 };
   } catch (error) {
     clearTimeout(timeoutId);
     throw error;
@@ -139,7 +139,7 @@ export async function generateDocument(
   templateName: string,
   variables: Record<string, string>,
   language?: string
-): Promise<string> {
+): Promise<{ text: string; tokensUsed: number }> {
   return generateDocumentWithContext(templateName, variables, "", "", language);
 }
 
@@ -152,7 +152,7 @@ export async function generateDocumentWithContext(
   userInstructions?: string,
   caseSummary?: string,
   templateSystemPrompt?: string
-): Promise<string> {
+): Promise<{ text: string; tokensUsed: number }> {
   const { systemPrompt, userPrompt } = buildDocumentPrompts(
     templateName, variables, companyContext, companyInstructions,
     language, userInstructions, caseSummary, templateSystemPrompt
@@ -161,6 +161,8 @@ export async function generateDocumentWithContext(
 }
 
 // Streaming variant — yields text chunks as Claude generates them.
+// usageRef is an optional out-param: after the generator is exhausted the
+// caller can read usageRef.tokensUsed to get the final token count.
 export async function* streamDocumentWithContext(
   templateName: string,
   variables: Record<string, string>,
@@ -169,7 +171,8 @@ export async function* streamDocumentWithContext(
   language?: string,
   userInstructions?: string,
   caseSummary?: string,
-  templateSystemPrompt?: string
+  templateSystemPrompt?: string,
+  usageRef?: { tokensUsed: number }
 ): AsyncGenerator<string> {
   const { systemPrompt, userPrompt } = buildDocumentPrompts(
     templateName, variables, companyContext, companyInstructions,
@@ -181,12 +184,13 @@ export async function* streamDocumentWithContext(
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  const stream = await client.messages.create({
+  // Use .stream() instead of .create({ stream: true }) so we can call
+  // finalUsage() after the loop to get the exact input+output token count.
+  const stream = client.messages.stream({
     model: AI_MODELS.ANTHROPIC,
     max_tokens: 4096,
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
-    stream: true,
   });
 
   for await (const event of stream) {
@@ -197,13 +201,22 @@ export async function* streamDocumentWithContext(
       yield event.delta.text;
     }
   }
+
+  if (usageRef) {
+    try {
+      const msg = await stream.finalMessage();
+      usageRef.tokensUsed = (msg.usage?.input_tokens ?? 0) + (msg.usage?.output_tokens ?? 0);
+    } catch {
+      // Non-critical — leave tokensUsed at 0 if usage isn't available.
+    }
+  }
 }
 
 export async function analyzeDocument(
   content: string,
   focusContext?: string,
   language?: string
-): Promise<string> {
+): Promise<{ text: string; tokensUsed: number }> {
   const lang = language || "es";
   const langMap: Record<string, string> = {
     es: "español", en: "English", pt: "português", fr: "français", de: "Deutsch",

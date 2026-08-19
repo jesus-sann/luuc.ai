@@ -95,7 +95,7 @@ async function handler(request: NextRequest) {
 
     // Analyze document using Claude with optional focus context
     // USAR CONTENIDO SANITIZADO para prevenir inyecciones
-    const analysisText = await analyzeDocument(sanitizedContent, sanitizedFocus, language);
+    const { text: analysisText, tokensUsed: analysisTokens } = await analyzeDocument(sanitizedContent, sanitizedFocus, language);
 
     // Parse JSON response from Claude - robust approach
     let analysis: AnalysisResponse;
@@ -144,11 +144,12 @@ async function handler(request: NextRequest) {
       await logUsage({
         user_id: user.id,
         action_type: USAGE_ACTION_TYPES.ANALYZE,
+        tokens_used: analysisTokens,
         metadata: {
           filename: sanitizedFilename,
           focusContext: sanitizedFocus,
           riskScore: analysis.score,
-          contentLength: sanitizedContent.length, // Para auditoría
+          contentLength: sanitizedContent.length,
         },
       });
 

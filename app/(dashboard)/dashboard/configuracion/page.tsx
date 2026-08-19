@@ -13,6 +13,7 @@ import {
   Loader2,
   Users,
   Activity,
+  Cpu,
 } from "lucide-react";
 import {
   Card,
@@ -80,6 +81,13 @@ export default function ConfiguracionPage() {
       icon: Activity,
       href: "/dashboard/configuracion/actividad",
       color: "bg-slate-500",
+    },
+    {
+      title: "Consumo de API",
+      description: "Tokens y costo estimado por operación en Anthropic",
+      icon: Cpu,
+      href: "/dashboard/configuracion/tokens",
+      color: "bg-blue-500",
     },
     {
       title: t("configuracion.security"),

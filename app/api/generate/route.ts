@@ -148,6 +148,7 @@ async function handler(request: NextRequest): Promise<Response> {
   const stream = new ReadableStream({
     async start(controller) {
       let fullContent = "";
+      const usageRef = { tokensUsed: 0 };
 
       try {
         // Stream document tokens to client as they arrive
@@ -159,7 +160,8 @@ async function handler(request: NextRequest): Promise<Response> {
           language,
           userInstructions,
           caseSummary,
-          templateSystemPrompt
+          templateSystemPrompt,
+          usageRef
         )) {
           fullContent += chunk;
           controller.enqueue(sse({ type: "delta", text: chunk }));
@@ -184,6 +186,7 @@ async function handler(request: NextRequest): Promise<Response> {
           await logUsage({
             user_id: userId,
             action_type: USAGE_ACTION_TYPES.GENERATE,
+            tokens_used: usageRef.tokensUsed,
             metadata: {
               template,
               title,
