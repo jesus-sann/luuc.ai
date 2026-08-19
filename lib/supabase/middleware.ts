@@ -1,10 +1,23 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Public routes that never require authentication
+const PUBLIC_ROUTES = new Set([
+  "/", "/login", "/register", "/auth/callback",
+  "/precios", "/terminos", "/privacidad", "/seguridad",
+  "/forgot-password", "/reset-password",
+]);
+
+function isPublicPath(pathname: string): boolean {
+  return (
+    PUBLIC_ROUTES.has(pathname) ||
+    pathname.startsWith("/auth/") ||
+    pathname.startsWith("/invite/")
+  );
+}
+
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,9 +31,7 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -29,33 +40,25 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // IMPORTANT: Avoid writing any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
+  // Use getSession() here instead of getUser().
+  // getSession() reads the JWT from the cookie — no network call to Supabase,
+  // which means no risk of MIDDLEWARE_INVOCATION_TIMEOUT on the Edge.
+  // API routes and server components call getUser() (with server-side verification)
+  // when they actually need to trust the user's identity.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  // Rutas públicas que no requieren autenticación
-  const publicRoutes = ["/", "/login", "/register", "/auth/callback", "/precios", "/terminos", "/privacidad", "/seguridad"];
-  const isPublicRoute =
-    publicRoutes.includes(request.nextUrl.pathname) ||
-    request.nextUrl.pathname.startsWith("/auth/") ||
-    request.nextUrl.pathname.startsWith("/invite/") ||
-    // Forgot-password / reset-password flows are unauthenticated
-    request.nextUrl.pathname === "/forgot-password" ||
-    request.nextUrl.pathname === "/reset-password";
+  const { pathname } = request.nextUrl;
+  const hasSession = !!session;
 
-  // Protect all non-public page routes — not just /dashboard (M-7)
-  if (!user && !isPublicRoute && !request.nextUrl.pathname.startsWith("/api/")) {
+  if (!hasSession && !isPublicPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Si hay usuario y está en login/register, redirigir a dashboard
-  if (user && (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/register")) {
+  if (hasSession && (pathname === "/login" || pathname === "/register")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
