@@ -37,10 +37,7 @@ const DOC_LANGUAGES = [
 ];
 
 const AI_PROVIDERS = [
-  { value: "auto", label: "Auto (predeterminado)", description: "Usa el modelo configurado por defecto" },
-  { value: "anthropic", label: "Claude (Anthropic)", description: "Más preciso para documentos legales" },
-  { value: "google", label: "Gemini (Google)", description: "Rápido y económico" },
-  { value: "groq", label: "Llama (Groq)", description: "Gratuito para pruebas" },
+  { value: "auto", label: "Claude (Predeterminado)", description: "Modelo de IA más preciso para documentos legales" },
 ];
 
 export default function CreacionPersonalizadaPage() {

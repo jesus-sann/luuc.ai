@@ -37,6 +37,20 @@ const nextConfig = {
     serverComponentsExternalPackages: ["pdf-parse"],
   },
 
+  // Keep large server-only packages out of the Lambda bundle.
+  // These run natively on the Lambda filesystem — tracing excludes them from
+  // the deployment zip, which is the main lever for staying under Vercel's
+  // 250 MB uncompressed function limit on the Hobby plan.
+  outputFileTracingExcludes: {
+    "*": [
+      "./node_modules/@sentry/nextjs/node_modules/@sentry/browser/**",
+      "./node_modules/pdfjs-dist/legacy/**",
+      "./node_modules/pdfjs-dist/types/**",
+      "./node_modules/pdfjs-dist/image_decoders/**",
+      "./node_modules/jspdf/dist/polyfills.es.js",
+    ],
+  },
+
   // ============================================================================
   // SECURITY HEADERS
   // ============================================================================
