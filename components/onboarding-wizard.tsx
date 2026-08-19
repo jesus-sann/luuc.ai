@@ -68,6 +68,8 @@ export function OnboardingWizard({
   const [isVisible, setIsVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  // Local dismissed state: if the API fails the user can still exit the modal.
+  const [dismissed, setDismissed] = useState(false);
 
   // Company setup form
   const [companyName, setCompanyName] = useState("");
@@ -91,7 +93,9 @@ export function OnboardingWizard({
 
   const handleWelcomeContinue = async () => {
     setIsSubmitting(true);
-    await onCompleteStep("welcome");
+    const ok = await onCompleteStep("welcome");
+    // If API fails, advance locally so the user isn't stuck
+    if (!ok) setDismissed(true);
     setIsSubmitting(false);
   };
 
@@ -160,7 +164,8 @@ export function OnboardingWizard({
     setIsSubmitting(false);
   };
 
-  // Don't show for tour steps (handled by tour component) or completed
+  // Don't show for tour steps (handled by tour component), completed, or locally dismissed
+  if (dismissed) return null;
   if (currentStep.startsWith("tour_") && currentStep !== "tour_start") {
     return null;
   }
@@ -200,10 +205,13 @@ export function OnboardingWizard({
           isVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
         )}
       >
-        {/* Skip button */}
+        {/* Skip button — always dismisses locally even if API fails */}
         {currentStep !== "completed" && (
           <button
-            onClick={onSkip}
+            onClick={async () => {
+              setDismissed(true);
+              await onSkip().catch(() => {});
+            }}
             className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
           >
             <X className="h-5 w-5" />

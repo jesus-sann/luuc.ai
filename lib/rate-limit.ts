@@ -78,14 +78,15 @@ export function rateLimit(config: RateLimitConfig) {
           return;
         } catch (err) {
           if (err instanceof RateLimitError) throw err;
-          // Supabase unreachable — in production, fail closed (strict) so limits
-          // are never bypassed during cold-start or connectivity loss.
-          // In dev/test, degrade to in-memory so local iteration isn't blocked.
-          if (process.env.NODE_ENV === "production") {
-            console.error("[rate-limit] Supabase RPC failed in production; denying request:", err);
+          // If the RPC function doesn't exist yet (migration not run), or Supabase
+          // has a Postgres error, degrade to in-memory so the app still works.
+          // Only fail closed on network-level connectivity failures (fetch errors).
+          const isNetworkError = err instanceof TypeError && (err as TypeError).message.includes("fetch");
+          if (isNetworkError && process.env.NODE_ENV === "production") {
+            console.error("[rate-limit] Supabase unreachable in production; denying request:", err);
             throw new RateLimitError("Servicio temporalmente no disponible. Intenta de nuevo en un momento.");
           }
-          console.warn("[rate-limit] Supabase RPC failed, using in-memory fallback:", err);
+          console.warn("[rate-limit] Supabase RPC unavailable, using in-memory fallback:", err);
         }
       }
 
