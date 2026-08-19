@@ -1,52 +1,43 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
-import { rateLimit, RateLimitError } from "@/lib/rate-limit";
 
-// Rate limiter for auth routes (5 requests per minute)
-const authLimiter = rateLimit({
-  interval: 60 * 1000,
-  uniqueTokenPerInterval: 100,
-  limit: 5,
-});
+// In-memory auth rate limiter — middleware runs on Edge (stateless, ephemeral).
+// Supabase RPC calls from Edge are too slow and cause MIDDLEWARE_INVOCATION_TIMEOUT.
+// Full rate limiting (Supabase-backed, durable) is enforced in each API route handler.
+const AUTH_WINDOW_MS = 60_000;
+const AUTH_LIMIT = 10; // per IP per minute on login/register pages
+const authMemory = new Map<string, { count: number; resetAt: number }>();
+
+function checkAuthRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = authMemory.get(ip);
+  if (!entry || now > entry.resetAt) {
+    authMemory.set(ip, { count: 1, resetAt: now + AUTH_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= AUTH_LIMIT) return false;
+  entry.count++;
+  return true;
+}
 
 function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp) {
-    return realIp;
-  }
-  return "unknown";
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return request.headers.get("x-real-ip") ?? "unknown";
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Apply rate limiting to auth routes — POST only to avoid locking out users
-  // who refresh or navigate back to the login/register page
+  // Light in-memory rate limit on auth page POST submissions.
+  // Does not call Supabase — no network round-trip in middleware.
   if (request.method === "POST" && (pathname === "/login" || pathname === "/register")) {
-    try {
-      const ip = getClientIp(request);
-      const key = ip !== "unknown" ? ip : `deploy-${process.env.VERCEL_DEPLOYMENT_ID ?? "local"}`;
-      await authLimiter.check(5, key);
-    } catch (error) {
-      if (error instanceof RateLimitError) {
-        return new NextResponse(
-          JSON.stringify({
-            success: false,
-            error: error.message,
-          }),
-          {
-            status: 429,
-            headers: {
-              "Content-Type": "application/json",
-              "Retry-After": "60",
-            },
-          }
-        );
-      }
+    const ip = getClientIp(request);
+    if (!checkAuthRateLimit(ip)) {
+      return new NextResponse(
+        JSON.stringify({ success: false, error: "Demasiados intentos. Espera un momento." }),
+        { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } }
+      );
     }
   }
 
@@ -56,12 +47,10 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
+     * Run middleware on page routes only — API routes do their own auth and
+     * rate limiting. Excluding /api/* eliminates a redundant supabase.auth.getUser()
+     * call on every API request, which was a major source of MIDDLEWARE_INVOCATION_TIMEOUT.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mjs)$).*)",
   ],
 };
