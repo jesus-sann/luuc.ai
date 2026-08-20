@@ -43,8 +43,8 @@ const faqs = [
     answer: "Sí. Tienes derecho al olvido en cualquier momento. Puedes eliminar documentos individuales, análisis, o solicitar la eliminación completa de tu cuenta y todos los datos asociados contactando a soporte@luuc.ai.",
   },
   {
-    question: "¿Puedo firmar un NDA con Luuc.ai?",
-    answer: "Sí. Para empresas que lo requieran, ofrecemos un Acuerdo de Confidencialidad (NDA) estándar. Descarga la plantilla y envíala firmada a legal@luuc.ai para que procedamos con la firma bilateral.",
+    question: "¿Puedo firmar un NDA con el prestador del servicio?",
+    answer: "Sí. El servicio Luuc.ai es operado por BLP Consulting Group S.A.S. Para organizaciones que requieran un Acuerdo de Confidencialidad (NDA) bilateral previo al uso de la plataforma, escribe a legal@luuc.ai indicando el nombre de tu organización y te enviaremos la plantilla para firma.",
   },
   {
     question: "¿Qué estándares de seguridad siguen?",
@@ -55,27 +55,31 @@ const faqs = [
 const complianceStandards = [
   {
     name: "SOC 2 Type II",
-    description: "Controles de seguridad auditados",
+    description: "Controles de seguridad auditados (Supabase, Vercel, AWS)",
     icon: BadgeCheck,
-    status: "Alineado"
+    status: "Proveedores certificados",
+    statusColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
   },
   {
     name: "ISO 27001",
-    description: "Gestión de seguridad de información",
+    description: "Gestión de seguridad de información (Supabase, Vercel, AWS)",
     icon: Globe,
-    status: "Alineado"
+    status: "Proveedores certificados",
+    statusColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
   },
   {
     name: "GDPR",
-    description: "Protección de datos personales",
+    description: "Estándar de referencia para transferencias internacionales bajo Art. 26 Ley 1581",
     icon: Shield,
-    status: "Cumplimiento"
+    status: "Referencia de infraestructura",
+    statusColor: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400"
   },
   {
     name: "Ley 1581 de 2012",
-    description: "Habeas Data Colombia",
+    description: "Habeas Data Colombia — BLP Consulting Group S.A.S. es Responsable del Tratamiento",
     icon: Building2,
-    status: "Cumplimiento"
+    status: "Aplicable y cumplida",
+    statusColor: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
   },
 ];
 
@@ -160,7 +164,7 @@ export default function SeguridadPage() {
                       <h3 className="font-semibold text-slate-900 dark:text-white">
                         {standard.name}
                       </h3>
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${standard.statusColor}`}>
                         {standard.status}
                       </span>
                     </div>
@@ -225,7 +229,7 @@ export default function SeguridadPage() {
           </div>
         </div>
 
-        {/* NDA Download */}
+        {/* NDA Contact */}
         <div className="rounded-2xl border border-blue-200 bg-blue-50 p-8 text-center dark:border-blue-800 dark:bg-blue-950/30">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-600">
             <FileSignature className="h-7 w-7 text-white" />
@@ -233,26 +237,20 @@ export default function SeguridadPage() {
           <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">
             ¿Necesitas un NDA?
           </h2>
-          <p className="mx-auto mb-6 max-w-lg text-slate-600 dark:text-slate-400">
-            Para empresas que requieren un acuerdo de confidencialidad formal antes
-            de usar la plataforma, ofrecemos un NDA bilateral estándar.
+          <p className="mx-auto mb-2 max-w-lg text-slate-600 dark:text-slate-400">
+            Para organizaciones que requieren un acuerdo de confidencialidad bilateral previo al uso de la plataforma, el NDA es firmado por <strong className="text-slate-800 dark:text-slate-200">BLP Consulting Group S.A.S.</strong> en nombre de Luuc.ai.
           </p>
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
-              <a href="/docs/nda-luuc-ai.pdf" download>
-                <FileSignature className="mr-2 h-4 w-4" />
-                Descargar NDA
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <a href="mailto:legal@luuc.ai">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Contactar Legal
-              </a>
-            </Button>
-          </div>
+          <p className="mx-auto mb-6 max-w-lg text-slate-600 dark:text-slate-400">
+            Escríbenos indicando el nombre de tu organización y te enviamos la plantilla para revisión y firma bilateral.
+          </p>
+          <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
+            <a href="mailto:legal@luuc.ai?subject=Solicitud%20NDA%20Luuc.ai">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Solicitar NDA — legal@luuc.ai
+            </a>
+          </Button>
           <p className="mt-4 text-sm text-slate-500 dark:text-slate-500">
-            Envía el NDA firmado a legal@luuc.ai y te responderemos en 24-48 horas.
+            Respondemos en 24–48 horas hábiles.
           </p>
         </div>
 
