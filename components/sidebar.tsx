@@ -103,9 +103,10 @@ function useFirmBranding() {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, signOut, loading } = useAuth();
+  const { user, signOut } = useAuth();
   const t = useTranslations();
   const firm = useFirmBranding();
+  const [signingOut, setSigningOut] = useState(false);
 
   const navigation = [
     { name: t("sidebar.dashboard"), href: "/dashboard", icon: Home, tourId: null },
@@ -117,6 +118,7 @@ export function Sidebar() {
   ];
 
   const handleSignOut = async () => {
+    setSigningOut(true);
     await signOut();
   };
 
@@ -201,10 +203,10 @@ export function Sidebar() {
         </Link>
         <button
           onClick={handleSignOut}
-          disabled={loading}
+          disabled={signingOut}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white disabled:opacity-50"
         >
-          {loading ? (
+          {signingOut ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
             <LogOut className="h-5 w-5" />

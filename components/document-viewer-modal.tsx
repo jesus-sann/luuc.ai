@@ -209,7 +209,10 @@ export function DocumentViewerModal({
     if (documentId) {
       const link = document.createElement("a");
       link.href = `/api/documents/${documentId}/export?format=${format}`;
+      link.download = "";
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     }
   };
 
