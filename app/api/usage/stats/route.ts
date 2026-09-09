@@ -89,7 +89,7 @@ async function handler(_request: NextRequest) {
     let thisMonthAnalyses = 0;
     if (monthLogs) {
       for (const log of monthLogs) {
-        if (log.action_type === "generate" || log.action_type === "generate_custom") {
+        if (log.action_type === "generate" || log.action_type === "custom_generate") {
           thisMonthDocuments++;
         } else if (log.action_type === "analyze") {
           thisMonthAnalyses++;
@@ -102,10 +102,10 @@ async function handler(_request: NextRequest) {
       .from("usage_logs")
       .select("metadata")
       .eq("user_id", user.id)
-      .in("action_type", ["generate", "generate_custom"]);
+      .in("action_type", ["generate", "custom_generate"]);
 
     let timeSavedMinutes = 0;
-    if (generateLogs) {
+    if (generateLogs && generateLogs.length > 0) {
       for (const log of generateLogs) {
         const meta = log.metadata as Record<string, string> | null;
         const docType = meta?.document_type ?? meta?.template ?? "";
@@ -113,7 +113,7 @@ async function handler(_request: NextRequest) {
         timeSavedMinutes += saved;
       }
     } else {
-      // Fallback to flat counts if log query fails
+      // Fallback: no matching logs (empty table or query failed) — use flat estimate from usage_count
       timeSavedMinutes = documentsGenerated * DEFAULT_DOC_MINUTES_SAVED;
     }
 

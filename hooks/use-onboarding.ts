@@ -104,7 +104,9 @@ export function useOnboarding() {
   }, []);
 
   // Check if should show onboarding
-  const shouldShowOnboarding = !loading && !state.completed;
+  // Don't show onboarding if the API failed — could mean the session is broken.
+  // Showing the wizard on a 401 would block the dashboard unnecessarily.
+  const shouldShowOnboarding = !loading && !error && !state.completed;
 
   // Check if in tour mode
   const isInTour = state.currentStep.startsWith("tour_");

@@ -68,14 +68,19 @@ function formatDocType(slug: string): string {
 export function UsageStats() {
   const [data, setData] = useState<UsageData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetch("/api/usage/stats")
       .then((r) => r.json())
       .then((res) => {
-        if (res.success) setData(res.data);
+        if (res.success) {
+          setData(res.data);
+        } else {
+          setError(true);
+        }
       })
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -83,7 +88,7 @@ export function UsageStats() {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
         <div className="h-4 w-32 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="mt-4 grid grid-cols-3 gap-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-20 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-700" />
           ))}
@@ -92,7 +97,16 @@ export function UsageStats() {
     );
   }
 
-  if (!data) return null;
+  if (error || !data) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Tu actividad</h2>
+        <p className="mt-2 text-sm text-slate-400 dark:text-slate-500">
+          No se pudo cargar la actividad. Recarga la página para intentarlo de nuevo.
+        </p>
+      </div>
+    );
+  }
 
   const totalActions = data.documentsGenerated + data.analysesCompleted;
 

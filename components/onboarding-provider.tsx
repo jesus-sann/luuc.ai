@@ -48,9 +48,9 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
   // Get user name from auth
   const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0];
 
-  // Determine what to show
-  const showWizard = shouldShowOnboarding && !isInTour;
-  const showTour = shouldShowOnboarding && isInTour;
+  // Determine what to show — require authenticated user to prevent modal on 401
+  const showWizard = !!user && shouldShowOnboarding && !isInTour;
+  const showTour = !!user && shouldShowOnboarding && isInTour;
 
   return (
     <OnboardingContext.Provider
