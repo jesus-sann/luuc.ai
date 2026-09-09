@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Loader2, Mail, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,6 @@ import { useTranslations } from "@/hooks/use-translations";
 
 function LoginForm() {
   const t = useTranslations();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -53,8 +52,10 @@ function LoginForm() {
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    // Full-page navigation so the browser sends fresh cookies to the server.
+    // router.push + router.refresh can race with @supabase/ssr's async cookie
+    // writes, causing the middleware to see no session and redirect back to /login.
+    window.location.href = "/dashboard";
   };
 
   const handleMagicLink = async () => {

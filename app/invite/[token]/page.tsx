@@ -65,7 +65,7 @@ export default function AcceptInvitePage() {
         setStatus("success");
         // Redirect to dashboard after 2 seconds
         setTimeout(() => {
-          router.push("/dashboard");
+          window.location.href = "/dashboard";
         }, 2000);
       } else {
         setError(data.error || "No se pudo aceptar la invitación");

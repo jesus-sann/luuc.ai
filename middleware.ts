@@ -10,10 +10,13 @@ import { type NextRequest, NextResponse } from "next/server";
 // server component via getCurrentUser() → supabase.auth.getUser().
 // ---------------------------------------------------------------------------
 
+// Extract project ref from URL — e.g. "jcznbbeevjpifjqxddrd" from
+// "https://jcznbbeevjpifjqxddrd.supabase.co". Hard-coded as fallback so the
+// middleware never silently breaks if the env var is absent in Edge Runtime.
 const SUPABASE_PROJECT_REF =
   (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "")
     .replace("https://", "")
-    .split(".")[0]; // e.g. "jcznbbeevjpifjqxddrd"
+    .split(".")[0] || "jcznbbeevjpifjqxddrd";
 
 const SESSION_COOKIE_PREFIX = `sb-${SUPABASE_PROJECT_REF}-auth-token`;
 

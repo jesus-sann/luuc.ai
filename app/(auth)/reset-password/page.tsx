@@ -91,7 +91,7 @@ export default function ResetPasswordPage() {
 
     // Redirigir al dashboard después de 2 segundos
     setTimeout(() => {
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     }, 2000);
   };
 
