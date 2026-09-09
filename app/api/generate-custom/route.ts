@@ -326,8 +326,12 @@ async function handler(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error generating custom document:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    const userMsg = msg.includes("ANTHROPIC_API_KEY")
+      ? "El servicio de IA no está configurado (falta ANTHROPIC_API_KEY). Contacta al administrador."
+      : "Error interno del servidor";
     return NextResponse.json(
-      { success: false, error: "Error interno del servidor" },
+      { success: false, error: userMsg },
       { status: 500 }
     );
   }

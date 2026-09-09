@@ -216,9 +216,12 @@ async function handler(request: NextRequest): Promise<Response> {
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         console.error("Error generating document (stream):", msg, err);
-        controller.enqueue(
-          sse({ type: "error", message: "Error generando documento. Intenta de nuevo." })
-        );
+        const userMsg = msg.includes("ANTHROPIC_API_KEY")
+          ? "El servicio de IA no está configurado (falta ANTHROPIC_API_KEY). Contacta al administrador."
+          : msg.includes("overloaded") || msg.includes("529")
+          ? "El servicio de IA está temporalmente sobrecargado. Intenta de nuevo en un momento."
+          : "Error generando documento. Intenta de nuevo.";
+        controller.enqueue(sse({ type: "error", message: userMsg }));
         controller.close();
       }
     },

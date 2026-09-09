@@ -43,10 +43,17 @@ function LoginForm() {
     });
 
     if (error) {
+      const msg = error.message;
       setError(
-        error.message === "Invalid login credentials"
-          ? "Correo o contraseña incorrectos"
-          : error.message
+        msg === "Invalid login credentials"
+          ? "Correo o contraseña incorrectos. Verifica tus datos o usa el enlace de recuperación."
+          : msg === "Email not confirmed"
+          ? "Tu correo no está confirmado. Revisa tu bandeja de entrada y haz clic en el enlace de confirmación."
+          : msg.includes("rate limit") || msg.includes("Too many")
+          ? "Demasiados intentos. Espera unos minutos e intenta de nuevo."
+          : msg.includes("fetch") || msg.includes("network") || msg.includes("NetworkError")
+          ? "Error de conexión. Verifica tu internet e intenta de nuevo."
+          : msg
       );
       setIsLoading(false);
       return;

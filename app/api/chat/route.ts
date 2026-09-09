@@ -92,8 +92,14 @@ async function handler(request: NextRequest) {
     });
   } catch (error) {
     console.error("[Chat API] Error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { success: false, error: "Error procesando la consulta" },
+      {
+        success: false,
+        error: msg.includes("ANTHROPIC_API_KEY")
+          ? "El asistente de IA no está configurado. Contacta al administrador."
+          : "Error procesando la consulta",
+      },
       { status: 500 }
     );
   }
