@@ -3,12 +3,10 @@
 import { useEffect, useState, useRef } from "react";
 import { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
   // Stable client ref — createClient() must not change on every render
   const supabaseRef = useRef(createClient());
   const supabase = supabaseRef.current;
@@ -49,9 +47,11 @@ export function useAuth() {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+    // Full-page navigation to the server-side signout route.
+    // The server clears the auth cookies via Set-Cookie response headers and
+    // redirects to /login — avoids the router.refresh() race condition that
+    // caused the middleware to see a stale session cookie and loop back to /dashboard.
+    window.location.href = "/auth/signout";
   };
 
   return {
