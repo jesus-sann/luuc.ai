@@ -52,7 +52,8 @@ function LoginForm() {
           : msg.includes("rate limit") || msg.includes("Too many")
           ? "Demasiados intentos. Espera unos minutos e intenta de nuevo."
           : msg.includes("fetch") || msg.includes("network") || msg.includes("NetworkError")
-          ? "Error de conexión. Verifica tu internet e intenta de nuevo."
+          || msg === "Load failed" || msg === "Failed to fetch"
+          ? "No se pudo conectar con el servidor de autenticación. Posibles causas: (1) el proyecto Supabase está pausado — reactívalo en supabase.com/dashboard, (2) localhost no está en los orígenes permitidos de Supabase, o (3) problema de red."
           : msg
       );
       setIsLoading(false);
