@@ -1,7 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Search, Clock, TrendingUp, Zap } from "lucide-react";
+import Link from "next/link";
+import { FileText, Search, Clock, TrendingUp, Zap, Users, BarChart3, ArrowRight } from "lucide-react";
+
+interface RecentItem {
+  action: string;
+  title: string;
+  docType: string;
+  date: string;
+  id: string;
+}
+
+interface DocTypeCount {
+  label: string;
+  count: number;
+}
 
 interface UsageData {
   documentsGenerated: number;
@@ -9,7 +23,11 @@ interface UsageData {
   thisMonthDocuments: number;
   thisMonthAnalyses: number;
   timeSavedMinutes: number;
-  recentActivity: { action: string; title: string; date: string }[];
+  recentActivity: RecentItem[];
+  topDocTypes: DocTypeCount[];
+  uniqueUsers: number;
+  monthLabel: string;
+  isCompanyScope: boolean;
 }
 
 function timeAgo(dateStr: string): string {
@@ -20,7 +38,9 @@ function timeAgo(dateStr: string): string {
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `hace ${hours}h`;
   const days = Math.floor(hours / 24);
-  return `hace ${days}d`;
+  if (days < 30) return `hace ${days}d`;
+  const months = Math.floor(days / 30);
+  return `hace ${months} mes${months > 1 ? "es" : ""}`;
 }
 
 function formatTime(minutes: number): string {
@@ -28,41 +48,6 @@ function formatTime(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return m > 0 ? `${h}h ${m}m` : `${h}h`;
-}
-
-function formatDocType(slug: string): string {
-  const labels: Record<string, string> = {
-    generate: "Documento",
-    generate_custom: "Documento personalizado",
-    analyze: "Análisis de riesgos",
-    "personal-declaration": "Declaración personal",
-    "legal-argument": "Argumento legal",
-    "evidence-summary": "Resumen de evidencia",
-    "case-summary": "Resumen del caso",
-    "cover-letter-uscis": "Cover letter USCIS",
-    "cover-letter-consular": "Cover letter consular",
-    "i360-vawa-cover-letter": "Cover letter VAWA",
-    "i918-u-visa-cover-letter": "Cover letter U-Visa",
-    "i589-cover-letter": "Cover letter I-589",
-    "i130-cover-letter": "Cover letter I-130",
-    "i485-cover-letter": "Cover letter I-485",
-    "i751-cover-letter": "Cover letter I-751",
-    "i129f-cover-letter": "Cover letter I-129F",
-    "i765-cover-letter": "Cover letter I-765",
-    "i131-cover-letter": "Cover letter I-131",
-    "i539-cover-letter": "Cover letter I-539",
-    "n400-cover-letter": "Cover letter N-400",
-    "i485-245i-cover-letter": "Cover letter I-485 (245i)",
-    "custom-immigration-cover-letter": "Cover letter (personalizada)",
-    "certified-translation": "Traducción certificada",
-    nda: "NDA",
-    contrato: "Contrato",
-    carta_correo: "Carta / Correo",
-    acta_reunion: "Acta de reunión",
-    politica_interna: "Política interna",
-    performance_report: "Reporte de desempeño",
-  };
-  return labels[slug] || slug;
 }
 
 export function UsageStats() {
@@ -87,7 +72,7 @@ export function UsageStats() {
   if (loading) {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
-        <div className="h-4 w-32 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+        <div className="h-4 w-40 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
         <div className="mt-4 grid grid-cols-3 gap-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-20 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-700" />
@@ -109,15 +94,27 @@ export function UsageStats() {
   }
 
   const totalActions = data.documentsGenerated + data.analysesCompleted;
+  const maxCount = data.topDocTypes[0]?.count ?? 1;
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+      {/* Header */}
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Tu actividad</h2>
+        <div>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+            {data.isCompanyScope ? "Actividad del equipo" : "Tu actividad"}
+          </h2>
+          {data.isCompanyScope && data.uniqueUsers > 1 && (
+            <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-400">
+              <Users className="h-3 w-3" />
+              {data.uniqueUsers} colaboradores
+            </p>
+          )}
+        </div>
         {totalActions > 0 && (
           <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
             <TrendingUp className="h-3 w-3" />
-            {totalActions} {totalActions === 1 ? "acción total" : "acciones totales"}
+            {totalActions} {totalActions === 1 ? "documento total" : "documentos totales"}
           </div>
         )}
       </div>
@@ -131,13 +128,13 @@ export function UsageStats() {
           <div>
             <p className="text-2xl font-bold leading-none">{formatTime(data.timeSavedMinutes)}</p>
             <p className="mt-0.5 text-[12px] text-blue-100">
-              ahorrados en redacción — basado en tiempos del equipo paralegal
+              ahorrados en redacción — estimado según tiempos del equipo paralegal
             </p>
           </div>
         </div>
       )}
 
-      {/* Counts */}
+      {/* KPI cards */}
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
           <div className="mb-2 flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/30">
@@ -162,31 +159,66 @@ export function UsageStats() {
           <p className="text-2xl font-bold text-slate-900 dark:text-white">
             {data.thisMonthDocuments + data.thisMonthAnalyses}
           </p>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">Este mes</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 capitalize">
+            {data.monthLabel}
+          </p>
         </div>
       </div>
 
+      {/* Document type breakdown */}
+      {data.topDocTypes.length > 0 && (
+        <div className="mt-5">
+          <div className="mb-2 flex items-center gap-1.5">
+            <BarChart3 className="h-3.5 w-3.5 text-slate-400" />
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Tipos más generados</p>
+          </div>
+          <div className="space-y-2">
+            {data.topDocTypes.map((t) => (
+              <div key={t.label} className="flex items-center gap-2">
+                <span className="w-36 flex-shrink-0 truncate text-[11px] text-slate-600 dark:text-slate-300">
+                  {t.label}
+                </span>
+                <div className="flex flex-1 items-center gap-2">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+                    <div
+                      className="h-full rounded-full bg-blue-500"
+                      style={{ width: `${Math.round((t.count / maxCount) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="w-4 text-right text-[11px] font-medium text-slate-500">{t.count}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Recent activity */}
       {data.recentActivity.length > 0 && (
-        <div className="mt-4">
-          <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">Actividad reciente</p>
-          <div className="space-y-1.5">
+        <div className="mt-5">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Documentos recientes</p>
+            <Link
+              href="/dashboard/documentos"
+              className="flex items-center gap-0.5 text-[11px] text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Ver todos <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="space-y-1">
             {data.recentActivity.map((item, i) => (
-              <div
+              <Link
                 key={i}
-                className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs text-slate-600 dark:text-slate-300"
+                href="/dashboard/documentos"
+                className="flex items-start gap-2.5 rounded-lg px-2 py-1.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-700/50"
               >
-                {item.action === "analyze" ? (
-                  <Search className="h-3 w-3 flex-shrink-0 text-emerald-500" />
-                ) : (
-                  <FileText className="h-3 w-3 flex-shrink-0 text-blue-500" />
-                )}
-                <span className="flex-1 truncate">{formatDocType(item.title)}</span>
-                <span className="flex items-center gap-1 text-[11px] text-slate-400">
-                  <Clock className="h-2.5 w-2.5" />
-                  {timeAgo(item.date)}
-                </span>
-              </div>
+                <FileText className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-blue-500" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium text-slate-700 dark:text-slate-200">{item.title}</p>
+                  <p className="text-[10px] text-slate-400">{item.docType}</p>
+                </div>
+                <span className="flex-shrink-0 text-[11px] text-slate-400">{timeAgo(item.date)}</span>
+              </Link>
             ))}
           </div>
         </div>

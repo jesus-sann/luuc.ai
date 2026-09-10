@@ -12,19 +12,13 @@ import { withRateLimit } from "@/lib/api-middleware";
 // from Table 3 and the blended PL1/PL2 estimate for cover letters.
 // These are estimates ("orden de magnitud"), not measured values.
 const MINUTES_SAVED_BY_DOC_TYPE: Record<string, number> = {
-  // Personal declaration: 60-120 min → 29-47 min (upload mode) ≈ 52 min saved
   "personal-declaration": 52,
-  // Legal argument / memorando: 60-120 min → 40-64 min ≈ 38 min saved
   "legal-argument": 38,
-  // Case summary (similar to legal argument)
   "case-summary": 35,
-  // Evidence summary / índice de anexos: 20-30 min → 3-6 min ≈ 22 min saved
   "evidence-summary": 22,
-  // Complex / VAWA cover letters: 35-40 min → 20-33 min ≈ 20 min saved
   "i360-vawa-cover-letter": 20,
   "i918-u-visa-cover-letter": 20,
   "i589-cover-letter": 20,
-  // Standard USCIS cover letters: blended PL1/PL2 ≈ 25 min saved
   "cover-letter-uscis": 25,
   "cover-letter-consular": 25,
   "i751-cover-letter": 25,
@@ -37,19 +31,60 @@ const MINUTES_SAVED_BY_DOC_TYPE: Record<string, number> = {
   "i539-cover-letter": 25,
   "n400-cover-letter": 25,
   "custom-immigration-cover-letter": 25,
-  // Certified translation — no declared baseline; conservative estimate
   "certified-translation": 30,
-  // General legal docs (non-immigration)
-  "nda": 20,
-  "contrato": 30,
-  "carta_correo": 15,
-  "acta_reunion": 15,
-  "politica_interna": 25,
-  "performance_report": 20,
+  nda: 20,
+  contrato: 30,
+  carta_correo: 15,
+  acta_reunion: 15,
+  politica_interna: 25,
+  performance_report: 20,
 };
 
-const DEFAULT_DOC_MINUTES_SAVED = 25; // fallback for unknown / custom templates
-const ANALYSIS_MINUTES_SAVED = 45;    // risk analysis: no prior equivalent; ~45 min manual review
+const DEFAULT_DOC_MINUTES_SAVED = 25;
+const ANALYSIS_MINUTES_SAVED = 45;
+
+const DOC_TYPE_LABELS: Record<string, string> = {
+  generate: "Documento",
+  custom_generate: "Documento personalizado",
+  analyze: "Análisis de riesgos",
+  "personal-declaration": "Declaración personal",
+  "legal-argument": "Argumento legal",
+  "legal-argument-brief": "Argumento legal",
+  "evidence-summary": "Resumen de evidencia",
+  "case-summary": "Resumen del caso",
+  "cover-letter-uscis": "Cover letter USCIS",
+  "cover-letter-consular": "Cover letter consular",
+  "i360-vawa-cover-letter": "Cover letter VAWA",
+  "i918-u-visa-cover-letter": "Cover letter U-Visa",
+  "i589-cover-letter": "Cover letter I-589",
+  "i130-cover-letter": "Cover letter I-130",
+  "i485-cover-letter": "Cover letter I-485",
+  "i751-cover-letter": "Cover letter I-751",
+  "i129f-cover-letter": "Cover letter I-129F",
+  "i765-cover-letter": "Cover letter I-765",
+  "i131-cover-letter": "Cover letter I-131",
+  "i539-cover-letter": "Cover letter I-539",
+  "n400-cover-letter": "Cover letter N-400",
+  "i485-245i-cover-letter": "Cover letter I-485 (245i)",
+  "custom-immigration-cover-letter": "Cover letter (personalizada)",
+  "certified-translation": "Traducción certificada",
+  nda: "NDA",
+  contrato: "Contrato",
+  carta_correo: "Carta / Correo",
+  acta_reunion: "Acta de reunión",
+  politica_interna: "Política interna",
+  performance_report: "Reporte de desempeño",
+};
+
+function labelForDocType(slug: string): string {
+  if (!slug) return "Documento";
+  // custom_contrato, custom_nda, etc.
+  if (slug.startsWith("custom_")) {
+    const base = slug.replace("custom_", "");
+    return DOC_TYPE_LABELS[base] ? `${DOC_TYPE_LABELS[base]} (personalizado)` : "Documento personalizado";
+  }
+  return DOC_TYPE_LABELS[slug] || slug;
+}
 
 async function handler(_request: NextRequest) {
   try {
@@ -62,76 +97,80 @@ async function handler(_request: NextRequest) {
     }
 
     const supabase = await createClient();
+    const companyId = user.company_id;
 
-    // Lifetime counts from users table
-    const documentsGenerated = user.usage_count || 0;
+    // ── Company-wide document counts ────────────────────────────────────────
+    // Prefer company scope so stakeholders see team totals, not just one user.
+    let docsQuery = supabase
+      .from("documents")
+      .select("id, title, doc_type, created_at, user_id", { count: "exact" });
 
-    const { data: userData } = await supabase
-      .from("users")
-      .select("usage_analyses")
-      .eq("id", user.id)
-      .single();
-
-    const analysesCompleted = userData?.usage_analyses || 0;
-
-    // This month counts
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    const { data: monthLogs } = await supabase
-      .from("usage_logs")
-      .select("action_type")
-      .eq("user_id", user.id)
-      .gte("created_at", startOfMonth.toISOString());
-
-    let thisMonthDocuments = 0;
-    let thisMonthAnalyses = 0;
-    if (monthLogs) {
-      for (const log of monthLogs) {
-        if (log.action_type === "generate" || log.action_type === "custom_generate") {
-          thisMonthDocuments++;
-        } else if (log.action_type === "analyze") {
-          thisMonthAnalyses++;
-        }
-      }
-    }
-
-    // Per-document-type time saved — query generate logs with metadata
-    const { data: generateLogs } = await supabase
-      .from("usage_logs")
-      .select("metadata")
-      .eq("user_id", user.id)
-      .in("action_type", ["generate", "custom_generate"]);
-
-    let timeSavedMinutes = 0;
-    if (generateLogs && generateLogs.length > 0) {
-      for (const log of generateLogs) {
-        const meta = log.metadata as Record<string, string> | null;
-        const docType = meta?.document_type ?? meta?.template ?? "";
-        const saved = MINUTES_SAVED_BY_DOC_TYPE[docType] ?? DEFAULT_DOC_MINUTES_SAVED;
-        timeSavedMinutes += saved;
-      }
+    if (companyId) {
+      docsQuery = docsQuery.eq("company_id", companyId);
     } else {
-      // Fallback: no matching logs (empty table or query failed) — use flat estimate from usage_count
-      timeSavedMinutes = documentsGenerated * DEFAULT_DOC_MINUTES_SAVED;
+      docsQuery = docsQuery.eq("user_id", user.id);
     }
 
+    const { data: allDocs, count: totalDocsCount } = await docsQuery.order("created_at", { ascending: false });
+
+    const documentsGenerated = totalDocsCount ?? allDocs?.length ?? 0;
+
+    // ── Analyses count ───────────────────────────────────────────────────────
+    let analysesQuery = supabase
+      .from("analyses")
+      .select("id", { count: "exact" });
+
+    if (companyId) {
+      analysesQuery = analysesQuery.eq("company_id", companyId);
+    } else {
+      analysesQuery = analysesQuery.eq("user_id", user.id);
+    }
+
+    const { count: analysesCount } = await analysesQuery;
+    const analysesCompleted = analysesCount ?? 0;
+
+    // ── This-month counts ────────────────────────────────────────────────────
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthLabel = now.toLocaleString("es-CO", { month: "long", year: "numeric" });
+
+    const thisMonthDocs = (allDocs || []).filter(
+      (d) => new Date(d.created_at) >= startOfMonth
+    );
+    const thisMonthDocuments = thisMonthDocs.length;
+
+    // ── Time saved calculation ───────────────────────────────────────────────
+    let timeSavedMinutes = (allDocs || []).reduce((sum, doc) => {
+      const saved = MINUTES_SAVED_BY_DOC_TYPE[doc.doc_type] ?? DEFAULT_DOC_MINUTES_SAVED;
+      return sum + saved;
+    }, 0);
     timeSavedMinutes += analysesCompleted * ANALYSIS_MINUTES_SAVED;
 
-    // Recent activity (last 5)
-    const { data: recentLogs } = await supabase
-      .from("usage_logs")
-      .select("action_type, metadata, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(5);
+    // ── Document type breakdown (top 5) ─────────────────────────────────────
+    const typeCount: Record<string, number> = {};
+    for (const doc of allDocs || []) {
+      const label = labelForDocType(doc.doc_type);
+      typeCount[label] = (typeCount[label] ?? 0) + 1;
+    }
+    const topDocTypes = Object.entries(typeCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([label, count]) => ({ label, count }));
 
-    const recentActivity = (recentLogs || []).map((log) => ({
-      action: log.action_type,
-      title: (log.metadata as Record<string, string>)?.document_type || log.action_type,
-      date: log.created_at,
+    // ── Recent activity (last 8 docs) ────────────────────────────────────────
+    const recentDocs = (allDocs || []).slice(0, 8);
+    const recentActivity = recentDocs.map((doc) => ({
+      action: "generate",
+      title: doc.title || labelForDocType(doc.doc_type),
+      docType: labelForDocType(doc.doc_type),
+      date: doc.created_at,
+      id: doc.id,
     }));
+
+    // ── Unique users (contributors) ──────────────────────────────────────────
+    const uniqueUsers = companyId
+      ? new Set((allDocs || []).map((d) => d.user_id)).size
+      : 1;
 
     return NextResponse.json({
       success: true,
@@ -139,9 +178,13 @@ async function handler(_request: NextRequest) {
         documentsGenerated,
         analysesCompleted,
         thisMonthDocuments,
-        thisMonthAnalyses,
+        thisMonthAnalyses: 0,
         timeSavedMinutes,
         recentActivity,
+        topDocTypes,
+        uniqueUsers,
+        monthLabel,
+        isCompanyScope: !!companyId,
       },
     });
   } catch (error) {
