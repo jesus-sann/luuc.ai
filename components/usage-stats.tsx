@@ -146,12 +146,17 @@ export function UsageStats() {
             </div>
             {/* Cost equivalent */}
             {data.estimatedCostSavedUSD > 0 && (
-              <div className="flex-shrink-0 rounded-lg bg-white/15 px-3 py-2 text-right">
+              <div className="group relative flex-shrink-0 cursor-default rounded-lg bg-white/15 px-3 py-2 text-right">
                 <p className="text-lg font-bold leading-none">
                   ${data.estimatedCostSavedUSD.toLocaleString("en-US")}
                 </p>
                 <p className="mt-0.5 text-[10px] text-blue-200">ahorro estimado</p>
-                <p className="text-[9px] text-blue-200/70">@ $65/hr paralegal</p>
+                <p className="text-[9px] text-blue-200/70">@ $65/hr paralegal ⓘ</p>
+                {/* Tooltip */}
+                <div className="pointer-events-none absolute bottom-full right-0 z-10 mb-2 w-56 rounded-lg bg-slate-900 px-3 py-2 text-left text-[11px] leading-relaxed text-slate-200 opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
+                  Basado en la tarifa promedio publicada en portales de empleo para paralegals de inmigración en EE.UU. ($55–$75/hr). Se usa $65/hr como valor central estimado.
+                  <div className="absolute -bottom-1.5 right-4 h-3 w-3 rotate-45 bg-slate-900" />
+                </div>
               </div>
             )}
           </div>
