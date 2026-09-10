@@ -17,12 +17,20 @@ interface DocTypeCount {
   count: number;
 }
 
+interface TimeSavedCategory {
+  category: string;
+  minutes: number;
+}
+
 interface UsageData {
   documentsGenerated: number;
   analysesCompleted: number;
   thisMonthDocuments: number;
   thisMonthAnalyses: number;
   timeSavedMinutes: number;
+  thisMonthTimeSavedMinutes: number;
+  timeSavedByCategory: TimeSavedCategory[];
+  estimatedCostSavedUSD: number;
   recentActivity: RecentItem[];
   topDocTypes: DocTypeCount[];
   uniqueUsers: number;
@@ -121,15 +129,49 @@ export function UsageStats() {
 
       {/* Time saved — hero metric */}
       {data.timeSavedMinutes > 0 && (
-        <div className="mb-4 flex items-center gap-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/15">
-            <Zap className="h-6 w-6 text-white" />
+        <div className="mb-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white">
+          {/* Top row: total + cost */}
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/15">
+              <Zap className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                <p className="text-2xl font-bold leading-none">{formatTime(data.timeSavedMinutes)}</p>
+                <span className="text-sm font-medium text-blue-200">ahorrados en redacción</span>
+              </div>
+              <p className="mt-0.5 text-[11px] text-blue-200/80">
+                Estimado según tiempos declarados del equipo paralegal
+              </p>
+            </div>
+            {/* Cost equivalent */}
+            {data.estimatedCostSavedUSD > 0 && (
+              <div className="flex-shrink-0 rounded-lg bg-white/15 px-3 py-2 text-right">
+                <p className="text-lg font-bold leading-none">
+                  ${data.estimatedCostSavedUSD.toLocaleString("en-US")}
+                </p>
+                <p className="mt-0.5 text-[10px] text-blue-200">ahorro estimado</p>
+                <p className="text-[9px] text-blue-200/70">@ $65/hr paralegal</p>
+              </div>
+            )}
           </div>
-          <div>
-            <p className="text-2xl font-bold leading-none">{formatTime(data.timeSavedMinutes)}</p>
-            <p className="mt-0.5 text-[12px] text-blue-100">
-              ahorrados en redacción — estimado según tiempos del equipo paralegal
-            </p>
+
+          {/* Sub-stats row */}
+          <div className="mt-3 flex flex-wrap gap-2 border-t border-white/20 pt-3">
+            {/* This month */}
+            {data.thisMonthTimeSavedMinutes > 0 && (
+              <div className="rounded-md bg-white/10 px-2.5 py-1.5">
+                <p className="text-[10px] text-blue-200/80 capitalize">{data.monthLabel}</p>
+                <p className="text-sm font-semibold leading-none">{formatTime(data.thisMonthTimeSavedMinutes)}</p>
+              </div>
+            )}
+            {/* Per category */}
+            {data.timeSavedByCategory.map((c) => (
+              <div key={c.category} className="rounded-md bg-white/10 px-2.5 py-1.5">
+                <p className="text-[10px] text-blue-200/80">{c.category}</p>
+                <p className="text-sm font-semibold leading-none">{formatTime(c.minutes)}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}

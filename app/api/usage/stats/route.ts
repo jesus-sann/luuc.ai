@@ -6,6 +6,40 @@ import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { withRateLimit } from "@/lib/api-middleware";
 
+// Conservative US immigration paralegal rate ($/hr) used for cost-equivalent estimate.
+// Source: BLS OES 2024 median for legal support workers; rounded down for conservatism.
+const PARALEGAL_HOURLY_RATE_USD = 65;
+
+// Category grouping for the time-saved breakdown.
+const DOC_TYPE_CATEGORY: Record<string, string> = {
+  "personal-declaration": "Inmigración",
+  "legal-argument": "Inmigración",
+  "case-summary": "Inmigración",
+  "evidence-summary": "Inmigración",
+  "i360-vawa-cover-letter": "Inmigración",
+  "i918-u-visa-cover-letter": "Inmigración",
+  "i589-cover-letter": "Inmigración",
+  "cover-letter-uscis": "Inmigración",
+  "cover-letter-consular": "Inmigración",
+  "i751-cover-letter": "Inmigración",
+  "i485-245i-cover-letter": "Inmigración",
+  "i130-cover-letter": "Inmigración",
+  "i485-cover-letter": "Inmigración",
+  "i129f-cover-letter": "Inmigración",
+  "i765-cover-letter": "Inmigración",
+  "i131-cover-letter": "Inmigración",
+  "i539-cover-letter": "Inmigración",
+  "n400-cover-letter": "Inmigración",
+  "custom-immigration-cover-letter": "Inmigración",
+  "certified-translation": "Traducciones",
+  nda: "Contratos",
+  contrato: "Contratos",
+  carta_correo: "Comunicaciones",
+  acta_reunion: "Comunicaciones",
+  politica_interna: "Políticas",
+  performance_report: "Reportes",
+};
+
 // Minutes of human work saved per document type.
 // Source: "Estimación de Tiempos de Elaboración Documental" (Sep 2026),
 // declared times from the USCIS paralegal team. Uses upload-mode midpoints
@@ -140,11 +174,32 @@ async function handler(_request: NextRequest) {
     const thisMonthDocuments = thisMonthDocs.length;
 
     // ── Time saved calculation ───────────────────────────────────────────────
-    let timeSavedMinutes = (allDocs || []).reduce((sum, doc) => {
+    const categoryMinutes: Record<string, number> = {};
+
+    let timeSavedMinutes = 0;
+    let thisMonthTimeSavedMinutes = 0;
+
+    for (const doc of allDocs || []) {
       const saved = MINUTES_SAVED_BY_DOC_TYPE[doc.doc_type] ?? DEFAULT_DOC_MINUTES_SAVED;
-      return sum + saved;
-    }, 0);
+      timeSavedMinutes += saved;
+
+      const category = DOC_TYPE_CATEGORY[doc.doc_type] ?? "Otros";
+      categoryMinutes[category] = (categoryMinutes[category] ?? 0) + saved;
+
+      if (new Date(doc.created_at) >= startOfMonth) {
+        thisMonthTimeSavedMinutes += saved;
+      }
+    }
+
     timeSavedMinutes += analysesCompleted * ANALYSIS_MINUTES_SAVED;
+
+    // Sort categories by minutes saved descending
+    const timeSavedByCategory = Object.entries(categoryMinutes)
+      .sort((a, b) => b[1] - a[1])
+      .map(([category, minutes]) => ({ category, minutes }));
+
+    // Cost equivalent: paralegal hours × rate
+    const estimatedCostSavedUSD = Math.round((timeSavedMinutes / 60) * PARALEGAL_HOURLY_RATE_USD);
 
     // ── Document type breakdown (top 5) ─────────────────────────────────────
     const typeCount: Record<string, number> = {};
@@ -180,6 +235,9 @@ async function handler(_request: NextRequest) {
         thisMonthDocuments,
         thisMonthAnalyses: 0,
         timeSavedMinutes,
+        thisMonthTimeSavedMinutes,
+        timeSavedByCategory,
+        estimatedCostSavedUSD,
         recentActivity,
         topDocTypes,
         uniqueUsers,
